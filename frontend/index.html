@@ -43,7 +43,10 @@
   <div id="result"></div>
 
   <script>
-    const API_BASE = "http://localhost:8000";
+    // Same-origin when served by the FastAPI app (deployed or `uvicorn` locally
+    // serving both); falls back to localhost:8000 only when this file is
+    // opened directly (file://) without the backend serving it.
+    const API_BASE = window.location.protocol === "file:" ? "http://localhost:8000" : "";
 
     async function loadMSMEs() {
       const res = await fetch(`${API_BASE}/msmes`);

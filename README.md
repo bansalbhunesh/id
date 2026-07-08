@@ -33,7 +33,24 @@ pip install -r requirements.txt
 uvicorn main:app --reload
 ```
 
-Then open `frontend/index.html` in a browser (it calls `http://localhost:8000`).
+This serves both the API and the frontend at `http://localhost:8000` (FastAPI mounts `frontend/` as static files). Opening `frontend/index.html` directly also works and auto-detects the local API.
+
+## Deploy
+
+Single-service, one process. Any container host works:
+
+```bash
+docker build -t udyampulse .
+docker run -p 8000:8000 udyampulse
+```
+
+Or directly, on any platform that runs a `Procfile`-style start command:
+
+```
+uvicorn main:app --host 0.0.0.0 --port $PORT
+```
+
+(working directory: `backend/`)
 
 ## Tests
 

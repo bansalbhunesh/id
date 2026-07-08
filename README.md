@@ -13,9 +13,35 @@ MSME credit evaluation relies on traditional financial documents that New-to-Cre
 3. **Explain** every score with plain-language reason codes, so a thin-file business rejected by traditional scoring can see exactly why it's approved here.
 4. **Recommend** an eligible credit limit and an improvement plan.
 
+## Architecture
+
+```
+MSME data (synthetic, or AA/GST/UPI/EPFO in Stage 2)
+        |
+        v
+  backend/scoring.py  --  5-pillar rule-based score (0-100, A-E grade)
+        |                       |
+        |                       v
+        |              backend/ml.py  --  linear PD-proxy model,
+        |              exact Shapley (SHAP-equivalent) reason codes
+        |                       |
+        +-----------------------+
+        v
+  backend/agent_memo.py  --  plain-language underwriter memo
+        |
+        v
+  backend/audit_log.py  --  every decision recorded (GET /audit-log)
+        |
+        v
+  frontend/index.html  --  health card, traditional-vs-alternate verdict,
+                            AI risk model reasons, memo
+```
+
+See `MODEL_CARD.md` for the model's purpose, training data, explainability, and known limitations.
+
 ## Status
 
-Early build. See `NEXT_SESSION_HANDOFF.md` (if present) for the latest handoff notes.
+Working PoC. See `NEXT_SESSION_HANDOFF.md` (if present) for the latest handoff notes.
 
 ## Project layout
 

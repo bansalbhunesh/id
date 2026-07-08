@@ -1,0 +1,428 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>UdyamPulse — IDBI Innovate 2026 Submission Deck</title>
+<meta name="hz:slide-selector" content=".slide">
+<meta name="hz:canvas-width" content="1280">
+<meta name="hz:canvas-height" content="720">
+<link rel="stylesheet" href="https://use.typekit.net/vad3crs.css">
+<style>
+:root {
+  --bg: #f2f5f3;
+  --bg-panel: #ffffff;
+  --ink: #10201f;
+  --ink-muted: #51655f;
+  --line: rgba(16,32,31,0.12);
+  --brand: #155e56;
+  --brand-ink: #0d3b36;
+  --accent: #b8842e;
+  --accent-soft: rgba(184,132,46,0.14);
+  --good: #2e7d5b;
+  --good-soft: rgba(46,125,91,0.12);
+  --bad: #b23b3b;
+  --bad-soft: rgba(178,59,59,0.10);
+  --shadow: 0 1px 2px rgba(16,32,31,0.06), 0 8px 24px rgba(16,32,31,0.06);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0b1d1f;
+    --bg-panel: #12292c;
+    --ink: #eaf2f0;
+    --ink-muted: #9fb6b1;
+    --line: rgba(234,242,240,0.14);
+    --brand: #4fa599;
+    --brand-ink: #bfe4de;
+    --accent: #e0a94f;
+    --accent-soft: rgba(224,169,79,0.16);
+    --good: #5fbf95;
+    --good-soft: rgba(95,191,149,0.14);
+    --bad: #e27c7c;
+    --bad-soft: rgba(226,124,124,0.12);
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.3);
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0b1d1f; --bg-panel: #12292c; --ink: #eaf2f0; --ink-muted: #9fb6b1;
+  --line: rgba(234,242,240,0.14); --brand: #4fa599; --brand-ink: #bfe4de;
+  --accent: #e0a94f; --accent-soft: rgba(224,169,79,0.16);
+  --good: #5fbf95; --good-soft: rgba(95,191,149,0.14);
+  --bad: #e27c7c; --bad-soft: rgba(226,124,124,0.12);
+  --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.3);
+}
+:root[data-theme="light"] {
+  --bg: #f2f5f3; --bg-panel: #ffffff; --ink: #10201f; --ink-muted: #51655f;
+  --line: rgba(16,32,31,0.12); --brand: #155e56; --brand-ink: #0d3b36;
+  --accent: #b8842e; --accent-soft: rgba(184,132,46,0.14);
+  --good: #2e7d5b; --good-soft: rgba(46,125,91,0.12);
+  --bad: #b23b3b; --bad-soft: rgba(178,59,59,0.10);
+  --shadow: 0 1px 2px rgba(16,32,31,0.06), 0 8px 24px rgba(16,32,31,0.06);
+}
+
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: #f2f5f3;
+  color: #10201f;
+  font-family: "source-sans-3", system-ui, sans-serif;
+  font-variant-numeric: tabular-nums;
+}
+h1, h2, h3 { font-family: "source-serif-4", Georgia, serif; text-wrap: balance; margin: 0; }
+
+.deck {
+  max-width: 1280px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  padding: 28px 0;
+}
+
+.slide {
+  position: relative;
+  width: 1280px;
+  height: 720px;
+  padding: 64px 72px 56px;
+  border: 1px solid rgba(16,32,31,0.12);
+  border-radius: 6px;
+  background: #f2f5f3;
+  box-shadow: 0 1px 2px rgba(16,32,31,0.06), 0 8px 24px rgba(16,32,31,0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  overflow: hidden;
+}
+
+.eyebrow {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #155e56;
+}
+.eyebrow .num { font-family: "source-serif-4", serif; font-size: 1.1rem; color: #b8842e; }
+
+.slide h2 {
+  font-size: clamp(1.7rem, 2.6vw, 2.35rem);
+  font-weight: 700;
+  color: #10201f;
+  max-width: 22ch;
+}
+.slide .kicker {
+  font-size: 1.05rem;
+  color: #51655f;
+  max-width: 62ch;
+  line-height: 1.5;
+}
+
+.grid {
+  display: grid;
+  gap: 20px;
+  flex: 1;
+  min-height: 0;
+}
+.grid.cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.grid.cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.grid.cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+
+.card {
+  min-width: 0;
+  background: #ffffff;
+  border: 1px solid rgba(16,32,31,0.12);
+  border-radius: 4px;
+  padding: 22px 24px;
+  box-shadow: 0 1px 2px rgba(16,32,31,0.06), 0 8px 24px rgba(16,32,31,0.06);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.card h3 { font-size: 1.05rem; font-weight: 600; color: #0d3b36; }
+.card p { margin: 0; color: #51655f; line-height: 1.55; font-size: 0.95rem; }
+.card .tag {
+  align-self: flex-start;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #b8842e;
+  background: rgba(184,132,46,0.14);
+  padding: 3px 9px;
+  border-radius: 3px;
+}
+
+.verdict-row { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.verdict {
+  border-radius: 4px;
+  padding: 20px 22px;
+  border: 1px solid rgba(16,32,31,0.12);
+}
+.verdict.bad { background: rgba(178,59,59,0.10); }
+.verdict.good { background: rgba(46,125,91,0.12); }
+.verdict .label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #51655f; }
+.verdict .decision { font-family: "source-serif-4", serif; font-size: 1.6rem; font-weight: 700; margin-top: 4px; }
+.verdict.bad .decision { color: #b23b3b; }
+.verdict.good .decision { color: #2e7d5b; }
+.verdict .reason { margin-top: 6px; color: #51655f; font-size: 0.9rem; }
+
+.stat-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
+.stat { text-align: left; min-width: 0; }
+.stat .value { font-family: "source-serif-4", serif; font-size: 2.4rem; font-weight: 700; color: #155e56; line-height: 1.2; }
+.stat .label { margin-top: 6px; font-size: 0.85rem; color: #51655f; }
+
+.flow { display: flex; align-items: stretch; gap: 0; flex: 1; min-width: 0; }
+.flow-step {
+  flex: 1;
+  min-width: 0;
+  background: #ffffff;
+  border: 1px solid rgba(16,32,31,0.12);
+  border-radius: 4px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.flow-step .step-num { font-family: "source-serif-4", serif; color: #b8842e; font-size: 1.3rem; font-weight: 700; }
+.flow-arrow { display: flex; align-items: center; padding: 0 10px; color: #51655f; font-size: 1.3rem; flex: 0 0 auto; }
+
+.roadmap { display: flex; flex-direction: column; gap: 0; flex: 1; min-width: 0; }
+.phase {
+  display: grid;
+  grid-template-columns: 140px minmax(0, 1fr);
+  gap: 24px;
+  padding: 18px 0;
+  border-top: 1px solid rgba(16,32,31,0.12);
+}
+.phase:first-child { border-top: none; }
+.phase .period { font-family: "source-serif-4", serif; font-weight: 700; color: #b8842e; font-size: 1.05rem; }
+.phase h4 { margin: 0 0 4px; font-size: 1.05rem; font-weight: 600; }
+.phase p { margin: 0; color: #51655f; font-size: 0.92rem; line-height: 1.5; }
+
+.links-list { display: flex; flex-direction: column; gap: 16px; flex: 1; justify-content: center; }
+.link-row {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 18px 22px;
+  background: #ffffff;
+  border: 1px solid rgba(16,32,31,0.12);
+  border-radius: 4px;
+}
+.link-row .icon { font-family: "source-serif-4", serif; color: #b8842e; font-size: 1.3rem; }
+.link-row .link-label { font-weight: 600; min-width: 220px; }
+.link-row .link-value { color: #51655f; font-size: 0.95rem; }
+.link-row .link-value.pending { font-style: italic; }
+
+.brief-item { display: flex; gap: 14px; min-width: 0; }
+.brief-item > div { min-width: 0; }
+.brief-item .idx { font-family: "source-serif-4", serif; color: #b8842e; font-weight: 700; font-size: 1.1rem; min-width: 1.4em; }
+.brief-item div p { margin: 4px 0 0; color: #51655f; line-height: 1.55; }
+.brief-item div strong { color: #10201f; }
+
+.team-block { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
+.team-block .row { display: flex; gap: 12px; font-size: 1.05rem; }
+.team-block .row .k { color: #51655f; min-width: 160px; }
+.team-block .row .v { font-weight: 600; }
+
+table.tech-table { width: 100%; border-collapse: collapse; flex: 1; }
+table.tech-table td { padding: 14px 18px; border-top: 1px solid rgba(16,32,31,0.12); vertical-align: top; }
+table.tech-table tr:first-child td { border-top: none; }
+table.tech-table td:first-child { font-weight: 600; width: 220px; color: #0d3b36; }
+table.tech-table td:last-child { color: #51655f; }
+
+.footer-mark {
+  position: absolute;
+  bottom: 24px;
+  right: 72px;
+  font-size: 0.72rem;
+  color: #51655f;
+  letter-spacing: 0.04em;
+}
+
+@media print {
+  body { background: white; }
+  .deck { gap: 0; padding: 0; max-width: none; }
+  .slide {
+    aspect-ratio: auto;
+    height: 720px;
+    width: 1280px;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    page-break-after: always;
+  }
+  @page { size: 1280px 720px; margin: 0; }
+}
+</style>
+</head>
+<body>
+<div class="deck">
+
+  <section class="slide" data-canvas-width="1280" data-canvas-height="720">
+    <div class="eyebrow"><span class="num">01</span> Team Details</div>
+    <h2 style="font-size:3rem;">UdyamPulse</h2>
+    <p class="kicker">An explainable MSME Financial Health Card built for IDBI Innovate 2026.</p>
+    <div class="team-block">
+      <div class="row"><span class="k">Team name</span><span class="v">Looper</span></div>
+      <div class="row"><span class="k">Team leader name</span><span class="v">Bhunesh Bansal</span></div>
+      <div class="row"><span class="k">Problem Statement</span><span class="v">Problem Statement 3 — Financial Health Score</span></div>
+    </div>
+    <div class="footer-mark">UdyamPulse · IDBI Innovate 2026</div>
+  </section>
+
+  <section class="slide" data-canvas-width="1280" data-canvas-height="720">
+    <div class="eyebrow"><span class="num">02</span> Brief About The Idea</div>
+    <h2>Consented alternate data, turned into a decision a bank can defend.</h2>
+    <div class="grid cols-2" style="align-items:start;">
+      <div class="brief-item"><span class="idx">01</span><div><strong>What it is.</strong><p>An AI-powered MSME Financial Health Card that scores businesses from consented alternate data.</p></div></div>
+      <div class="brief-item"><span class="idx">02</span><div><strong>Who it's for.</strong><p>New-to-Credit (NTC) and New-to-Bank (NTB) MSMEs that traditional bureau-based underwriting rejects outright.</p></div></div>
+      <div class="brief-item"><span class="idx">03</span><div><strong>Inputs.</strong><p>GST filings, UPI transaction trails, Account Aggregator bank statements, EPFO records.</p></div></div>
+      <div class="brief-item"><span class="idx">04</span><div><strong>Outputs.</strong><p>A 0–100 score, an A–E grade, an eligible credit limit, and a plain-language improvement plan.</p></div></div>
+    </div>
+    <div class="footer-mark">UdyamPulse · IDBI Innovate 2026</div>
+  </section>
+
+  <section class="slide" data-canvas-width="1280" data-canvas-height="720">
+    <div class="eyebrow"><span class="num">03</span> Opportunities</div>
+    <h2>Explainability and auditability, by default.</h2>
+    <div class="grid cols-3">
+      <div class="card"><span class="tag">Differentiation</span><h3>Beyond a number</h3><p>Most alternate-data scoring tools return a score. UdyamPulse returns a decision a bank can defend to a regulator and a borrower can act on.</p></div>
+      <div class="card"><span class="tag">Approach</span><h3>Two engines, one verdict</h3><p>Independent, cross-checkable scoring methods run side by side and show explicitly what bureau-only underwriting would have decided vs. alternate data.</p></div>
+      <div class="card"><span class="tag">USP</span><h3>The regulatory gap</h3><p>Of 127 AI-using regulated entities surveyed, only 15 use SHAP/LIME explainability and only 18 keep audit logs (RBI). UdyamPulse ships both by default.</p></div>
+    </div>
+    <div class="footer-mark">UdyamPulse · IDBI Innovate 2026</div>
+  </section>
+
+  <section class="slide" data-canvas-width="1280" data-canvas-height="720">
+    <div class="eyebrow"><span class="num">04</span> Features</div>
+    <h2>What the health card actually does.</h2>
+    <div class="grid cols-2">
+      <div class="card"><h3>5-Pillar Health Score</h3><p>Liquidity, Discipline, Momentum, Leverage, Digital Footprint → 0–100 score, A–E grade, eligible limit.</p></div>
+      <div class="card"><h3>Explainable ML + Shapley</h3><p>A trained model with exact per-feature Shapley attribution behind every decision — no black box.</p></div>
+      <div class="card"><h3>Traditional vs. Alternate Verdict</h3><p>Side-by-side comparison showing the rejected-to-approved reversal for thin-file businesses.</p></div>
+      <div class="card"><h3>Improvement Plan + Audit Log</h3><p>A concrete action plan for borrowers, and an append-only audit trail for every decision made.</p></div>
+    </div>
+    <div class="footer-mark">UdyamPulse · IDBI Innovate 2026</div>
+  </section>
+
+  <section class="slide" data-canvas-width="1280" data-canvas-height="720">
+    <div class="eyebrow"><span class="num">05</span> Process Flow</div>
+    <h2>From consented data to an auditable decision.</h2>
+    <div class="flow">
+      <div class="flow-step"><span class="step-num">01</span><h3>Data intake</h3><p style="color:#51655f;font-size:0.9rem;">AA statements, GST, UPI, EPFO</p></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><span class="step-num">02</span><h3>Dual scoring</h3><p style="color:#51655f;font-size:0.9rem;">Rule engine + ML model, in parallel</p></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><span class="step-num">03</span><h3>Verdict & explain</h3><p style="color:#51655f;font-size:0.9rem;">Traditional vs. alternate, Shapley reasons</p></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><span class="step-num">04</span><h3>Memo & audit</h3><p style="color:#51655f;font-size:0.9rem;">Underwriter memo, decision logged</p></div>
+    </div>
+    <div class="footer-mark">UdyamPulse · IDBI Innovate 2026</div>
+  </section>
+
+  <section class="slide" data-canvas-width="1280" data-canvas-height="720">
+    <div class="eyebrow"><span class="num">06</span> Wireframes / Mock Diagrams <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#51655f;">(optional)</span></div>
+    <h2>The rejected → approved moment.</h2>
+    <p class="kicker">The NTC hero (Shree Ganesh Textiles) has zero bureau history — declined instantly by a traditional process, approved on alternate data by UdyamPulse.</p>
+    <div class="verdict-row">
+      <div class="verdict bad">
+        <div class="label">Traditional (bureau-only)</div>
+        <div class="decision">Rejected</div>
+        <div class="reason">No credit bureau history on file (New-to-Credit / New-to-Bank).</div>
+      </div>
+      <div class="verdict good">
+        <div class="label">UdyamPulse (alternate data)</div>
+        <div class="decision">Approved</div>
+        <div class="reason">Grade A · Score 86/100 · Eligible limit ₹27,00,000.</div>
+      </div>
+    </div>
+    <div class="footer-mark">UdyamPulse · IDBI Innovate 2026</div>
+  </section>
+
+  <section class="slide" data-canvas-width="1280" data-canvas-height="720">
+    <div class="eyebrow"><span class="num">07</span> Architecture</div>
+    <h2>One service. Two engines. A full audit trail.</h2>
+    <div class="grid cols-2 cols-4-print" style="grid-template-columns:repeat(4,1fr);">
+      <div class="card"><h3>Single FastAPI Service</h3><p>One process serves the API and the frontend — one Dockerfile, one deploy target.</p></div>
+      <div class="card"><h3>Rule + ML Dual Engine</h3><p>Transparent 5-pillar rules alongside a trained model with exact Shapley attribution.</p></div>
+      <div class="card"><h3>Agentic Memo Layer</h3><p>Template-based today; a documented seam swaps in AWS Bedrock for Stage 2.</p></div>
+      <div class="card"><h3>Audit & Compliance Log</h3><p>Every decision recorded; serverless-safe, in-memory-first design.</p></div>
+    </div>
+    <div class="footer-mark">UdyamPulse · IDBI Innovate 2026</div>
+  </section>
+
+  <section class="slide" data-canvas-width="1280" data-canvas-height="720">
+    <div class="eyebrow"><span class="num">08</span> Technologies Used</div>
+    <h2>A stack chosen for zero dependency risk.</h2>
+    <table class="tech-table">
+      <tr><td>Backend</td><td>Python, FastAPI, Pydantic, pytest</td></tr>
+      <tr><td>ML layer</td><td>Dependency-free linear regression model with closed-form Shapley attribution — no numpy, scikit-learn, or shap required</td></tr>
+      <tr><td>Frontend</td><td>Vanilla HTML / CSS / JS, no build step</td></tr>
+      <tr><td>Deployment &amp; CI</td><td>Docker, Vercel (@vercel/python), GitHub Actions</td></tr>
+      <tr><td>Stage 2 targets</td><td>AWS Bedrock, XGBoost / LightGBM + shap, IDBI sandbox AA/GST/UPI/EPFO APIs</td></tr>
+    </table>
+    <div class="footer-mark">UdyamPulse · IDBI Innovate 2026</div>
+  </section>
+
+  <section class="slide" data-canvas-width="1280" data-canvas-height="720">
+    <div class="eyebrow"><span class="num">09</span> Estimated Implementation Cost <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#51655f;">(optional)</span></div>
+    <h2>Near-zero to prototype. Scoped jointly for Stage 2.</h2>
+    <p class="kicker" style="font-size:1.15rem;">The prototype runs entirely on an open-source stack and free-tier hosting. Stage 2 production cost scales with transaction volume and is best scoped jointly with IDBI during the sandbox mentorship phase, once real data volume is known.</p>
+    <div class="footer-mark">UdyamPulse · IDBI Innovate 2026</div>
+  </section>
+
+  <section class="slide" data-canvas-width="1280" data-canvas-height="720">
+    <div class="eyebrow"><span class="num">10</span> Snapshots Of The Prototype</div>
+    <h2>The live health card.</h2>
+    <p class="kicker">Insert real screenshots here before submission: the health card view, the AI risk model reasons, the underwriter memo, and the improvement plan. See <code>docs/demo.gif</code> in the GitHub repo for a recorded walkthrough.</p>
+    <div class="stat-row">
+      <div class="stat"><div class="value">86</div><div class="label">NTC hero score / 100</div></div>
+      <div class="stat"><div class="value">A</div><div class="label">Grade achieved</div></div>
+      <div class="stat"><div class="value">₹27L</div><div class="label">Eligible limit unlocked</div></div>
+      <div class="stat"><div class="value">0</div><div class="label">Bureau history required</div></div>
+    </div>
+    <div class="footer-mark">UdyamPulse · IDBI Innovate 2026</div>
+  </section>
+
+  <section class="slide" data-canvas-width="1280" data-canvas-height="720">
+    <div class="eyebrow"><span class="num">11</span> Performance Report / Benchmarking</div>
+    <h2>Verified, not just claimed.</h2>
+    <div class="stat-row">
+      <div class="stat"><div class="value">11/11</div><div class="label">Automated tests passing</div></div>
+      <div class="stat"><div class="value">100%</div><div class="label">Decisions with Shapley reasons</div></div>
+      <div class="stat"><div class="value">100%</div><div class="label">Decisions in the audit log</div></div>
+      <div class="stat"><div class="value">CI</div><div class="label">Enforced on every push</div></div>
+    </div>
+    <p class="kicker">Stage 2 will report the correct metrics for imbalanced credit risk — KS statistic, AUC, and Gini coefficient — once trained on real IDBI sandbox data, not raw accuracy.</p>
+    <div class="footer-mark">UdyamPulse · IDBI Innovate 2026</div>
+  </section>
+
+  <section class="slide" data-canvas-width="1280" data-canvas-height="720">
+    <div class="eyebrow"><span class="num">12</span> Additional Details / Future Development</div>
+    <h2>The Stage 2 roadmap.</h2>
+    <div class="roadmap">
+      <div class="phase"><div class="period">Phase 1</div><div><h4>Real data integration</h4><p>Swap synthetic data for IDBI sandbox AA/GST/UPI/EPFO feeds; recalibrate on real distributions.</p></div></div>
+      <div class="phase"><div class="period">Phase 2</div><div><h4>Production ML model</h4><p>Upgrade to XGBoost/LightGBM with the shap library at production data volume.</p></div></div>
+      <div class="phase"><div class="period">Phase 3</div><div><h4>Fairness &amp; monitoring</h4><p>Disparate-impact auditing across sector and geography; score drift and PSI monitoring.</p></div></div>
+      <div class="phase"><div class="period">Phase 4</div><div><h4>Bedrock-powered memos</h4><p>Wire the underwriter memo to AWS Bedrock for richer, more nuanced narratives.</p></div></div>
+    </div>
+    <div class="footer-mark">UdyamPulse · IDBI Innovate 2026</div>
+  </section>
+
+  <section class="slide" data-canvas-width="1280" data-canvas-height="720">
+    <div class="eyebrow"><span class="num">13</span> Links</div>
+    <h2>Where to find everything.</h2>
+    <div class="links-list">
+      <div class="link-row"><span class="icon">→</span><span class="link-label">GitHub Public Repository</span><span class="link-value">github.com/bansalbhunesh/id</span></div>
+      <div class="link-row"><span class="icon">→</span><span class="link-label">Demo Video (3 minutes)</span><span class="link-value pending">Add link before submission</span></div>
+      <div class="link-row"><span class="icon">→</span><span class="link-label">Final Product Link</span><span class="link-value pending">Add link once Vercel deployment is live</span></div>
+    </div>
+    <div class="footer-mark">UdyamPulse · IDBI Innovate 2026</div>
+  </section>
+
+</div>
+</body>
+</html>

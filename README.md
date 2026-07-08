@@ -136,6 +136,7 @@ backend/              FastAPI service, scoring engine, ML layer, governance API
 frontend/index.html   Static underwriter cockpit served by FastAPI
 docs/deck/            Submission deck HTML
 docs/PITCH_OUTLINE.md Deck content mapped to the IDBI template
+docs/COMPETITIVE_RESEARCH.md Public repo scan and differentiation notes
 docs/demo.gif         Recorded walkthrough
 MODEL_CARD.md         Model purpose, training data, explainability, limitations
 ```
@@ -148,4 +149,3 @@ MODEL_CARD.md         Model purpose, training data, explainability, limitations
 4. Wire underwriter memo generation to AWS Bedrock with the deterministic memo as fallback.
 5. Expand fairness monitoring by sector, geography, vintage, gender where available, and bureau-history status.
 6. Pilot metrics: NTC/NTB approval lift, decision-time reduction, early-NPA guardrail, and portfolio diversification.
-

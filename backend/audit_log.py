@@ -6,12 +6,21 @@ notes that most regulated entities using AI do not keep audit logs. This
 module is UdyamPulse's answer: every scored decision is recorded with its
 grade, verdict, and top reasons, so any decision can be reconstructed and
 reviewed later.
+
+In-memory storage is the source of truth (works identically on a normal
+VM/Docker host or an ephemeral serverless function). Disk persistence to
+LOG_PATH is attempted best-effort on top of that -- serverless filesystems
+are often read-only or reset between invocations, so a failed disk write
+must never break a scoring request. Stage 2 swaps this for a real
+database/log store.
 """
 import json
 import time
 from pathlib import Path
 
 LOG_PATH = Path(__file__).parent / "audit_log.jsonl"
+
+_memory_log: list[dict] = []
 
 
 def record(score_result: dict) -> None:
@@ -24,11 +33,19 @@ def record(score_result: dict) -> None:
         "alternate_data_decision": score_result["alternate_data_decision"],
         "reasons": score_result["reasons"],
     }
-    with LOG_PATH.open("a", encoding="utf-8") as f:
-        f.write(json.dumps(entry) + "\n")
+    _memory_log.append(entry)
+
+    try:
+        with LOG_PATH.open("a", encoding="utf-8") as f:
+            f.write(json.dumps(entry) + "\n")
+    except OSError:
+        pass  # read-only filesystem (e.g. serverless) -- in-memory log still holds it
 
 
 def read_recent(limit: int = 50) -> list[dict]:
+    if _memory_log:
+        return _memory_log[-limit:]
+
     if not LOG_PATH.exists():
         return []
     lines = LOG_PATH.read_text(encoding="utf-8").strip().splitlines()

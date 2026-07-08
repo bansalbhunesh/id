@@ -2,6 +2,7 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
+import audit_log
 from scoring import MSMEProfile, score_profile
 from sample_data import SAMPLE_PROFILES
 
@@ -36,3 +37,8 @@ def get_score(msme_id: str):
 @app.post("/score")
 def score_custom(profile: MSMEProfile):
     return score_profile(profile)
+
+
+@app.get("/audit-log")
+def get_audit_log(limit: int = 50):
+    return audit_log.read_recent(limit)

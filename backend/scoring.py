@@ -124,7 +124,9 @@ def score_profile(p: MSMEProfile) -> dict:
 
     from ml import explain  # local imports: avoid circular imports at module load
     from agent_memo import generate_memo
+    import audit_log
 
     result["ml"] = explain(p)
     result["memo"] = generate_memo(result)
+    audit_log.record(result)
     return result

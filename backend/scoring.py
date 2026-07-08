@@ -122,7 +122,9 @@ def score_profile(p: MSMEProfile) -> dict:
         "alternate_data_decision": "Approved" if grade in ("A", "B", "C") else "Rejected",
     }
 
-    from ml import explain  # local import: avoids a circular import at module load
+    from ml import explain  # local imports: avoid circular imports at module load
+    from agent_memo import generate_memo
 
     result["ml"] = explain(p)
+    result["memo"] = generate_memo(result)
     return result

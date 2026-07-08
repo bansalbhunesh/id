@@ -32,3 +32,9 @@ def test_reasons_present_for_every_profile():
         result = score_profile(profile)
         assert isinstance(result["reasons"], list)
         assert "score" in result and 0 <= result["score"] <= 100
+
+
+def test_memo_mentions_rejection_reversal_for_ntc_hero():
+    result = score_profile(SAMPLE_PROFILES["ntc_hero"])
+    assert "decline" in result["memo"].lower() or "reject" in result["memo"].lower()
+    assert result["name"] in result["memo"]

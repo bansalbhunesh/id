@@ -2,6 +2,7 @@ venv/
 __pycache__/
 *.pyc
 .pytest_cache/
+.pytest_tmp/
 node_modules/
 .env
 backend/audit_log.jsonl

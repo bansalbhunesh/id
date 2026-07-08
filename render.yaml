@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: udyampulse-idbi
+    runtime: docker
+    branch: main
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    autoDeployTrigger: commit
+    healthCheckPath: /health
+    envVars:
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: PORT
+        value: "8000"
+
+previews:
+  generation: manual
+  expireAfterDays: 3

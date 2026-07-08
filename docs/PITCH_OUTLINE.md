@@ -64,7 +64,7 @@ Single-service architecture:
 
 ## Slide 8 - Technologies Used
 
-Python, FastAPI, Pydantic, pytest, vanilla HTML/CSS/JS, Docker, Vercel config, Render-compatible single-service deploy, GitHub Actions.
+Python, FastAPI, Pydantic, pytest, vanilla HTML/CSS/JS, Docker, Render web service, render.yaml Blueprint, GitHub Actions.
 
 Stage 2 targets: IDBI sandbox AA/GST/UPI/EPFO APIs, AWS Bedrock, XGBoost/LightGBM, SHAP, Postgres audit store, drift and fairness monitoring.
 
@@ -76,7 +76,7 @@ Stage 2 targets: IDBI sandbox AA/GST/UPI/EPFO APIs, AWS Bedrock, XGBoost/LightGB
 
 ## Slide 10 - Snapshots Of The Prototype
 
-Use fresh screenshots from the current app:
+Use the committed screenshots from `docs/deck/assets/`:
 
 1. First viewport of the cockpit - portfolio impact, case queue, grade A, Rs 27,00,000 limit, Traditional Rejected / UdyamPulse Approved.
 2. Middle of decision pack - pillar bars, reason codes, Shapley attribution, and memo.
@@ -103,5 +103,4 @@ Use fresh screenshots from the current app:
 
 - GitHub repository: https://github.com/bansalbhunesh/id
 - Live product link: https://id-ysm9.onrender.com
-- Demo video: add final 3-minute walkthrough link after recording.
-
+- Recorded walkthrough: https://github.com/bansalbhunesh/id/blob/main/docs/demo.gif

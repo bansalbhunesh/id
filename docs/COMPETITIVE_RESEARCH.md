@@ -1,6 +1,6 @@
 # Competitive Research
 
-This note records the public competitor scan used to shape UdyamPulse for IDBI Innovate 2026 PS3: MSME Financial Health Score.
+This note records the public competitor scan used to shape UdyamPulse for IDBI Innovate 2026 PS3: MSME Financial Health Score. Last checked: 2026-07-09.
 
 ## Reviewed Repositories
 
@@ -14,7 +14,7 @@ This note records the public competitor scan used to shape UdyamPulse for IDBI I
 
 The pasted H2S/IDBI submission plan and deck template sections were treated as the operating brief: Team Details, Brief, Opportunities, Features, Process Flow, Wireframes, Architecture, Technologies, Cost, Snapshots, Performance Report, Additional Details, and Links.
 
-Public web search during this build did not surface a stable official Devpost or rules URL for the exact IDBI Innovate PS3 page, so the implementation avoids fragile contest-rule assumptions and anchors the submission to the problem statement, live prototype, model card, tests, and the required deck structure.
+Public web search during this build did not surface a stable official Devpost, Unstop, or rules URL for the exact IDBI Innovate PS3 page, so the implementation avoids fragile contest-rule assumptions and anchors the submission to the problem statement, live prototype, model card, tests, and the required deck structure.
 
 ## Positioning Decision
 

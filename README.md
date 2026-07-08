@@ -125,7 +125,7 @@ cd backend
 uvicorn main:app --host 0.0.0.0 --port $PORT
 ```
 
-`Dockerfile` and `vercel.json` are included. The current Render deployment URL is:
+`Dockerfile` and `render.yaml` are included for reproducible Render deployment. The current live URL is:
 
 [https://id-ysm9.onrender.com](https://id-ysm9.onrender.com)
 
@@ -135,10 +135,14 @@ uvicorn main:app --host 0.0.0.0 --port $PORT
 backend/              FastAPI service, scoring engine, ML layer, governance API
 frontend/index.html   Static underwriter cockpit served by FastAPI
 docs/deck/            Submission deck HTML
+docs/deck/UdyamPulse-IDBI-Submission-Deck.pdf Submission-ready deck PDF
 docs/PITCH_OUTLINE.md Deck content mapped to the IDBI template
 docs/COMPETITIVE_RESEARCH.md Public repo scan and differentiation notes
+docs/SUBMISSION_CHECKLIST.md Final submission links, proof, and verification gates
+docs/DEMO_SCRIPT.md 3-minute demo narration and click path
 docs/demo.gif         Recorded walkthrough
 MODEL_CARD.md         Model purpose, training data, explainability, limitations
+render.yaml           Render Blueprint for the live web service
 ```
 
 ## Stage 2 roadmap

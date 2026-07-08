@@ -1,5 +1,7 @@
 # UdyamPulse
 
+[![tests](https://github.com/bansalbhunesh/id/actions/workflows/tests.yml/badge.svg)](https://github.com/bansalbhunesh/id/actions/workflows/tests.yml)
+
 AI-powered MSME Financial Health Card — built for **IDBI Innovate 2026** (Problem Statement 3: Financial Health Score).
 
 ## Problem

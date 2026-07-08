@@ -38,4 +38,34 @@ SAMPLE_PROFILES: dict[str, MSMEProfile] = {
         unique_counterparties=12,
         outstanding_debt_to_inflow=0.68,
     ),
+    "borderline_improving": MSMEProfile(
+        name="Sunrise Auto Parts",
+        avg_monthly_inflow=310000,
+        inflow_volatility=0.28,
+        cheque_bounce_rate=0.06,
+        gst_filing_streak_months=14,
+        gst_turnover_growth_pct=15,
+        upi_txn_count_monthly=95,
+        unique_counterparties=22,
+        outstanding_debt_to_inflow=0.42,
+        has_bureau_history=True,
+        # A middling grade with a clear single lever (leverage) -- good for
+        # demoing the improvement-plan feature on a business that isn't
+        # already rejected outright.
+    ),
+    "digitally_thin": MSMEProfile(
+        name="Himalayan Handicrafts Co-op",
+        avg_monthly_inflow=95000,
+        inflow_volatility=0.20,
+        cheque_bounce_rate=0.03,
+        gst_filing_streak_months=30,
+        gst_turnover_growth_pct=5,
+        upi_txn_count_monthly=18,
+        unique_counterparties=6,
+        outstanding_debt_to_inflow=0.15,
+        has_bureau_history=False,
+        # Disciplined and low-leverage, but a thin digital footprint (few
+        # counterparties, low UPI volume) -- a different NTC story than the
+        # ntc_hero case: healthy business, just not very digitally visible yet.
+    ),
 }

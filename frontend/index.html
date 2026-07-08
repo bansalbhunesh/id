@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>UdyamPulse — MSME Financial Health Card</title>
+<style>
+  body { font-family: system-ui, sans-serif; max-width: 720px; margin: 40px auto; padding: 0 16px; color: #1a1a1a; }
+  h1 { margin-bottom: 4px; }
+  .sub { color: #666; margin-top: 0; }
+  select, button { font-size: 1rem; padding: 8px 12px; margin: 8px 8px 8px 0; }
+  .card { border: 1px solid #ddd; border-radius: 12px; padding: 20px; margin-top: 20px; }
+  .grade { font-size: 3rem; font-weight: bold; }
+  .grade.A, .grade.B { color: #1a7f37; }
+  .grade.C { color: #9a6700; }
+  .grade.D, .grade.E { color: #cf222e; }
+  .pillars { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin: 16px 0; }
+  .pillar { background: #f6f8fa; border-radius: 8px; padding: 8px 12px; }
+  .reasons { list-style: none; padding: 0; }
+  .reasons li { padding: 4px 0; }
+  .limit { font-size: 1.4rem; font-weight: 600; margin: 12px 0; }
+  .error { color: #cf222e; }
+</style>
+</head>
+<body>
+  <h1>UdyamPulse</h1>
+  <p class="sub">AI-powered MSME Financial Health Card — built on consented alternate data (GST, UPI, AA, EPFO).</p>
+
+  <label for="msme">Select an MSME:</label><br />
+  <select id="msme"></select>
+  <button id="load">Get Health Card</button>
+
+  <div id="result"></div>
+
+  <script>
+    const API_BASE = "http://localhost:8000";
+
+    async function loadMSMEs() {
+      const res = await fetch(`${API_BASE}/msmes`);
+      const msmes = await res.json();
+      const select = document.getElementById("msme");
+      select.innerHTML = msmes.map(m => `<option value="${m.id}">${m.name}</option>`).join("");
+    }
+
+    async function loadScore() {
+      const id = document.getElementById("msme").value;
+      const resultEl = document.getElementById("result");
+      resultEl.innerHTML = "<p>Loading…</p>";
+      try {
+        const res = await fetch(`${API_BASE}/msmes/${id}/score`);
+        if (!res.ok) throw new Error(`API error ${res.status}`);
+        const data = await res.json();
+        resultEl.innerHTML = `
+          <div class="card">
+            <h2>${data.name}</h2>
+            <div class="grade ${data.grade}">${data.grade}</div>
+            <p>Score: ${data.score} / 100</p>
+            <div class="limit">Eligible limit: ₹${data.eligible_limit.toLocaleString("en-IN")}</div>
+            <div class="pillars">
+              ${Object.entries(data.pillars).map(([k, v]) => `<div class="pillar"><strong>${k.replace(/_/g, " ")}</strong>: ${v}/20</div>`).join("")}
+            </div>
+            <h3>Why this score</h3>
+            <ul class="reasons">${data.reasons.map(r => `<li>${r}</li>`).join("")}</ul>
+          </div>`;
+      } catch (err) {
+        resultEl.innerHTML = `<p class="error">Could not reach the API. Is the backend running on ${API_BASE}? (${err.message})</p>`;
+      }
+    }
+
+    document.getElementById("load").addEventListener("click", loadScore);
+    loadMSMEs().then(loadScore);
+  </script>
+</body>
+</html>

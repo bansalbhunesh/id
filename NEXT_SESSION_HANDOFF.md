@@ -12,18 +12,20 @@ Full working PoC for **IDBI Innovate 2026, Problem Statement 3 (MSME Financial H
 - Compliance layer — audit log (`backend/audit_log.py`, serverless-safe) + `MODEL_CARD.md` targeting RBI's FREE-AI/Model Risk Management draft.
 - Single-service deploy: FastAPI serves the static frontend too (`Dockerfile`, `vercel.json`).
 - CI (`.github/workflows/tests.yml`) running the 11-test pytest suite on every push.
-- `docs/PITCH_OUTLINE.md` — 10-slide deck structure mapped to IDBI's template.
+- `docs/PITCH_OUTLINE.md` — rewritten to match the **actual official template** (`D:\Downloads\Prototype Submission Deck _ IDBI Innovate.pdf`), slide-by-slide, with ready-to-paste content. Important correction: the demo video requirement is **3 minutes**, not 60–90s.
+- `docs/demo.gif` — a short recorded walkthrough of the live app (NTC hero rejected→approved, then the improvement plan on the borderline persona).
 
 **5 synthetic MSME personas** in `backend/sample_data.py`, including two distinct NTC/NTB stories.
 
-All 12 commits pushed to `git@github.com:bansalbhunesh/id.git` (main branch). Working tree is clean.
+Repo confirmed **public** on GitHub (template requires this). All 14 commits pushed to `git@github.com:bansalbhunesh/id.git` (main branch). Working tree is clean.
 
 ## What's left (needs your action, not code)
 
 1. **Live deployment** — you chose to connect the GitHub repo via the Vercel dashboard yourself (Add New Project → import `bansalbhunesh/id` → Framework: Other → Deploy). As of this handoff, no Vercel project named `id`/`udyampulse` exists yet under your account — this step is still pending. `vercel.json` is ready to go; if the build fails, check `get_deployment_build_logs` for the `@vercel/python` builder output.
-2. **The pitch deck (mandatory PDF)** — build it in IDBI's official template using `docs/PITCH_OUTLINE.md` as the script. Needs real screenshots from a running instance (local `uvicorn` or the live Vercel URL once connected).
-3. **Demo video** — 60–90s screen recording of the NTC hero flow (rejected traditionally → approved on alternate data → SHAP reasons → memo → improvement plan).
-4. **Submission form** — Challenge = PS3, deployment link (once live), GitHub link (already have it), PDF deck.
+2. **The pitch deck (mandatory PDF)** — open `D:\Downloads\Prototype Submission Deck _ IDBI Innovate.pdf` (the real template) and paste in the content from `docs/PITCH_OUTLINE.md`, slide by slide.
+3. **Screenshots for slide 10** — take fresh ones yourself from the running app (I captured some via browser automation this session but couldn't locate the saved files on disk to hand off directly — easiest to just recapture: run `uvicorn`, open `localhost:8000`, screenshot the NTC hero card, the AI risk model/memo section, and the borderline persona's improvement plan).
+4. **Demo video (3 minutes, per the real template)** — walk through: NTC hero rejected traditionally → approved on alternate data → SHAP reasons → memo → switch to the borderline persona → improvement plan.
+5. **Submission form** — Challenge = PS3, deployment link (once live), GitHub link (already have it, confirmed public), PDF deck.
 
 ## Commands to run next
 
@@ -36,4 +38,4 @@ uvicorn main:app --port 8000    # serves API + frontend at http://localhost:8000
 
 ## Current branch / commit
 
-`main` @ `b08dc71` ("add more demo personas and CI badge").
+`main` @ `b0f4ff0` ("rewrite pitch outline to match the real official template").

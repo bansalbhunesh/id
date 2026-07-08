@@ -1,43 +1,65 @@
-# Handoff — UdyamPulse
+# Handoff - UdyamPulse
 
-## What's done
+## Current state
 
-Full working PoC for **IDBI Innovate 2026, Problem Statement 3 (MSME Financial Health Score)**:
+UdyamPulse is a working IDBI Innovate 2026 PS3 PoC for MSME Financial Health Score.
 
-- Rule-based 5-pillar scorer (`backend/scoring.py`) — 0–100 score, A–E grade, eligible credit limit.
-- ML explainability layer (`backend/linear_model.py`, `backend/ml.py`) — a real, trained linear model (pure Python, zero new dependencies) with **exact closed-form Shapley attribution**.
-- Traditional-vs-alternate-data verdict — the rejected→approved money-shot for thin-file (NTC/NTB) businesses.
-- Borderline-improving persona + a computed **improvement plan** (weakest pillar → action → projected grade/limit uplift).
-- Agentic underwriter memo (`backend/agent_memo.py`) — template-based now; documented seam to swap in AWS Bedrock later.
-- Compliance layer — audit log (`backend/audit_log.py`, serverless-safe) + `MODEL_CARD.md` targeting RBI's FREE-AI/Model Risk Management draft.
-- Single-service deploy: FastAPI serves the static frontend too (`Dockerfile`, `vercel.json`).
-- CI (`.github/workflows/tests.yml`) running the 11-test pytest suite on every push.
-- `docs/PITCH_OUTLINE.md` — rewritten to match the **actual official template** (`D:\Downloads\Prototype Submission Deck _ IDBI Innovate.pdf`), slide-by-slide, with ready-to-paste content. Important correction: the demo video requirement is **3 minutes**, not 60–90s.
-- `docs/demo.gif` — a short recorded walkthrough of the live app (NTC hero rejected→approved, then the improvement plan on the borderline persona).
-- **`docs/deck/index.html` — the actual 13-slide submission deck**, built to match the official template's exact section structure, self-contained (fonts embedded as base64, no external dependencies), verified via JS to have zero content overflow on any slide. Print-ready at 1280×720 (16:9) via `Ctrl+P` → Save as PDF. See `docs/deck/README.md` for exact steps.
+What is now in the repo:
 
-**5 synthetic MSME personas** in `backend/sample_data.py`, including two distinct NTC/NTB stories.
+- FastAPI single-service app serving API plus static frontend.
+- Banker-grade underwriter cockpit in `frontend/index.html`.
+- Five-pillar score, A-E grade, risk band, eligible limit, reason codes, policy guardrails, source map, decision path, memo, and improvement plan.
+- NTC/NTB rejected-vs-approved money-shot for Shree Ganesh Textiles.
+- Portfolio impact endpoint (`GET /portfolio`) showing 2 NTC rescues and Rs 30,80,000 credit unlocked in the synthetic cohort.
+- Governance endpoint (`GET /governance`) exposing model controls, audit count, fairness-by-bureau-history summary, and deployment notes.
+- Audit log endpoint (`GET /audit-log`) for reconstructable decisions.
+- Dependency-free trained linear model with exact Shapley attribution.
+- Updated `README.md`, `MODEL_CARD.md`, and `.impeccable.md` design context.
+- Tests expanded to 15 passing tests.
 
-Repo confirmed **public** on GitHub (template requires this). All 16 commits pushed to `git@github.com:bansalbhunesh/id.git` (main branch). Working tree is clean.
+## Verified this session
 
-## What's left (blocked on your credentials/hands, or on a safety constraint I won't cross)
-
-1. **Live deployment** — needs your GitHub OAuth consent in the Vercel dashboard (Add New Project → import `bansalbhunesh/id` → Framework: Other → Deploy). No Vercel project exists yet under your account for this repo. `vercel.json` is ready; if the build fails, check `get_deployment_build_logs` for the `@vercel/python` builder output.
-2. **Replace the two placeholder slides in the deck** — slides 6 and 10 (`docs/deck/index.html`) currently use illustrative stats instead of real screenshots. Run `uvicorn`, open `localhost:8000`, screenshot the NTC hero card and the borderline persona's improvement plan, and swap them in.
-3. **Print the deck to PDF** — `Ctrl+P` → Save as PDF on `docs/deck/index.html`. I did not automate this step myself: triggering a browser print dialog risks freezing the automation session the same way a JS `alert()` does, and the harness explicitly warns against that.
-   - I also tried a second route: imported the deck into Adobe Express (`export_html_to_express`) — the import was verified faithful (all 13 slides, correct text, correct fonts resolved to `SourceSerif4-*`/`SourceSans3-*`, correct colors). But `download_design` (the PDF export) refused: **"This design contains premium content. Upgrade to Adobe Express Premium to download it."** I did not upgrade the account — that's a paid decision only you can make. If you have (or get) Express Premium, the editable document is here: `https://new.express.adobe.com/id/urn:aaid:sc:AP:86fc3ffb-3f0d-4263-b232-df7089aa7e31` — otherwise stick with the free `Ctrl+P` route on the original `docs/deck/index.html`, which needs no account at all.
-4. **Demo video (3 minutes, per the real template)** — walk through: NTC hero rejected traditionally → approved on alternate data → SHAP reasons → memo → switch to the borderline persona → improvement plan. Add the link into slide 13.
-5. **Submission form** — Challenge = PS3, deployment link (once live), GitHub link (already filled into slide 13, confirmed public), PDF deck.
-
-## Commands to run next
+Commands/results:
 
 ```bash
 cd backend
-source venv/Scripts/activate   # venv already created and populated
-pytest -q                       # 11 tests, all passing
-uvicorn main:app --port 8000    # serves API + frontend at http://localhost:8000
+..\.venv\Scripts\python -m pytest -q --basetemp ..\.pytest_tmp
+# 15 passed, 1 Starlette/httpx deprecation warning
 ```
 
-## Current branch / commit
+Runtime checks:
 
-`main` @ `34a46d8` ("build the actual 13-slide submission deck").
+- `GET /health` returned `ok`.
+- `GET /portfolio` returned 5 cases, 4 alternate-data approvals, 2 NTC rescues, Rs 30,80,000 credit unlocked.
+- `GET /msmes/ntc_hero/score` returned traditional `Rejected`, alternate-data `Approved`, grade A, score 86, Rs 27,00,000 limit.
+- Playwright browser verification against a spawned local server found no console errors, no horizontal overflow at 1366px desktop or 390px mobile, 4 impact metrics, 5 case buttons, 5 source signals, and governance controls rendered.
+
+Note: this Codex harness reaps background uvicorn processes after tool calls. Use the command below to keep a local server open in a normal terminal.
+
+```bash
+cd backend
+..\.venv\Scripts\python -m uvicorn main:app --host 127.0.0.1 --port 8000
+```
+
+## Public/live status
+
+- Current live URL checked: https://id-ysm9.onrender.com
+- It was live and returned the old deployed app before these local changes.
+- Push/redeploy is still needed for the live URL to show the new cockpit.
+
+## Competitor research snapshot
+
+Public search surfaced PS3 competitor repos including:
+
+- `rohilkohli/msme-health-score`: broad React/FastAPI app shell with many routes, auth, Docker, data-source modules.
+- `pixie0718/finhealth-ai`: feature-heavy owner/manager platform with loan products, dashboards, MySQL, Docker docs.
+- `Abhiroop-hgv/msme-health-card`: lighter Vite prototype with mock services and default README.
+
+Differentiation target applied here: make UdyamPulse look more bank-ready and regulator-ready than the field without adding brittle infrastructure.
+
+## Still worth doing
+
+1. Commit and push the local changes, then confirm Render redeploys `https://id-ysm9.onrender.com`.
+2. Update `docs/PITCH_OUTLINE.md` and `docs/deck/index.html` screenshots/content to match the new cockpit and the 15-test suite.
+3. Export the final deck PDF and record the 3-minute demo video required by the template.
+4. Re-check the live URL in a fresh browser after deploy.

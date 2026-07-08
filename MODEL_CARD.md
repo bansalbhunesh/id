@@ -1,67 +1,65 @@
-# Model Card — UdyamPulse MSME Financial Health Model
+# Model Card - UdyamPulse MSME Financial Health Model
 
 ## Purpose
 
-Produces an explainable financial health score, credit grade, eligible
-limit, and reason codes for an MSME from consented alternate data (bank
-statements via Account Aggregator, GST filings, UPI transaction trails,
-EPFO), aimed at New-to-Credit (NTC) and New-to-Bank (NTB) enterprises that
-traditional bureau-based underwriting cannot evaluate.
+UdyamPulse produces an explainable MSME financial health score, credit grade, risk band, eligible limit, reason codes, and underwriter memo from consented alternate-data signals. It is aimed at New-to-Credit and New-to-Bank enterprises that traditional bureau-based underwriting cannot evaluate fairly.
 
 ## Model type
 
-Two components, intentionally simple and fully auditable for the
-prototype stage:
+The Stage-1 prototype intentionally uses two auditable scoring layers:
 
-1. **Rule-based pillar scorer** (`backend/scoring.py`) — five weighted,
-   hand-specified pillars (Liquidity, Discipline, Momentum, Leverage,
-   Digital Footprint), each 0–20, summed to a 0–100 score with an A–E
-   grade. Every threshold is inspectable in source.
-2. **Linear PD-proxy model** (`backend/linear_model.py`) — an OLS
-   regression fit on a synthetic training set, with **exact Shapley
-   (SHAP-equivalent) feature attribution** computed in closed form
-   (`weight_i × (x_i − mean_i)`), requiring no external ML library.
+1. **Rule-based pillar scorer** (`backend/scoring.py`)
+   - Five pillars: Liquidity, Discipline, Momentum, Leverage, Digital Footprint.
+   - Each pillar is 0-20; total is 0-100 with A-E grade and risk band.
+   - Also emits data-source signals, policy guardrails, decision path, and improvement plan.
 
-Both outputs are surfaced together so a reviewer can cross-check the
-transparent rule engine against the learned model.
+2. **Linear PD-proxy model** (`backend/linear_model.py`, `backend/ml.py`)
+   - OLS regression fit on a synthetic training set.
+   - Exact Shapley attribution for a linear model: `weight_i * (x_i - mean_i)`.
+   - Dependency-free implementation so the PoC remains transparent and easy to run.
+
+The UI surfaces both layers together so an underwriter can cross-check a transparent policy score against a learned risk model.
 
 ## Training data
 
-Synthetic only (`backend/synthetic_training.py`), generated from a
-domain-informed formula plus noise. **No real customer or bank data is
-used in this prototype.** Stage 2 (post-shortlist) retrains on IDBI
-sandbox AA/GST/UPI/EPFO data under the bank's data-governance controls.
+Training data is synthetic only (`backend/synthetic_training.py`). It is generated from a domain-informed formula plus noise and does not contain real customer or bank data.
+
+Stage 2 should retrain and recalibrate on IDBI sandbox AA/GST/UPI/EPFO feeds under bank data-governance controls.
 
 ## Explainability
 
-Every score returns per-feature reason codes ("Strong" / "Watch" for the
-rule-based pillars; ranked Shapley contributions for the ML layer) so an
-underwriter or an applicant can see exactly why a score landed where it
-did — directly answering RBI's draft Guidance on Model Risk Management,
-which requires AI-assisted credit decisions to be "consistent, unbiased,
-explainable and verifiable."
+Every score returns:
+
+- Plain-language pillar reason codes.
+- Ranked Shapley feature contributions.
+- Traditional bureau-only verdict and alternate-data verdict.
+- Policy guardrail status.
+- Decision path from bureau screen to credit-line recommendation.
+
+This directly targets model-risk expectations around explainable, verifiable AI-assisted credit decisions.
 
 ## Auditability
 
-Every scoring call is appended to an audit log (`backend/audit_log.py`,
-`backend/audit_log.jsonl`) with a timestamp, score, grade, both the
-traditional and alternate-data verdicts, and the reason codes — so any
-past decision can be reconstructed. Exposed via `GET /audit-log`.
+Every scoring call is appended to the audit log (`backend/audit_log.py`) with timestamp, borrower name, score, grade, risk band, eligible limit, traditional verdict, alternate-data verdict, and reason codes. The audit trail is exposed through `GET /audit-log`.
 
-## Known limitations (prototype stage)
+The governance endpoint (`GET /governance`) exposes model version, live controls, audit count, fairness summary, and deployment notes.
 
-- Trained on synthetic, not real, financial data — coefficients will be
-  recalibrated once real AA/GST/UPI data is available.
-- No formal fairness/bias audit has been run yet; Stage 2 roadmap
-  includes a disparate-impact check across sector and geography.
-- The linear model is intentionally simple for transparency; Stage 2
-  swaps in a gradient-boosted model (XGBoost/LightGBM) with the `shap`
-  library once real data volume justifies the added complexity —
-  `linear_model.py`'s `fit` / `predict` / `shap_contributions` interface
-  is designed to be a drop-in replacement target.
+## Fairness and monitoring
+
+The Stage-1 demo includes a small synthetic cohort fairness view grouped by bureau-history status and sector (`GET /portfolio`, `GET /governance`). This is not a production fairness certification. Stage 2 should add:
+
+- Out-of-time validation.
+- Disparate-impact checks across sector, geography, vintage, and protected/proxy variables where legally available.
+- Score drift and population stability index monitoring.
+- Reason-code stability monitoring.
+
+## Known limitations
+
+- Synthetic training data means coefficients are illustrative, not production-calibrated.
+- The fairness view is a demo-cohort monitor, not statistically significant.
+- The deterministic underwriter memo is a stable fallback, not a live LLM call.
+- The linear model is intentionally simple; Stage 2 should evaluate XGBoost/LightGBM with SHAP on real data volume.
 
 ## Intended use
 
-Decision support for MSME credit underwriting at IDBI Bank. Not intended
-as a fully automated approve/decline system without human review at this
-stage.
+Decision support for MSME credit underwriting. The current prototype should not be treated as a fully automated approve/decline system without human review.

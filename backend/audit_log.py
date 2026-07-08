@@ -29,6 +29,8 @@ def record(score_result: dict) -> None:
         "name": score_result["name"],
         "score": score_result["score"],
         "grade": score_result["grade"],
+        "risk_band": score_result.get("risk_band"),
+        "eligible_limit": score_result.get("eligible_limit"),
         "traditional_decision": score_result["traditional"]["decision"],
         "alternate_data_decision": score_result["alternate_data_decision"],
         "reasons": score_result["reasons"],

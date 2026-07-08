@@ -1,73 +1,107 @@
-# UdyamPulse — Content for the Official IDBI Innovate Deck
+# UdyamPulse - Content for the Official IDBI Innovate Deck
 
-This maps directly onto **"Prototype Submission Deck _ IDBI Innovate.pdf"** — the official 15-slide template downloaded from the H2S portal (in `D:\Downloads`). Paste this content straight into that file; don't rebuild the template from scratch.
+This maps onto the IDBI Innovate prototype submission template. Keep the official visual template, but refresh screenshots and copy from the current app.
 
-## Slide 1 — Team Details
-- **Team name:** Looper
-- **Team leader name:** Bhunesh Bansal
-- **Problem Statement:** Problem Statement 3 — Financial Health Score
+## Slide 1 - Team Details
 
-## Slide 2 — Brief about the idea
-UdyamPulse is an AI-powered MSME Financial Health Card. It turns consented alternate data — GST filings, UPI transaction trails, Account Aggregator bank statements, EPFO records — into an explainable 0–100 health score, an A–E grade, an eligible credit limit, and a plain-language improvement plan. It's built specifically for New-to-Credit (NTC) and New-to-Bank (NTB) MSMEs: businesses with no bureau history that traditional underwriting rejects outright, even when their actual cash flows are healthy.
+- Team name: Looper
+- Project: UdyamPulse
+- Problem Statement: PS3 - Financial Health Score
+- One-liner: Consented alternate data in; explainable financial health card, eligible credit line, and improvement plan out.
 
-## Slide 3 — Opportunities
-- **How different is it from existing ideas?** Most alternate-data scoring tools (Perfios, FinBox, HyperVerge) return a score. UdyamPulse returns a score a bank can *defend to a regulator* and a borrower can *act on* — every decision carries exact Shapley (SHAP-equivalent) reason codes, an audit trail, and a concrete improvement plan, not just a number.
-- **How does it solve the problem?** It runs two independent, cross-checkable scoring methods side by side (a transparent rule engine + a trained ML model) and shows, explicitly, what a bureau-only process would have decided vs. what alternate data reveals — the rejected→approved contrast is the whole pitch in one screen.
-- **USP:** Explainability and auditability are default behavior, not an afterthought. RBI's draft Guidance on Model Risk Management (Jun 2024) requires AI-assisted credit decisions to be "consistent, unbiased, explainable and verifiable" — yet of 127 AI-using regulated entities surveyed, only 15 use SHAP/LIME-style explainability and only 18 keep audit logs. UdyamPulse ships both by default.
+## Slide 2 - Brief About The Idea
 
-## Slide 4 — List of features
-- 5-pillar financial health score (Liquidity, Discipline, Momentum, Leverage, Digital Footprint) → 0–100 score, A–E grade
-- Trained ML risk model with exact Shapley feature attribution (per-decision reason codes)
-- Side-by-side traditional (bureau-only) vs. alternate-data verdict
-- Eligible credit limit calculation
-- Borrower-facing improvement plan (weakest pillar → concrete action → projected grade/limit uplift)
-- AI-generated underwriter memo (plain-language summary for credit officers)
-- Append-only audit log of every scoring decision (`GET /audit-log`)
-- Model card documenting training data, limitations, and intended use
+UdyamPulse is a banker-grade MSME Financial Health Card. It turns consented alternate data - GST, UPI, Account Aggregator-style bank statements, EPFO, sector, geography, vintage, and bureau status - into an explainable 0-100 score, A-E grade, risk band, eligible credit limit, underwriter memo, and borrower improvement plan.
 
-## Slide 5 — Process flow diagram
-Flow: **Consented data intake** (AA bank statements + GST + UPI + EPFO) → **Feature engine** (5 pillars) → **Dual scoring** (rule engine + ML/Shapley model) → **Verdict comparison** (traditional vs. alternate-data) → **Underwriter memo + improvement plan generation** → **Audit log** → **Dashboard / health-card display**.
-(Redraw this as a simple left-to-right box diagram — the README's ASCII version in the GitHub repo is the reference.)
+It is built for New-to-Credit and New-to-Bank MSMEs that traditional bureau-first underwriting rejects even when their real operating data is healthy.
 
-## Slide 6 — Wireframes / mock diagrams (optional)
-Use screenshots of the running app: the health card view (grade, score, eligible limit, traditional-vs-alternate verdict boxes) and the AI risk model / memo / improvement plan section below it.
+## Slide 3 - Opportunities
 
-## Slide 7 — Architecture diagram
-Single-service architecture: FastAPI backend (Python) serving both the REST API and the static frontend, with a rule-based scorer, a linear ML model (Shapley attribution), an agent-memo generator, and an audit log module, all behind one process — deployable as a single Docker container or Vercel function. See `README.md`'s architecture section for the full box diagram.
+- Difference from existing ideas: most teams and fintech demos stop at a score. UdyamPulse exposes the decision path, reason codes, Shapley attribution, audit trail, policy guardrails, source map, and fairness monitor.
+- Problem solved: it makes viable thin-file MSMEs visible to IDBI without turning AI into a black box.
+- USP: the rejected-to-approved NTC reversal is visible in the first minute and backed by regulator-ready evidence.
 
-## Slide 8 — Technologies used
-Python, FastAPI, Pydantic, pytest (backend + API); vanilla HTML/CSS/JS (frontend, no build step); a dependency-free linear regression model with closed-form Shapley attribution (OLS via Gauss-Jordan elimination — no numpy/scikit-learn/shap required); Docker; Vercel (`@vercel/python`) for deployment; GitHub Actions for CI. Stage 2 targets: AWS Bedrock (agentic memo generation), XGBoost/LightGBM + `shap` (production-scale model), IDBI sandbox AA/GST/UPI/EPFO APIs.
+## Slide 4 - List Of Features
 
-## Slide 9 — Estimated implementation cost (optional)
-Prototype cost: effectively zero (open-source stack, free-tier hosting). Stage 2 production estimate: AWS compute + Bedrock inference costs scale with transaction volume; exact figures depend on IDBI's sandbox data volume and are best scoped jointly during the mentorship phase.
+- Five-pillar score: Liquidity, Discipline, Momentum, Leverage, Digital Footprint.
+- Traditional bureau-only verdict vs alternate-data verdict.
+- Eligible working-capital limit.
+- Exact Shapley attribution from a trained dependency-free linear model.
+- Plain-language reason codes.
+- Underwriter memo.
+- Borrower improvement plan.
+- Policy guardrails and source map.
+- Audit log.
+- Portfolio impact endpoint and governance endpoint.
+- Fairness view by bureau-history status and sector.
 
-## Slide 10 — Snapshots of the prototype
-Capture fresh screenshots from the running app (`uvicorn main:app` locally, or the live Vercel URL):
-1. Top of the health card for the NTC hero (Shree Ganesh Textiles) — shows grade A, ₹27,00,000 eligible limit, and the **Traditional: Rejected / UdyamPulse: Approved** side-by-side verdict boxes.
-2. Scrolled down — the "AI risk model" Shapley reasons and the underwriter memo.
-3. The borderline persona (Sunrise Auto Parts) — the "Improvement plan" section showing the concrete grade/limit uplift.
+## Slide 5 - Process Flow Diagram
 
-*Note: if using a screen-capture tool with a visible extension sidebar or toolbar in frame, crop it out before pasting into the deck.*
+Draw left to right:
 
-## Slide 11 — Prototype performance report / benchmarking
-- 11 automated tests passing (pytest), covering scoring logic, ML weight recovery, the Shapley-sum invariant, the traditional-vs-alternate verdict, the improvement plan, and audit logging — enforced by CI on every push.
-- ML model validated against known linear relationships (exact coefficient recovery) before being trusted on synthetic MSME data.
-- Roadmap for real-data validation: report **KS statistic, AUC, and Gini coefficient** (the correct metrics for imbalanced credit risk — not raw accuracy) once trained on IDBI sandbox data.
+Consented data sources -> Feature engine -> Five-pillar score -> ML attribution -> Policy guardrails -> Credit line -> Underwriter memo + borrower plan -> Audit log.
 
-## Slide 12 — Additional details / future development
-Stage 2 roadmap (post-shortlist):
-1. Swap synthetic data for IDBI sandbox AA/GST/UPI/EPFO feeds; recalibrate on real distributions.
-2. Upgrade to a gradient-boosted model (XGBoost/LightGBM) with the `shap` library at production data volume.
-3. Add fairness/disparate-impact auditing across sector and geography.
-4. Add monitoring: score drift, population stability index (PSI).
-5. Wire the underwriter memo to AWS Bedrock for richer, more nuanced narratives.
-6. Pilot metrics: approval-rate lift on NTC/NTB, decision-time reduction, early-NPA guardrail — quantified against IDBI's book.
+## Slide 6 - Wireframes / Mock Diagrams
 
-## Slide 13 — Links
-- **GitHub Public Repository:** https://github.com/bansalbhunesh/id (already public, verified)
-- **Demo Video Link (3 minutes):** record after the live deploy is up — walk through the NTC hero rejected→approved flow, the AI risk model reasons, the memo, and the improvement plan on the borderline persona.
-- **Final Product Link:** pending — connect the Vercel dashboard to this repo (Add New Project → import `bansalbhunesh/id` → Framework: Other → Deploy); `vercel.json` is already configured.
+Use the first viewport of the current underwriter cockpit:
 
----
+- Portfolio impact strip.
+- Case queue.
+- Decision pack for Shree Ganesh Textiles.
+- Traditional Rejected vs UdyamPulse Approved verdict boxes.
 
-**Before finalizing:** the official template's slide 13 explicitly asks for a **3-minute** demo video — plan the walkthrough script to that length, not shorter.
+## Slide 7 - Architecture Diagram
+
+Single-service architecture:
+
+- FastAPI backend serving REST API and static frontend.
+- `backend/scoring.py` for five-pillar policy scoring and guardrails.
+- `backend/ml.py` and `backend/linear_model.py` for trained Shapley attribution.
+- `backend/agent_memo.py` for deterministic underwriter memo with AWS Bedrock seam.
+- `backend/audit_log.py` for reconstructable decision events.
+- `backend/portfolio.py` for impact and governance summaries.
+- `frontend/index.html` for the no-build underwriter cockpit.
+
+## Slide 8 - Technologies Used
+
+Python, FastAPI, Pydantic, pytest, vanilla HTML/CSS/JS, Docker, Vercel config, Render-compatible single-service deploy, GitHub Actions.
+
+Stage 2 targets: IDBI sandbox AA/GST/UPI/EPFO APIs, AWS Bedrock, XGBoost/LightGBM, SHAP, Postgres audit store, drift and fairness monitoring.
+
+## Slide 9 - Estimated Implementation Cost
+
+- Stage 1 prototype: single service, lightweight infra, synthetic data.
+- Stage 2 pilot: cloud container service, managed Postgres, Bedrock usage, monitoring, and sandbox API integration.
+- Cost control: deterministic memo fallback and dependency-light ML keep demo/pilot resilient.
+
+## Slide 10 - Snapshots Of The Prototype
+
+Use fresh screenshots from the current app:
+
+1. First viewport of the cockpit - portfolio impact, case queue, grade A, Rs 27,00,000 limit, Traditional Rejected / UdyamPulse Approved.
+2. Middle of decision pack - pillar bars, reason codes, Shapley attribution, and memo.
+3. Governance rail - source map, policy guardrails, audit count, fairness summary, and Sunrise Auto Parts improvement plan.
+
+## Slide 11 - Prototype Performance Report / Benchmarking
+
+- 15 automated tests passing.
+- Coverage includes scoring, grade boundaries, NTC reversal, improvement plan, audit logging, ML Shapley invariant, known linear coefficient recovery, portfolio impact, governance summary, and API endpoints.
+- Stage-1 portfolio impact: 5 synthetic MSME files, 4 alternate-data approvals, 2 NTC rescues, Rs 30,80,000 credit unlocked.
+- Runtime browser verification: no console errors and no horizontal overflow at desktop or mobile widths.
+- Stage 2 validation metrics: KS, AUC, Gini, PSI drift, reason-code stability, and disparate-impact checks.
+
+## Slide 12 - Additional Details / Future Development
+
+1. Replace synthetic fields with IDBI sandbox AA/GST/UPI/EPFO feeds.
+2. Recalibrate score and limits on real repayment/portfolio outcomes.
+3. Add out-of-time validation and model monitoring.
+4. Wire underwriter memo generation to AWS Bedrock with deterministic fallback.
+5. Add RBAC and persistent audit storage.
+6. Pilot metrics: NTC/NTB approval lift, decision-time reduction, early-NPA guardrail, and portfolio diversification.
+
+## Slide 13 - Links
+
+- GitHub repository: https://github.com/bansalbhunesh/id
+- Live product link: https://id-ysm9.onrender.com
+- Demo video: add final 3-minute walkthrough link after recording.
+

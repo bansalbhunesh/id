@@ -4,6 +4,10 @@ from scoring import MSMEProfile
 SAMPLE_PROFILES: dict[str, MSMEProfile] = {
     "ntc_hero": MSMEProfile(
         name="Shree Ganesh Textiles (New-to-Credit)",
+        sector="Textiles",
+        district="Surat",
+        vintage_months=31,
+        employees=18,
         avg_monthly_inflow=450000,
         inflow_volatility=0.18,
         cheque_bounce_rate=0.02,
@@ -18,6 +22,10 @@ SAMPLE_PROFILES: dict[str, MSMEProfile] = {
     ),
     "steady_wholesaler": MSMEProfile(
         name="Patel Wholesale Traders",
+        sector="Wholesale",
+        district="Ahmedabad",
+        vintage_months=84,
+        employees=26,
         avg_monthly_inflow=820000,
         inflow_volatility=0.12,
         cheque_bounce_rate=0.01,
@@ -29,6 +37,10 @@ SAMPLE_PROFILES: dict[str, MSMEProfile] = {
     ),
     "stressed_retailer": MSMEProfile(
         name="City Corner Retail",
+        sector="Retail",
+        district="Nagpur",
+        vintage_months=52,
+        employees=7,
         avg_monthly_inflow=180000,
         inflow_volatility=0.55,
         cheque_bounce_rate=0.14,
@@ -40,6 +52,10 @@ SAMPLE_PROFILES: dict[str, MSMEProfile] = {
     ),
     "borderline_improving": MSMEProfile(
         name="Sunrise Auto Parts",
+        sector="Auto Components",
+        district="Pune",
+        vintage_months=46,
+        employees=14,
         avg_monthly_inflow=310000,
         inflow_volatility=0.28,
         cheque_bounce_rate=0.06,
@@ -55,6 +71,10 @@ SAMPLE_PROFILES: dict[str, MSMEProfile] = {
     ),
     "digitally_thin": MSMEProfile(
         name="Himalayan Handicrafts Co-op",
+        sector="Handicrafts",
+        district="Dehradun",
+        vintage_months=64,
+        employees=21,
         avg_monthly_inflow=95000,
         inflow_volatility=0.20,
         cheque_bounce_rate=0.03,

@@ -20,7 +20,7 @@ def generate_memo(score_result: dict) -> str:
 
     lines = [
         f"{name} scores grade {grade} ({score_result['score']}/100) on alternate-data underwriting, "
-        f"suggesting an eligible limit of ₹{limit:,.0f}."
+        f"suggesting an eligible limit of Rs {limit:,.0f}."
     ]
 
     if trad["decision"] == "Rejected" and score_result["alternate_data_decision"] == "Approved":

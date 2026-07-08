@@ -140,7 +140,8 @@ docs/PITCH_OUTLINE.md Deck content mapped to the IDBI template
 docs/COMPETITIVE_RESEARCH.md Public repo scan and differentiation notes
 docs/SUBMISSION_CHECKLIST.md Final submission links, proof, and verification gates
 docs/DEMO_SCRIPT.md 3-minute demo narration and click path
-docs/demo.gif         Recorded walkthrough
+docs/demo.webm        Captioned recorded walkthrough video
+docs/demo.gif         Lightweight walkthrough fallback
 MODEL_CARD.md         Model purpose, training data, explainability, limitations
 render.yaml           Render Blueprint for the live web service
 ```

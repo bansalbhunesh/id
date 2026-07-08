@@ -48,9 +48,10 @@ Live app checks:
 - GitHub: https://github.com/bansalbhunesh/id
 - Live product: https://id-ysm9.onrender.com
 - Deck PDF: `docs/deck/UdyamPulse-IDBI-Submission-Deck.pdf`
-- Recorded walkthrough GIF: `docs/demo.gif`
+- Recorded walkthrough video: `docs/demo.webm`
+- Lightweight walkthrough fallback: `docs/demo.gif`
 - Demo narration script: `docs/DEMO_SCRIPT.md`
 
 ## Remaining Human Step
 
-Submit the final form with the GitHub URL, live product URL, deck PDF, and either the existing `docs/demo.gif` walkthrough or a voiceover recording made from `docs/DEMO_SCRIPT.md`.
+Submit the final form with the GitHub URL, live product URL, deck PDF, and `docs/demo.webm`. If the form requires hosted video instead of a repository file, upload `docs/demo.webm` and paste that hosted link.

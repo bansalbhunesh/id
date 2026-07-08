@@ -7,7 +7,8 @@ Use this as the final IDBI Innovate / H2S submission source of truth.
 - GitHub repository: https://github.com/bansalbhunesh/id
 - Live product: https://id-ysm9.onrender.com
 - Submission deck PDF: `docs/deck/UdyamPulse-IDBI-Submission-Deck.pdf`
-- Recorded walkthrough GIF: `docs/demo.gif`
+- Recorded walkthrough video: `docs/demo.webm`
+- Lightweight walkthrough fallback: `docs/demo.gif`
 - Demo script for voiceover/video: `docs/DEMO_SCRIPT.md`
 
 ## Required Proof
@@ -15,6 +16,7 @@ Use this as the final IDBI Innovate / H2S submission source of truth.
 - Working prototype: live Render deployment serves the underwriter cockpit and API.
 - Source code: public GitHub repository with backend, frontend, tests, Dockerfile, and Render Blueprint.
 - Pitch deck: 13-slide deck mapped to the IDBI template sections.
+- Demo video: captioned WebM walkthrough recorded from the live Render app.
 - Screenshots: live cockpit, decision pack, governance/evidence rail.
 - Model governance: `MODEL_CARD.md`, audit log endpoint, source map, policy guardrails, fairness summary.
 - Competitor research: `docs/COMPETITIVE_RESEARCH.md`.

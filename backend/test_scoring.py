@@ -34,6 +34,18 @@ def test_reasons_present_for_every_profile():
         assert "score" in result and 0 <= result["score"] <= 100
 
 
+def test_improvement_plan_present_for_non_a_grades_and_raises_limit():
+    for profile in SAMPLE_PROFILES.values():
+        result = score_profile(profile)
+        plan = result["improvement_plan"]
+        if result["grade"] == "A":
+            assert plan is None
+        else:
+            assert plan is not None
+            assert plan["limit_increase"] >= 0
+            assert plan["focus_pillar"] in result["pillars"]
+
+
 def test_memo_mentions_rejection_reversal_for_ntc_hero():
     result = score_profile(SAMPLE_PROFILES["ntc_hero"])
     assert "decline" in result["memo"].lower() or "reject" in result["memo"].lower()

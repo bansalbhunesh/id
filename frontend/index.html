@@ -96,6 +96,15 @@
             </div>
 
             ${data.memo ? `<div class="ml-section"><h3>Underwriter memo</h3><p>${data.memo}</p></div>` : ""}
+
+            ${data.improvement_plan ? `
+            <div class="ml-section">
+              <h3>Improvement plan</h3>
+              <p>${data.improvement_plan.action} Doing so could raise your grade to
+                <strong>${data.improvement_plan.potential_grade}</strong> and your eligible limit by
+                <strong>₹${data.improvement_plan.limit_increase.toLocaleString("en-IN")}</strong>
+                (to ₹${data.improvement_plan.potential_eligible_limit.toLocaleString("en-IN")}).</p>
+            </div>` : ""}
           </div>`;
       } catch (err) {
         resultEl.innerHTML = `<p class="error">Could not reach the API. Is the backend running on ${API_BASE}? (${err.message})</p>`;

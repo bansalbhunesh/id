@@ -90,6 +90,40 @@ def traditional_verdict(p: MSMEProfile) -> dict:
     return {"decision": "Approved", "reason": "Bureau history present and within thresholds."}
 
 
+IMPROVEMENT_ACTIONS = {
+    "liquidity": "Smooth out month-to-month cash inflow swings (e.g. staggered receivables) to lower volatility.",
+    "discipline": "Reduce cheque bounces and keep GST filings continuous, month after month.",
+    "momentum": "Grow GST-reported turnover consistently over the next few filing cycles.",
+    "leverage": "Pay down outstanding debt relative to monthly inflow.",
+    "digital_footprint": "Route more transactions through UPI and widen the base of counterparties paid/received from.",
+}
+
+IMPROVEMENT_STEP = 5  # assumed achievable pillar-point gain from acting on the suggestion
+
+
+def improvement_plan(pillars: dict[str, int], p: MSMEProfile) -> dict | None:
+    """What would move this business to the next grade, and by how much."""
+    current_total = sum(pillars.values())
+    current_grade = grade_for(current_total)
+    if current_grade == "A":
+        return None
+
+    weakest_pillar = min(pillars, key=pillars.get)
+    improved_value = min(PILLAR_MAX, pillars[weakest_pillar] + IMPROVEMENT_STEP)
+    potential_total = current_total - pillars[weakest_pillar] + improved_value
+    potential_grade = grade_for(potential_total)
+    potential_limit = eligible_limit(potential_total, p)
+    current_limit = eligible_limit(current_total, p)
+
+    return {
+        "focus_pillar": weakest_pillar,
+        "action": IMPROVEMENT_ACTIONS[weakest_pillar],
+        "potential_grade": potential_grade,
+        "potential_eligible_limit": potential_limit,
+        "limit_increase": round(potential_limit - current_limit, 2),
+    }
+
+
 def reason_codes(pillars: dict[str, int]) -> list[str]:
     reasons = []
     for name, value in pillars.items():
@@ -120,6 +154,7 @@ def score_profile(p: MSMEProfile) -> dict:
         "reasons": reason_codes(pillars),
         "traditional": traditional_verdict(p),
         "alternate_data_decision": "Approved" if grade in ("A", "B", "C") else "Rejected",
+        "improvement_plan": improvement_plan(pillars, p),
     }
 
     from ml import explain  # local imports: avoid circular imports at module load

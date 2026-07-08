@@ -18,6 +18,7 @@ class MSMEProfile(BaseModel):
     upi_txn_count_monthly: int
     unique_counterparties: int
     outstanding_debt_to_inflow: float  # ratio
+    has_bureau_history: bool = True  # False = New-to-Credit / New-to-Bank
 
 
 PILLAR_MAX = 20
@@ -69,6 +70,26 @@ def eligible_limit(total: int, p: MSMEProfile) -> float:
     return round(p.avg_monthly_inflow * multiplier, 2)
 
 
+def traditional_verdict(p: MSMEProfile) -> dict:
+    """What a bureau-only underwriting process would decide.
+
+    Traditional retail/MSME underwriting leans heavily on credit bureau
+    history; a business with none is typically declined outright,
+    regardless of how healthy its actual cash flows are.
+    """
+    if not p.has_bureau_history:
+        return {
+            "decision": "Rejected",
+            "reason": "No credit bureau history on file (New-to-Credit/New-to-Bank).",
+        }
+    if p.outstanding_debt_to_inflow > 0.6:
+        return {
+            "decision": "Rejected",
+            "reason": "Existing debt load exceeds traditional underwriting threshold.",
+        }
+    return {"decision": "Approved", "reason": "Bureau history present and within thresholds."}
+
+
 def reason_codes(pillars: dict[str, int]) -> list[str]:
     reasons = []
     for name, value in pillars.items():
@@ -90,11 +111,18 @@ def score_profile(p: MSMEProfile) -> dict:
     }
     total = sum(pillars.values())
     grade = grade_for(total)
-    return {
+    result = {
         "name": p.name,
         "score": total,
         "grade": grade,
         "pillars": pillars,
         "eligible_limit": eligible_limit(total, p),
         "reasons": reason_codes(pillars),
+        "traditional": traditional_verdict(p),
+        "alternate_data_decision": "Approved" if grade in ("A", "B", "C") else "Rejected",
     }
+
+    from ml import explain  # local import: avoids a circular import at module load
+
+    result["ml"] = explain(p)
+    return result

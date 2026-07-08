@@ -21,6 +21,12 @@ def test_grade_boundaries():
     assert grade_for(10) == "E"
 
 
+def test_ntc_hero_rejected_traditionally_but_approved_on_alternate_data():
+    result = score_profile(SAMPLE_PROFILES["ntc_hero"])
+    assert result["traditional"]["decision"] == "Rejected"
+    assert result["alternate_data_decision"] == "Approved"
+
+
 def test_reasons_present_for_every_profile():
     for profile in SAMPLE_PROFILES.values():
         result = score_profile(profile)

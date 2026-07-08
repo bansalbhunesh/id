@@ -12,6 +12,7 @@ SAMPLE_PROFILES: dict[str, MSMEProfile] = {
         upi_txn_count_monthly=340,
         unique_counterparties=64,
         outstanding_debt_to_inflow=0.05,
+        has_bureau_history=False,
         # No credit bureau history at all -> traditional scoring rejects this business outright.
         # Alternate data (GST streak, UPI velocity, low bounce rate) tells a different story.
     ),

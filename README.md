@@ -8,13 +8,15 @@
 ![Python](https://img.shields.io/badge/python-3.12+-blue)
 ![FastAPI](https://img.shields.io/badge/backend-FastAPI-009688)
 ![Dependencies](https://img.shields.io/badge/ML%20layer-zero%20new%20dependencies-brightgreen)
-![Status](https://img.shields.io/badge/status-stage2--ready%20PoC-brightgreen)
+![Status](https://img.shields.io/badge/status-first--round%20ready-brightgreen)
 
 Built for **IDBI Innovate 2026** - Problem Statement 3: Financial Health Score - Team **Looper**
 
 </div>
 
 ---
+
+![UdyamPulse live underwriting cockpit](docs/deck/assets/live-cockpit-viewport.png)
 
 ## The 10-second pitch
 
@@ -27,6 +29,18 @@ A New-to-Credit business with zero bureau history gets declined by a traditional
 | Reason given | No credit bureau history | Ranked reason codes, Shapley attribution, policy guardrails |
 
 That reversal is reproducible, explained, audited, and visible on the first screen of the live app.
+
+## First-round rule fit
+
+Public rule check, verified on 09 July 2026:
+
+- Official event venue: [IDBI Innovate 2026 on Hack2skill](https://hack2skill.com/event/idbinnovate).
+- Track: [IDBI's public MSME Inclusion Track post](https://www.linkedin.com/posts/idbi-bank_idbibank-idbiinnovate2026-bankinghackathon-activity-7479451537912721410-oI3E) asks teams to build a Financial Health Card using alternate data for faster credit decisions and MSME finance access.
+- Deadline and opportunity: [Hack2skill's public post](https://www.linkedin.com/posts/hack2skill_idbiinnovate-hackathon-startupindia-activity-7472640963304251392-ccFV) references 09 July 2026 registration, prize money, mentorship, and a possible co-development path.
+- Sandbox timing: [public program summaries](https://www2.fundsforngos.org/innovation/idbi-innovate-2026-national-innovation-challenge-for-banking-solutions-india/) indicate sandbox APIs, synthetic datasets, cloud resources, and mentorship are provided to shortlisted participants, so this repo keeps the public cohort synthetic while exposing sandbox-ready contracts.
+- Devpost check: no official IDBI Innovate 2026 Devpost page was found; the current public event surface appears to be Hack2skill.
+
+Full checklist: [docs/FIRST_ROUND_RULES_CHECK.md](docs/FIRST_ROUND_RULES_CHECK.md)
 
 ## Why judges can verify it quickly
 
@@ -48,6 +62,20 @@ Most PS3 competitors converge on "MSME score + alternate data + SHAP." UdyamPuls
 6. Generates a stable underwriter memo and borrower improvement plan, with optional AWS Bedrock Runtime memo generation and deterministic fallback.
 7. Records every scoring event in `/audit-log`.
 8. Exposes portfolio impact, pilot KPIs, validation metrics, drift checks, reason-code stability, and model-risk controls through live APIs.
+
+## Product proof
+
+### Decision pack
+
+![Decision pack with NTC approval reversal, health pillars, memo, and guardrails](docs/deck/assets/decision-pack.png)
+
+### Governance and evidence rail
+
+![Governance evidence rail with validation, fairness, pilot KPIs, and source map](docs/deck/assets/governance-evidence.png)
+
+### Mobile review flow
+
+![Mobile UdyamPulse cockpit](docs/deck/assets/mobile-live.png)
 
 ## Architecture
 
@@ -112,6 +140,8 @@ Useful endpoints:
 - `GET /audit-log`
 - `POST /score`
 - `POST /sandbox/score`
+- `POST /sandbox/recalibration/report`
+- `GET /model/status`
 
 ## Testing
 

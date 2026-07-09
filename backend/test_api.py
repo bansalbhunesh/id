@@ -40,6 +40,15 @@ def test_submission_proof_endpoint_exposes_backend_evidence():
     assert body["hero_reversal"]["alternate_data_decision"] == "Approved"
     assert body["portfolio_impact"]["credit_unlocked"] > 0
     assert body["validation_metrics"]["auc"] == 1.0
+    assert len(body["rubric_scorecard"]) >= 6
+    assert len(body["competitor_gap_map"]) >= 5
+    assert len(body["judge_runbook"]) >= 5
+    assert {item["criterion"] for item in body["rubric_scorecard"]} >= {
+        "Innovation",
+        "Feasibility",
+        "Business impact",
+        "Governance readiness",
+    }
 
     capability_layers = {item["layer"] for item in body["backend_capabilities"]}
     assert {
@@ -58,3 +67,33 @@ def test_submission_proof_endpoint_exposes_backend_evidence():
         "/governance",
         "/audit-log",
     } <= api_paths
+
+
+def test_submission_proof_maps_judging_rubric_to_verifiable_routes():
+    response = client.get("/submission/proof")
+
+    assert response.status_code == 200
+    body = response.json()
+    rubric_evidence = {
+        evidence
+        for item in body["rubric_scorecard"]
+        for evidence in item["evidence"]
+    }
+    gap_proofs = {item["proof"] for item in body["competitor_gap_map"]}
+    runbook_endpoints = {item["endpoint"] for item in body["judge_runbook"]}
+
+    assert "/submission/proof" in rubric_evidence
+    assert "/msmes/ntc_hero/score" in rubric_evidence
+    assert "/submission/proof" in gap_proofs
+    assert {
+        "/health",
+        "/msmes/ntc_hero/score",
+        "/governance",
+        "/submission/proof",
+    } <= runbook_endpoints
+    assert body["truth_boundary"] == {
+        "public_data": "synthetic_demo_cohort",
+        "private_idbi_data": "not_claimed",
+        "sandbox_access": "designed_for_post_shortlisting_api_access",
+        "production_model": "optional_stage2_gbm_shap_requires_labelled_outcomes",
+    }

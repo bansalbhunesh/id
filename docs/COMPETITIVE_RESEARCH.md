@@ -22,8 +22,9 @@ UdyamPulse should not compete as "another credit score." It should compete as a 
 
 - Shows the exact rejected-by-bureau and approved-by-alternate-data contrast for a New-to-Credit MSME.
 - Produces a health grade, eligible credit limit, reason codes, Shapley-style attribution, memo, improvement plan, source map, and policy guardrails in one screen.
-- Ships audit and governance endpoints (`/audit-log`, `/portfolio`, `/governance`) rather than only a UI mock.
-- Includes a model card, deterministic fallback logic, 15 passing tests, GitHub Actions, Render deployment, and `render.yaml` Blueprint.
+- Ships audit, governance, validation, sandbox, and submission-proof endpoints (`/audit-log`, `/portfolio`, `/governance`, `/validation/report`, `/sandbox/score`, `/submission/proof`) rather than only a UI mock.
+- Includes a model card, deterministic fallback logic, 30 passing tests, GitHub Actions, Render deployment, and `render.yaml` Blueprint.
+- Encodes the judging rubric, competitor gap map, and live verification runbook in `/submission/proof`, so reviewers can inspect the proof from the backend itself.
 - Keeps the prototype resilient: single FastAPI service, static frontend, Dockerfile, no separate frontend build pipeline, no paid API dependency for the public build.
 
 ## Final Submission Advantage
@@ -36,3 +37,4 @@ The repo now carries both product proof and submission proof:
 - Deck screenshots: `docs/deck/assets/`
 - Model governance: `MODEL_CARD.md`
 - Plain-text pitch: `docs/PITCH_OUTLINE.md`
+- Backend proof: `/submission/proof` with truth boundary, rubric scorecard, competitor gap map, API catalog, and judge runbook.

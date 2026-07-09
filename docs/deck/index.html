@@ -237,8 +237,8 @@ h1, h2, h3 { font-family: 'Fraunces', Georgia, serif; text-wrap: balance; margin
 }
 .shot-stack {
   display: grid;
-  grid-template-rows: 1fr 1fr;
-  gap: 18px;
+  grid-template-rows: repeat(3, 1fr);
+  gap: 12px;
   min-height: 0;
 }
 .shot-frame {
@@ -447,6 +447,10 @@ table.tech-table td:last-child { color: var(--ink-muted); }
           <img src="assets/governance-evidence.png" alt="Governance and evidence side rail showing live controls, fairness summary, and source map" />
           <figcaption class="shot-caption">Governance rail: controls, validation metrics, pilot KPIs, fairness slices, audit count, and 5 data-source signals.</figcaption>
         </figure>
+        <figure class="shot-frame">
+          <img src="assets/proof-runbook.png" alt="Proof tab showing rubric scorecard, truth boundary, judge runbook, and backend API catalog" />
+          <figcaption class="shot-caption">Proof tab: truth boundary, judging rubric, competitor gap map, runbook, and API catalog.</figcaption>
+        </figure>
       </div>
     </div>
     <div class="footer-mark">UdyamPulse · IDBI Innovate 2026</div>
@@ -456,10 +460,10 @@ table.tech-table td:last-child { color: var(--ink-muted); }
     <div class="eyebrow"><span class="num">11</span> Performance Report / Benchmarking</div>
     <h2>Verified, not just claimed.</h2>
     <div class="stat-row">
-      <div class="stat"><div class="value">28/28</div><div class="label">Automated tests passing</div></div>
+      <div class="stat"><div class="value">30/30</div><div class="label">Automated tests passing</div></div>
       <div class="stat"><div class="value">100%</div><div class="label">Decisions with Shapley reasons</div></div>
       <div class="stat"><div class="value">5</div><div class="label">Source signals mapped</div></div>
-      <div class="stat"><div class="value">4</div><div class="label">Live governance controls</div></div>
+      <div class="stat"><div class="value">5</div><div class="label">Live governance controls</div></div>
     </div>
     <p class="kicker">Browser verification on the live Render app found no console errors and no horizontal overflow on desktop or mobile. Recalibration and validation APIs report source coverage, real-distribution profiles, KS, AUC, Gini, PSI drift, reason-code stability, and fairness gap checks, ready to run on IDBI sandbox data.</p>
     <div class="footer-mark">UdyamPulse · IDBI Innovate 2026</div>

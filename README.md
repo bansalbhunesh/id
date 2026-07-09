@@ -61,7 +61,7 @@ What to verify in under three minutes:
 1. Open the live app and keep the default Shree Ganesh Textiles case selected.
 2. Compare `Traditional bureau-only: Rejected` with `UdyamPulse alternate data: Approved`.
 3. Inspect the health-card pillars, reason codes, model attribution, decision path, and policy guardrails.
-4. Switch to governance/evidence and confirm audit, validation, pilot KPI, fairness, and source-map proof.
+4. Switch to `Proof` and `Governance` to confirm audit, validation, pilot KPI, fairness, source-map, rubric, and competitor-gap proof.
 
 ## Backend Proof
 
@@ -69,7 +69,7 @@ The backend is not a mock response behind a polished screen. The judge can verif
 
 | Proof surface | What it proves |
 |---|---|
-| `GET /submission/proof` | One payload summarizing the NTC reversal, truth boundary, backend capability map, API catalog, validation metrics, controls, and Stage 2 swap points. |
+| `GET /submission/proof` | One payload summarizing the NTC reversal, truth boundary, backend capability map, judge runbook, rubric scorecard, competitor gap map, API catalog, validation metrics, controls, and Stage 2 swap points. |
 | `GET /msmes/ntc_hero/score` | Full decision packet: score, grade, limit, reason codes, exact Shapley attribution, memo, guardrails, source map, and decision path. |
 | `POST /sandbox/score` | AA/GST/UPI/EPFO/Bureau-style payloads normalize into the same score contract used by the cockpit. |
 | `POST /sandbox/recalibration/report` | Sandbox feature distributions, source coverage, outcome labels, and GBM/SHAP readiness are profiled before model upgrade. |
@@ -84,6 +84,17 @@ curl https://id-ysm9.onrender.com/msmes/ntc_hero/score
 curl https://id-ysm9.onrender.com/governance
 ```
 
+Rubric coverage is implemented as backend data, not only README copy:
+
+| Judge lens | Verifiable proof |
+|---|---|
+| Innovation | NTC bureau rejection becomes an explainable alternate-data approval with memo, reasons, guardrails, and audit. |
+| Feasibility | One FastAPI service, static cockpit, Dockerfile, Render Blueprint, GitHub Actions, and no mandatory paid API dependency. |
+| Scalability | Separate ingestion, scoring, attribution, validation, audit, governance, and Stage 2 model swap points. |
+| Business impact | Portfolio impact, NTC rescues, credit unlocked, pilot KPIs, early-risk guardrail, and diversification measures. |
+| Technical implementation | Pydantic validation, exact linear Shapley attribution, sandbox contracts, validation metrics, fairness slices, and API proof. |
+| Governance readiness | Truth boundary, human review lane, audit reconstruction, drift/reason stability, model card, and deterministic memo fallback. |
+
 ## Features
 
 - Underwriter cockpit with borrower queue, score, grade, risk band, credit-line recommendation, and decision comparison.
@@ -97,48 +108,79 @@ curl https://id-ysm9.onrender.com/governance
 ## Architecture
 
 ```mermaid
-flowchart LR
-  subgraph Inputs["Input contracts"]
-    Demo["Public synthetic MSME cohort"]
-    Custom["Custom MSME JSON"]
-    Sandbox["IDBI sandbox-style feeds<br/>AA, GST, UPI, EPFO, Bureau"]
+flowchart TB
+  Judge["Judge / underwriter reviewer"]
+
+  subgraph Review["Review surfaces"]
+    UI["Static credit cockpit<br/>Decision, Evidence, Governance, Proof, Sources"]
+    README["README + deck + model card"]
+    OpenAPI["OpenAPI docs"]
   end
 
-  subgraph API["FastAPI backend - single deployable service"]
-    Routes["API routes<br/>main.py"]
-    Validate["Pydantic validation<br/>impossible values rejected"]
-    Ingest["Feed normalization<br/>feed_ingestion.py"]
-    Score["Five-pillar scorecard<br/>scoring.py"]
-    Explain["Risk attribution<br/>linear_model.py + ml.py"]
-    Memo["Underwriter memo<br/>agent_memo.py"]
-    Audit["Audit event log<br/>audit_log.py"]
-    Monitor["Validation and recalibration<br/>validation.py + recalibration.py"]
-    Govern["Portfolio governance<br/>portfolio.py + pilot_metrics.py"]
-    Proof["Submission proof API<br/>submission_proof.py"]
+  subgraph FastAPI["Single FastAPI deployable"]
+    Routes["main.py routes"]
+    Health["/health"]
+    Proof["/submission/proof<br/>rubric, runbook, gap map, truth boundary"]
+    ScoreAPI["/msmes/{id}/score + /score"]
+    SandboxAPI["/sandbox/score + /sandbox/recalibration/report"]
+    GovernanceAPI["/governance + /portfolio + /pilot-metrics"]
+    ValidationAPI["/validation/demo + /validation/report"]
+    AuditAPI["/audit-log + /model/status"]
   end
 
-  UI["Static credit cockpit<br/>frontend/index.html"]
-  Docs["README, deck, model card"]
+  subgraph Core["Decision core"]
+    Validate["Pydantic profile/feed validation"]
+    Ingest["AA/GST/UPI/EPFO/Bureau feed normalization"]
+    Score["Five-pillar scorecard<br/>health grade, verdict, eligible limit"]
+    Explain["Exact linear Shapley attribution<br/>optional GBM/SHAP gate"]
+    Memo["Deterministic memo<br/>optional Bedrock provider"]
+    Audit["Reconstructable audit event"]
+  end
 
-  Demo --> Routes
-  Custom --> Routes
-  Sandbox --> Routes
-  Routes --> Validate
-  Validate --> Ingest
-  Validate --> Score
-  Ingest --> Score
-  Score --> Explain
-  Score --> Memo
-  Score --> Audit
-  Score --> Monitor
-  Score --> Govern
-  Explain --> Proof
+  subgraph Controls["Governance and monitoring"]
+    Portfolio["NTC rescues + credit unlocked"]
+    Validation["AUC, Gini, KS, PSI, reason stability"]
+    Fairness["Sector, geography, vintage, gender-ready, bureau-history slices"]
+    Pilot["Approval lift, decision-time reduction, early-NPA guardrail"]
+  end
+
+  subgraph Stage2["Post-shortlisting swap points"]
+    IDBI["Approved IDBI sandbox feeds"]
+    Outcomes["Repayment outcomes"]
+    Storage["Persistent audit storage"]
+    ModelUpgrade["XGBoost/LightGBM + SHAP"]
+  end
+
+  Judge --> UI
+  Judge --> README
+  Judge --> OpenAPI
+  UI --> Routes
+  README --> Proof
+  OpenAPI --> Routes
+  Routes --> Health
+  Routes --> Proof
+  Routes --> ScoreAPI
+  Routes --> SandboxAPI
+  Routes --> GovernanceAPI
+  Routes --> ValidationAPI
+  Routes --> AuditAPI
+  ScoreAPI --> Validate --> Score
+  SandboxAPI --> Ingest --> Validate
+  Score --> Explain --> Memo --> Audit
+  Audit --> GovernanceAPI
+  Score --> Portfolio
+  Score --> Validation
+  Score --> Fairness
+  Score --> Pilot
+  Portfolio --> Proof
+  Validation --> Proof
+  Fairness --> Proof
+  Pilot --> Proof
   Audit --> Proof
-  Monitor --> Proof
-  Govern --> Proof
-  Proof --> UI
-  Routes --> UI
-  Proof --> Docs
+  IDBI -.-> Ingest
+  Outcomes -.-> Validation
+  Storage -.-> Audit
+  ModelUpgrade -.-> Explain
 ```
 
 Important endpoints:
@@ -146,7 +188,7 @@ Important endpoints:
 | Endpoint | Purpose |
 |---|---|
 | `GET /msmes` and `GET /msmes/{id}/score` | Demo cohort and score packets |
-| `GET /submission/proof` | Judge-facing backend capability, architecture, and truth-boundary proof |
+| `GET /submission/proof` | Judge-facing capability, architecture, rubric, runbook, competitor-gap, and truth-boundary proof |
 | `POST /score` | Score a custom MSME profile |
 | `POST /sandbox/score` | Normalize and score sandbox-style AA/GST/UPI/EPFO/Bureau payloads |
 | `POST /sandbox/recalibration/report` | Profile sandbox distributions and readiness for GBM/SHAP |
@@ -182,11 +224,11 @@ docker run -p 8000:8000 udyampulse
 
 ## Evidence
 
-- Test suite: 29 tests covering scoring, validation, NTC reversal, improvement plans, audit logging, ML Shapley invariants, sandbox mapping, recalibration reports, validation metrics, fairness monitoring, pilot KPIs, governance summaries, submission proof, and API endpoints.
+- Test suite: 30 tests covering scoring, validation, NTC reversal, improvement plans, audit logging, ML Shapley invariants, sandbox mapping, recalibration reports, validation metrics, fairness monitoring, pilot KPIs, governance summaries, submission proof, and API endpoints.
 - Public cohort impact: 2 NTC rescues and Rs 30,80,000 credit unlocked in the synthetic demo cohort.
 - Governance evidence: policy guardrails, source map, audit count, validation metrics, pilot KPIs, fairness slices, and model status are visible in the app.
-- Backend evidence: `/submission/proof` exposes the capability map, route catalog, architecture flow, validation metrics, controls, and Stage 2 swap points directly from backend functions.
-- UI verification: desktop `1440x950` and mobile `390x900` browser smoke checks passed with no console errors, no horizontal overflow, four working review tabs, and 44px minimum interactive targets.
+- Backend evidence: `/submission/proof` exposes the capability map, judge runbook, route catalog, rubric scorecard, competitor gap map, architecture flow, validation metrics, controls, and Stage 2 swap points directly from backend functions.
+- UI verification: desktop `1440x950` and mobile `390x900` browser smoke checks passed with no console errors, no horizontal overflow, five working review tabs, and 44px minimum interactive targets.
 - Model transparency: [MODEL_CARD.md](MODEL_CARD.md) documents synthetic training data, explainability, intended use, and limitations.
 
 ## Screenshots
@@ -214,10 +256,22 @@ docker run -p 8000:8000 udyampulse
       Audit count, model-risk controls, OOT validation, pilot KPIs, fairness slices, and source-map proof.
     </td>
     <td width="50%" valign="top">
+      <img src="docs/deck/assets/proof-runbook.png" width="100%" alt="Proof tab showing truth boundary, rubric scorecard, judge runbook, and backend API catalog" />
+      <br />
+      <strong>Judge proof tab</strong><br />
+      Rubric scorecard, truth boundary, competitor gap map, runbook, and backend API catalog pulled from `/submission/proof`.
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
       <img src="docs/deck/assets/mobile-live.png" width="45%" alt="Mobile UdyamPulse review flow" />
       <br />
       <strong>Mobile review</strong><br />
       Same borrower review flow compressed for a phone screen without hiding the decision evidence.
+    </td>
+    <td width="50%" valign="top">
+      <strong>Full-resolution assets</strong><br />
+      The gallery stays intentionally compact. Reviewers can open the PNGs in `docs/deck/assets/` for larger inspection.
     </td>
   </tr>
 </table>
@@ -229,7 +283,7 @@ Full-resolution images remain in [docs/deck/assets](docs/deck/assets) for detail
 - Track fit: IDBI's public MSME Inclusion track asks for a Financial Health Card using alternate data for faster credit decisions and finance access for underserved MSMEs.
 - Public event surface: the official public event venue found during review is [IDBI Innovate 2026 on Hack2skill](https://hack2skill.com/event/idbinnovate); no official IDBI Devpost page was found.
 - Sandbox interpretation: public summaries indicate sandbox APIs, synthetic datasets, cloud resources, and mentorship are provided after shortlisting. This repo therefore ships synthetic proof data plus sandbox-ready ingestion, validation, recalibration, monitoring, and governance contracts.
-- Differentiation: many PS3 demos stop at a score; UdyamPulse shows the bank decision pack around that score - rejection reversal, reasons, attribution, memo, source map, guardrails, audit, validation, pilot metrics, and fairness checks.
+- Differentiation: many PS3 demos stop at a score; UdyamPulse shows the bank decision pack around that score - rejection reversal, reasons, attribution, memo, source map, guardrails, audit, validation, pilot metrics, fairness checks, and a backend-verifiable judge proof endpoint.
 - Competitive notes: [docs/COMPETITIVE_RESEARCH.md](docs/COMPETITIVE_RESEARCH.md)
 - Submission checklist: [docs/SUBMISSION_CHECKLIST.md](docs/SUBMISSION_CHECKLIST.md)
 

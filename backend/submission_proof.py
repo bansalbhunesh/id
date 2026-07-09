@@ -108,6 +108,98 @@ BACKEND_CAPABILITIES = [
 ]
 
 
+RUBRIC_SCORECARD = [
+    {
+        "criterion": "Innovation",
+        "proof": "Moves beyond a generic score by showing bureau rejection reversal, alternate-data approval, explainability, memo, borrower plan, and audit trail together.",
+        "evidence": ["/msmes/ntc_hero/score", "/submission/proof"],
+    },
+    {
+        "criterion": "Feasibility",
+        "proof": "Runs as one FastAPI service with static UI, Dockerfile, Render Blueprint, automated tests, and no mandatory paid API dependency in public mode.",
+        "evidence": ["Dockerfile", "render.yaml", "GitHub Actions", "/health"],
+    },
+    {
+        "criterion": "Scalability",
+        "proof": "Separates validation, ingestion, scoring, attribution, audit, recalibration, and governance so Stage 2 can swap data/model/storage without rewriting the cockpit.",
+        "evidence": ["/sandbox/score", "/sandbox/recalibration/report", "/model/status"],
+    },
+    {
+        "criterion": "Business impact",
+        "proof": "Quantifies NTC rescues, credit unlocked, approval lift, decision-time reduction, early-NPA guardrail, and portfolio diversification in the public cohort.",
+        "evidence": ["/portfolio", "/pilot-metrics"],
+    },
+    {
+        "criterion": "Technical implementation",
+        "proof": "Implements Pydantic validation, score contracts, exact linear Shapley attribution, validation metrics, fairness slices, and API-level proof instead of static UI claims.",
+        "evidence": ["/score", "/validation/report", "/governance"],
+    },
+    {
+        "criterion": "Governance readiness",
+        "proof": "Surfaces model limitations, human review lane, audit reconstruction, fairness monitoring, PSI drift, reason-code stability, and deterministic memo fallback.",
+        "evidence": ["MODEL_CARD.md", "/audit-log", "/governance"],
+    },
+]
+
+
+COMPETITOR_GAP_MAP = [
+    {
+        "common_pattern": "Score-card-only demo",
+        "udyampulse_advantage": "Full bank decision pack: verdict comparison, limit, pillars, reasons, Shapley attribution, memo, guardrails, and improvement plan.",
+        "proof": "/msmes/ntc_hero/score",
+    },
+    {
+        "common_pattern": "Frontend-first prototype",
+        "udyampulse_advantage": "Backend-verifiable API catalog and submission proof endpoint expose the same evidence shown in the cockpit.",
+        "proof": "/submission/proof",
+    },
+    {
+        "common_pattern": "Alternate-data claims without sandbox path",
+        "udyampulse_advantage": "Sandbox-style AA/GST/UPI/EPFO/Bureau ingestion and recalibration contracts are implemented now, while private access is not falsely claimed.",
+        "proof": "/sandbox/score",
+    },
+    {
+        "common_pattern": "Explainability as a slide",
+        "udyampulse_advantage": "Every score packet returns exact linear Shapley-equivalent contributions plus human-readable reason codes.",
+        "proof": "/msmes/{id}/score",
+    },
+    {
+        "common_pattern": "Missing model-risk story",
+        "udyampulse_advantage": "Governance endpoint exposes audit, validation, drift, reason stability, fairness slices, pilot KPIs, and deployment caveats.",
+        "proof": "/governance",
+    },
+]
+
+
+JUDGE_RUNBOOK = [
+    {
+        "step": "1. Check the service is live",
+        "endpoint": "/health",
+        "expected": "status is ok and the static cockpit is served by the same FastAPI deployable.",
+    },
+    {
+        "step": "2. Verify the NTC reversal",
+        "endpoint": "/msmes/ntc_hero/score",
+        "expected": "traditional underwriting is Rejected while alternate-data underwriting is Approved with Grade A.",
+    },
+    {
+        "step": "3. Inspect the bank decision pack",
+        "endpoint": "/msmes/ntc_hero/score",
+        "expected": "score, eligible limit, pillars, reason codes, Shapley attribution, memo, guardrails, and source map are present.",
+    },
+    {
+        "step": "4. Validate model-risk controls",
+        "endpoint": "/governance",
+        "expected": "audit events, controls, validation metrics, pilot KPIs, fairness slices, and caveats are inspectable.",
+    },
+    {
+        "step": "5. Confirm sandbox readiness without fake data claims",
+        "endpoint": "/submission/proof",
+        "expected": "truth boundary says private IDBI data is not claimed while sandbox ingestion and recalibration swap points are implemented.",
+    },
+]
+
+
 def build_submission_proof(audit_events: list[dict]) -> dict[str, Any]:
     portfolio = build_portfolio_snapshot()
     governance = build_governance_summary(audit_events)
@@ -134,6 +226,9 @@ def build_submission_proof(audit_events: list[dict]) -> dict[str, Any]:
         },
         "portfolio_impact": portfolio["summary"],
         "backend_capabilities": BACKEND_CAPABILITIES,
+        "rubric_scorecard": RUBRIC_SCORECARD,
+        "competitor_gap_map": COMPETITOR_GAP_MAP,
+        "judge_runbook": JUDGE_RUNBOOK,
         "api_catalog": API_CATALOG,
         "architecture": {
             "runtime": "single_fastapi_process_serves_api_and_static_cockpit",

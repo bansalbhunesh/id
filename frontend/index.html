@@ -655,7 +655,7 @@
 
   .data-row {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: minmax(104px, 0.85fr) minmax(0, 1.15fr);
     gap: var(--space-3);
     align-items: center;
     min-height: 42px;
@@ -670,6 +670,16 @@
   .data-row strong,
   .row-title {
     font-weight: 850;
+  }
+
+  .data-row span,
+  .data-row strong {
+    min-width: 0;
+  }
+
+  .data-row strong {
+    text-align: right;
+    overflow-wrap: anywhere;
   }
 
   .stack-list {
@@ -895,6 +905,19 @@
       justify-items: start;
     }
 
+    .tabs {
+      flex-wrap: wrap;
+      overflow-x: visible;
+    }
+
+    .tab-button {
+      flex: 1 1 calc(50% - var(--space-2));
+    }
+
+    .data-row strong {
+      text-align: left;
+    }
+
     .badge {
       white-space: normal;
     }
@@ -987,6 +1010,7 @@
             <button class="tab-button" type="button" role="tab" data-tab="decision" aria-selected="true">Decision</button>
             <button class="tab-button" type="button" role="tab" data-tab="evidence" aria-selected="false">Evidence</button>
             <button class="tab-button" type="button" role="tab" data-tab="governance" aria-selected="false">Governance</button>
+            <button class="tab-button" type="button" role="tab" data-tab="proof" aria-selected="false">Proof</button>
             <button class="tab-button" type="button" role="tab" data-tab="sources" aria-selected="false">Sources</button>
           </div>
           <div id="tabContent" class="tab-panel" role="tabpanel">
@@ -1023,6 +1047,7 @@
       governance: null,
       validation: null,
       model: null,
+      submissionProof: null,
       activeId: "ntc_hero",
       activeScore: null,
       activeTab: "decision",
@@ -1321,7 +1346,7 @@
       ]) : `<div class="data-row"><span class="muted">No pilot KPI rows</span><strong>-</strong></div>`;
 
       return `
-        <div class="grid-3">
+        <div class="grid-2">
           <section class="table-card">
             <h3>Model and audit</h3>
             ${renderMiniRows([
@@ -1387,6 +1412,119 @@
       `;
     }
 
+    function renderProofTab() {
+      const proof = state.submissionProof;
+      if (!proof) {
+        return `<div class="empty-state">Submission proof is not loaded yet.</div>`;
+      }
+
+      const hero = proof.hero_reversal || {};
+      const truth = proof.truth_boundary || {};
+      const rubric = proof.rubric_scorecard || [];
+      const gaps = proof.competitor_gap_map || [];
+      const apis = proof.api_catalog || [];
+      const capabilities = proof.backend_capabilities || [];
+      const runbook = proof.judge_runbook || [];
+      const renderEvidenceChips = (items = []) => items.map((item) => `<code>${esc(item)}</code>`).join(" ");
+
+      return `
+        <div class="grid-2">
+          <section class="table-card">
+            <h3>Judge proof</h3>
+            ${renderMiniRows([
+              ["Proof API", "Live"],
+              ["Traditional verdict", hero.traditional_decision || "-"],
+              ["UdyamPulse verdict", hero.alternate_data_decision || "-"],
+              ["Grade", `${hero.grade || "-"} / ${hero.score ?? "-"} score`],
+              ["Eligible limit", formatCurrency(hero.eligible_limit)],
+            ])}
+          </section>
+          <section class="table-card">
+            <h3>Truth boundary</h3>
+            ${renderMiniRows([
+              ["Public data", truth.public_data ? "Synthetic demo cohort" : "-"],
+              ["Private IDBI data", truth.private_idbi_data === "not_claimed" ? "Not claimed" : titleize(truth.private_idbi_data || "-")],
+              ["Sandbox access", truth.sandbox_access ? "Post-shortlisting contract" : "-"],
+              ["Production model", truth.production_model ? "Optional Stage 2 GBM/SHAP" : "-"],
+            ])}
+          </section>
+          <section class="table-card">
+            <h3>Implemented backend</h3>
+            ${renderMiniRows([
+              ["Capability layers", capabilities.length],
+              ["Proof APIs", apis.length],
+              ["Runbook steps", runbook.length],
+              ["Rubric criteria", rubric.length],
+              ["Competitor gaps", gaps.length],
+            ])}
+          </section>
+        </div>
+
+        <section class="card" style="margin-top: 12px;">
+          <h3>Rubric scorecard</h3>
+          <div class="grid-2">
+            ${rubric.map((item) => `
+              <div class="stack-item">
+                ${badge(item.criterion || "Rubric", "good")}
+                <strong>${esc(item.proof)}</strong>
+                <span class="muted">${renderEvidenceChips(item.evidence)}</span>
+              </div>
+            `).join("") || `<div class="empty-state">No rubric rows available.</div>`}
+          </div>
+        </section>
+
+        <section class="card" style="margin-top: 12px;">
+          <h3>Competitor gap map</h3>
+          <div class="grid-2">
+            ${gaps.map((item) => `
+              <div class="stack-item">
+                ${badge(item.proof || "Proof", "warn")}
+                <strong>${esc(item.common_pattern)}</strong>
+                <span class="muted">${esc(item.udyampulse_advantage)}</span>
+              </div>
+            `).join("") || `<div class="empty-state">No competitor gap rows available.</div>`}
+          </div>
+        </section>
+
+        <section class="card" style="margin-top: 12px;">
+          <h3>Judge verification runbook</h3>
+          <div class="grid-2">
+            ${runbook.map((item) => `
+              <div class="stack-item">
+                ${badge(item.endpoint || "Endpoint", "good")}
+                <strong>${esc(item.step)}</strong>
+                <span class="muted">${esc(item.expected)}</span>
+              </div>
+            `).join("") || `<div class="empty-state">No runbook rows available.</div>`}
+          </div>
+        </section>
+
+        <section class="card" style="margin-top: 12px;">
+          <h3>Backend capability and API proof</h3>
+          <div class="grid-2">
+            <div class="stack-list">
+              ${capabilities.map((item) => `
+                <div class="stack-item">
+                  ${badge(item.layer || "Capability")}
+                  <strong>${esc((item.modules || []).join(" + "))}</strong>
+                  <span class="muted">${esc(item.implemented)}</span>
+                </div>
+              `).join("") || `<div class="empty-state">No capability rows available.</div>`}
+            </div>
+            <div class="stack-list">
+              ${apis.map((item) => `
+                <div class="stack-item">
+                  ${badge(`${item.method} ${item.path}`)}
+                  <strong>${esc(item.layer)}</strong>
+                  <span class="muted">${esc(item.proves)}</span>
+                </div>
+              `).join("") || `<div class="empty-state">No API catalog rows available.</div>`}
+            </div>
+          </div>
+        </section>
+      `;
+    }
+
     function renderTabContent() {
       const score = state.activeScore;
       if (!score) {
@@ -1398,6 +1536,7 @@
         decision: () => renderDecisionTab(score),
         evidence: () => renderEvidenceTab(score),
         governance: () => renderGovernanceTab(),
+        proof: () => renderProofTab(),
         sources: () => renderSourcesTab(score),
       };
 
@@ -1419,6 +1558,7 @@
       const controlRows = [
         ["Audit events", governance?.audit?.events_recorded ?? "-"],
         ["Active model", governance?.model?.runtime?.active_provider || state.model?.active_provider || "linear"],
+        ["Proof API", state.submissionProof?.status ? "Live" : "Pending"],
         ["OOT AUC", validation?.auc ?? "-"],
       ];
 
@@ -1465,13 +1605,14 @@
 
     async function init() {
       try {
-        const [health, msmes, portfolio, governance, validation, model] = await Promise.all([
+        const [health, msmes, portfolio, governance, validation, model, submissionProof] = await Promise.all([
           api("/health"),
           api("/msmes"),
           api("/portfolio"),
           api("/governance"),
           api("/validation/demo"),
           api("/model/status"),
+          api("/submission/proof"),
         ]);
 
         state.health = health;
@@ -1480,6 +1621,7 @@
         state.governance = governance;
         state.validation = validation;
         state.model = model;
+        state.submissionProof = submissionProof;
 
         setApiStatus(health.status === "ok", health.status === "ok" ? "Live" : "Check");
         setModelStatus();

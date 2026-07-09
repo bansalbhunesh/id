@@ -2,7 +2,12 @@
 
 # UdyamPulse
 
-**An explainable MSME Financial Health Card that turns consented alternate data into credit decisions traditional underwriting cannot make.**
+**Explainable MSME Financial Health Card for IDBI Innovate 2026 PS3.**
+
+[Live demo](https://id-ysm9.onrender.com) |
+[Submission deck](docs/deck/UdyamPulse-IDBI-Submission-Deck.pdf) |
+[Walkthrough video](docs/demo.webm) |
+[Model card](MODEL_CARD.md)
 
 [![tests](https://github.com/bansalbhunesh/id/actions/workflows/tests.yml/badge.svg)](https://github.com/bansalbhunesh/id/actions/workflows/tests.yml)
 ![Python](https://img.shields.io/badge/python-3.12+-blue)
@@ -16,54 +21,123 @@ Built for **IDBI Innovate 2026** - Problem Statement 3: Financial Health Score -
 
 ---
 
-![UdyamPulse live underwriting cockpit](docs/deck/assets/live-cockpit-viewport.png)
+## Table Of Contents
 
-## The 10-second pitch
+- [Overview](#overview)
+- [Demo](#demo)
+- [Features](#features)
+- [Architecture](#architecture)
+- [Setup](#setup)
+- [Evidence](#evidence)
+- [Screenshots](#screenshots)
+- [Judging Proof](#judging-proof)
+- [Limitations](#limitations)
 
-A New-to-Credit business with zero bureau history gets declined by a traditional lender on day one, even when its real cash-flow data is strong. UdyamPulse uses consented alternate data signals - GST, UPI, Account Aggregator-style bank statements, EPFO, and Udyam-like profile data - to produce a decision a bank can defend and a borrower can act on.
+## Overview
 
-| | Traditional bureau-only | UdyamPulse alternate data |
+UdyamPulse turns consented alternate-data signals into a bank-reviewable credit decision for thin-file MSMEs. The public prototype uses a synthetic cohort and sandbox-ready API contracts; it does not claim private IDBI data access.
+
+The core demo moment is a New-to-Credit case traditional underwriting rejects because there is no bureau file. UdyamPulse approves the same business with a defensible Grade A health score, reason codes, Shapley attribution, policy guardrails, and an underwriter memo.
+
+| Case | Traditional bureau-only | UdyamPulse alternate data |
 |---|:---:|:---:|
 | Shree Ganesh Textiles, no bureau file | Rejected | Approved - Grade A, Score 86/100 |
 | Eligible credit limit | Rs 0 | Rs 27,00,000 |
-| Reason given | No credit bureau history | Ranked reason codes, Shapley attribution, policy guardrails |
+| Explanation | No credit bureau history | Ranked reason codes, Shapley attribution, policy guardrails |
 
-That reversal is reproducible, explained, audited, and visible on the first screen of the live app.
+## Demo
 
-## First-round rule fit
+- Live app: [https://id-ysm9.onrender.com](https://id-ysm9.onrender.com)
+- Walkthrough video: [docs/demo.webm](docs/demo.webm)
+- Lightweight fallback: [docs/demo.gif](docs/demo.gif)
+- Submission deck: [docs/deck/UdyamPulse-IDBI-Submission-Deck.pdf](docs/deck/UdyamPulse-IDBI-Submission-Deck.pdf)
+- First-round rules check: [docs/FIRST_ROUND_RULES_CHECK.md](docs/FIRST_ROUND_RULES_CHECK.md)
 
-Public rule check, verified on 09 July 2026:
+What to verify in under three minutes:
 
-- Official event venue: [IDBI Innovate 2026 on Hack2skill](https://hack2skill.com/event/idbinnovate).
-- Track: [IDBI's public MSME Inclusion Track post](https://www.linkedin.com/posts/idbi-bank_idbibank-idbiinnovate2026-bankinghackathon-activity-7479451537912721410-oI3E) asks teams to build a Financial Health Card using alternate data for faster credit decisions and MSME finance access.
-- Deadline and opportunity: [Hack2skill's public post](https://www.linkedin.com/posts/hack2skill_idbiinnovate-hackathon-startupindia-activity-7472640963304251392-ccFV) references 09 July 2026 registration, prize money, mentorship, and a possible co-development path.
-- Sandbox timing: [public program summaries](https://www2.fundsforngos.org/innovation/idbi-innovate-2026-national-innovation-challenge-for-banking-solutions-india/) indicate sandbox APIs, synthetic datasets, cloud resources, and mentorship are provided to shortlisted participants, so this repo keeps the public cohort synthetic while exposing sandbox-ready contracts.
-- Devpost check: no official IDBI Innovate 2026 Devpost page was found; the current public event surface appears to be Hack2skill.
+1. Open the live app and keep the default Shree Ganesh Textiles case selected.
+2. Compare `Traditional bureau-only: Rejected` with `UdyamPulse alternate data: Approved`.
+3. Inspect the health-card pillars, reason codes, model attribution, decision path, and policy guardrails.
+4. Switch to governance/evidence and confirm audit, validation, pilot KPI, fairness, and source-map proof.
 
-Full checklist: [docs/FIRST_ROUND_RULES_CHECK.md](docs/FIRST_ROUND_RULES_CHECK.md)
+## Features
 
-## Why judges can verify it quickly
+- Underwriter cockpit with borrower queue, score, grade, risk band, credit-line recommendation, and decision comparison.
+- Five-pillar financial health card: Liquidity, Discipline, Momentum, Leverage, and Digital Footprint.
+- Exact linear Shapley attribution plus plain-language reason codes.
+- Deterministic underwriter memo and borrower improvement plan; optional AWS Bedrock memo generation is a Stage 2 configuration path.
+- Audit log for scoring events and governance summary endpoints.
+- Sandbox-ready ingestion via `POST /sandbox/score` for AA/GST/UPI/EPFO/Bureau-style payloads.
+- Recalibration and monitoring APIs for AUC, Gini, KS, PSI drift, reason-code stability, pilot KPIs, and fairness slices.
 
-Most PS3 competitors converge on "MSME score + alternate data + SHAP." UdyamPulse pushes the demo further into what a bank judge actually scores:
+## Architecture
 
-- A banker cockpit, not just a score card: case queue, traditional-vs-alternate decision, limit recommendation, decision path, pillar bars, memo, and improvement plan.
-- Governance is live product surface: policy guardrails, model-risk controls, source map, audit count, out-of-time validation metrics, pilot KPIs, and fairness slices.
-- The NTC reversal is quantified at portfolio level: 2 NTC rescues and Rs 30,80,000 credit unlocked in the public synthetic cohort.
-- The stack is intentionally deployable: one FastAPI process serves API plus static UI; no fragile frontend build step.
-- The ML layer is inspectable: a trained dependency-free linear model with exact Shapley attribution plus an optional XGBoost/LightGBM + SHAP runtime path once real labelled outcome files arrive.
+```text
+Synthetic demo cohort / custom MSME JSON / IDBI sandbox-style feeds
+        |
+        v
+FastAPI scoring service
+  - five-pillar scorecard and policy guardrails
+  - linear PD-proxy model with exact Shapley attribution
+  - sandbox feed normalization and recalibration reports
+  - audit log, validation, pilot metrics, governance summaries
+        |
+        v
+Static underwriter cockpit
+  - served by the same FastAPI process
+  - no frontend build step
+```
 
-## What it does
+Important endpoints:
 
-1. Ingests the demo MSME cohort and accepts IDBI sandbox-style AA, GST, UPI, EPFO, bureau, geography, sector, vintage, gender, and employment payloads through `POST /sandbox/score`.
-2. Scores five health pillars: Liquidity, Discipline, Momentum, Leverage, and Digital Footprint.
-3. Produces a 0-100 score, A-E grade, risk band, and eligible working-capital limit.
-4. Shows the rejected-vs-approved contrast between traditional bureau-only and alternate-data underwriting.
-5. Explains every decision with plain-language reason codes and exact Shapley feature attribution.
-6. Generates a stable underwriter memo and borrower improvement plan, with optional AWS Bedrock Runtime memo generation and deterministic fallback.
-7. Records every scoring event in `/audit-log`.
-8. Exposes portfolio impact, pilot KPIs, validation metrics, drift checks, reason-code stability, and model-risk controls through live APIs.
+| Endpoint | Purpose |
+|---|---|
+| `GET /msmes` and `GET /msmes/{id}/score` | Demo cohort and score packets |
+| `POST /score` | Score a custom MSME profile |
+| `POST /sandbox/score` | Normalize and score sandbox-style AA/GST/UPI/EPFO/Bureau payloads |
+| `POST /sandbox/recalibration/report` | Profile sandbox distributions and readiness for GBM/SHAP |
+| `GET /portfolio`, `/governance`, `/pilot-metrics` | Portfolio impact and control evidence |
+| `GET /validation/demo`, `POST /validation/report` | AUC, Gini, KS, PSI, and reason-code stability |
+| `GET /audit-log`, `GET /model/status` | Audit trail and active model metadata |
 
-## Product proof
+## Setup
+
+```bash
+cd backend
+pip install -r requirements.txt
+uvicorn main:app --reload
+```
+
+Open `http://localhost:8000`.
+
+Run tests:
+
+```bash
+cd backend
+pytest -q
+```
+
+Container deploy:
+
+```bash
+docker build -t udyampulse .
+docker run -p 8000:8000 udyampulse
+```
+
+`Dockerfile` and `render.yaml` are included for a single-service Render deployment.
+
+## Evidence
+
+- Test suite: 28 tests covering scoring, validation, NTC reversal, improvement plans, audit logging, ML Shapley invariants, sandbox mapping, recalibration reports, validation metrics, fairness monitoring, pilot KPIs, governance summaries, and API endpoints.
+- Public cohort impact: 2 NTC rescues and Rs 30,80,000 credit unlocked in the synthetic demo cohort.
+- Governance evidence: policy guardrails, source map, audit count, validation metrics, pilot KPIs, fairness slices, and model status are visible in the app.
+- Model transparency: [MODEL_CARD.md](MODEL_CARD.md) documents synthetic training data, explainability, intended use, and limitations.
+
+## Screenshots
+
+### Live cockpit
+
+![UdyamPulse live underwriting cockpit](docs/deck/assets/live-cockpit-viewport.png)
 
 ### Decision pack
 
@@ -77,132 +151,19 @@ Most PS3 competitors converge on "MSME score + alternate data + SHAP." UdyamPuls
 
 ![Mobile UdyamPulse cockpit](docs/deck/assets/mobile-live.png)
 
-## Architecture
+## Judging Proof
 
-```text
-Synthetic MSME cohort / custom MSME JSON / IDBI sandbox-style feeds
-        |
-        v
-backend/scoring.py
-  - five-pillar policy score
-  - risk band
-  - data-source signals
-  - policy guardrails
-  - decision path
-        |
-        +--> backend/ml.py / linear_model.py
-        |      trained linear PD-proxy with exact Shapley attribution
-        |
-        +--> backend/agent_memo.py
-        |      deterministic memo plus optional AWS Bedrock Runtime provider
-        |
-        +--> backend/audit_log.py
-        |      reconstructable decision trail
-        |
-        +--> backend/feed_ingestion.py
-        |      AA/GST/UPI/EPFO/Bureau payload normalization
-        |
-        +--> backend/validation.py
-        |      AUC, Gini, KS, PSI, and reason-code stability checks
-        |
-        +--> backend/pilot_metrics.py
-        |      NTC/NTB lift, decision-time reduction, NPA guardrail, diversification
-        |
-        +--> backend/portfolio.py
-               portfolio impact and governance summary
+- Track fit: IDBI's public MSME Inclusion track asks for a Financial Health Card using alternate data for faster credit decisions and finance access for underserved MSMEs.
+- Public event surface: the official public event venue found during review is [IDBI Innovate 2026 on Hack2skill](https://hack2skill.com/event/idbinnovate); no official IDBI Devpost page was found.
+- Sandbox interpretation: public summaries indicate sandbox APIs, synthetic datasets, cloud resources, and mentorship are provided after shortlisting. This repo therefore ships synthetic proof data plus sandbox-ready ingestion, validation, recalibration, monitoring, and governance contracts.
+- Differentiation: many PS3 demos stop at a score; UdyamPulse shows the bank decision pack around that score - rejection reversal, reasons, attribution, memo, source map, guardrails, audit, validation, pilot metrics, and fairness checks.
+- Competitive notes: [docs/COMPETITIVE_RESEARCH.md](docs/COMPETITIVE_RESEARCH.md)
+- Submission checklist: [docs/SUBMISSION_CHECKLIST.md](docs/SUBMISSION_CHECKLIST.md)
 
-frontend/index.html
-  - static underwriter cockpit
-  - no build step
-  - served by the same FastAPI app
-```
+## Limitations
 
-## Quick start
-
-```bash
-cd backend
-pip install -r requirements.txt
-uvicorn main:app --reload
-```
-
-Open `http://localhost:8000`.
-
-Useful endpoints:
-
-- `GET /health`
-- `GET /msmes`
-- `GET /msmes/ntc_hero/score`
-- `GET /portfolio`
-- `GET /governance`
-- `GET /pilot-metrics`
-- `GET /validation/demo`
-- `POST /validation/report`
-- `GET /audit-log`
-- `POST /score`
-- `POST /sandbox/score`
-- `POST /sandbox/recalibration/report`
-- `GET /model/status`
-
-## Testing
-
-```bash
-cd backend
-pytest -q
-```
-
-Current suite: 28 tests covering scoring, input validation, traditional-vs-alternate verdicts, improvement plans, audit logging, ML Shapley invariants, sandbox feed mapping, recalibration reports, validation metrics, expanded fairness monitoring, pilot KPIs, governance summaries, and API endpoints.
-
-## Deploy
-
-Single-service container:
-
-```bash
-docker build -t udyampulse .
-docker run -p 8000:8000 udyampulse
-```
-
-Direct process start:
-
-```bash
-cd backend
-uvicorn main:app --host 0.0.0.0 --port $PORT
-```
-
-`Dockerfile` and `render.yaml` are included for reproducible Render deployment. The current live URL is:
-
-[https://id-ysm9.onrender.com](https://id-ysm9.onrender.com)
-
-## Project layout
-
-```text
-backend/              FastAPI service, scoring engine, ML layer, governance API
-frontend/index.html   Static underwriter cockpit served by FastAPI
-docs/deck/            Submission deck HTML
-docs/deck/UdyamPulse-IDBI-Submission-Deck.pdf Submission-ready deck PDF
-docs/PITCH_OUTLINE.md Deck content mapped to the IDBI template
-docs/COMPETITIVE_RESEARCH.md Public repo scan and differentiation notes
-docs/SUBMISSION_CHECKLIST.md Final submission links, proof, and verification gates
-docs/DEMO_SCRIPT.md 3-minute demo narration and click path
-docs/demo.webm        Captioned recorded walkthrough video
-docs/demo.gif         Lightweight walkthrough fallback
-MODEL_CARD.md         Model purpose, training data, explainability, limitations
-render.yaml           Render Blueprint for the live web service
-```
-
-## Stage 2 readiness
-
-Implemented now:
-
-1. `/sandbox/score` accepts IDBI sandbox-style AA/GST/UPI/EPFO/Bureau payloads and normalizes them into the same scoring contract.
-2. `/sandbox/recalibration/report` profiles real sandbox feature distributions, source coverage, outcome labels, validation metrics, and GBM/SHAP readiness thresholds.
-3. `/validation/report` and `/validation/demo` expose AUC, Gini, KS, PSI drift, and reason-code stability.
-4. `/governance` expands fairness monitoring by sector, geography, vintage, gender where available, and bureau-history status, including approval-rate gap checks.
-5. `/pilot-metrics` tracks NTC/NTB approval lift, decision-time reduction, early-NPA guardrail definition, and portfolio diversification.
-6. `/model/status` exposes the active linear or optional XGBoost/LightGBM runtime and explainability mode.
-7. `backend/agent_memo.py` can call AWS Bedrock Runtime when configured, with deterministic memo fallback.
-
-Requires IDBI sandbox/data-room access:
-
-1. Replace the public synthetic demo cohort with live consented AA/GST/UPI/EPFO feeds and repayment outcomes.
-2. Recalibrate limits and score bands through `/sandbox/recalibration/report` once real distributions and outcomes are available.
-3. Set `UDYAMPULSE_MODEL_PROVIDER=xgboost|lightgbm` and `UDYAMPULSE_TRAINING_DATA` to train the optional SHAP-backed runtime on production-scale outcomes, then compare it against the transparent scorecard.
+- Public data is synthetic and illustrative; it is not IDBI customer, sandbox, or repayment-outcome data.
+- The default ML model is a transparent linear PD-proxy trained on synthetic data; optional XGBoost/LightGBM + SHAP requires approved labelled data and installed production ML packages.
+- Fairness slices are demo-cohort monitors, not statistically significant production fairness certification.
+- AWS Bedrock memo generation is optional and requires configured credentials and a model ID; deterministic memo generation remains the default fallback.
+- UdyamPulse is decision support for underwriters, not a fully automated approve/decline system without human review.

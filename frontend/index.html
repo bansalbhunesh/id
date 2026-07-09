@@ -81,6 +81,13 @@
     padding: var(--space-4) 0 var(--space-5);
   }
 
+  .topbar > *,
+  .workspace > *,
+  .right-stack > *,
+  .impact-grid > * {
+    min-width: 0;
+  }
+
   .eyebrow,
   .label,
   .kicker {
@@ -106,6 +113,7 @@
     font-size: clamp(2rem, 4.2vw, 4.6rem);
     line-height: 0.92;
     letter-spacing: 0;
+    overflow-wrap: break-word;
   }
 
   .topbar p:last-child {
@@ -126,12 +134,18 @@
     justify-content: space-between;
     gap: var(--space-3);
     align-items: center;
+    min-width: 0;
     min-height: 44px;
     padding: var(--space-2) var(--space-3);
     border: 1px solid var(--line);
     border-radius: var(--radius);
     background: color-mix(in oklch, var(--panel) 84%, transparent);
     box-shadow: var(--shadow);
+  }
+
+  .status-pill > span {
+    min-width: 0;
+    overflow-wrap: anywhere;
   }
 
   .dot {
@@ -157,6 +171,7 @@
     border: 1px solid var(--line);
     border-radius: var(--radius);
     background: var(--panel);
+    max-width: 100%;
   }
 
   .metric strong {
@@ -186,6 +201,7 @@
     border-radius: var(--radius);
     background: color-mix(in oklch, var(--panel) 96%, white);
     box-shadow: var(--shadow);
+    max-width: 100%;
   }
 
   .panel-header {
@@ -553,7 +569,13 @@
   }
 
   @media (max-width: 820px) {
+    body {
+      overflow-x: hidden;
+    }
+
     .app {
+      width: 100vw;
+      max-width: 100vw;
       padding: var(--space-3);
     }
 
@@ -577,7 +599,33 @@
     }
 
     h1 {
-      font-size: 2.35rem;
+      font-size: 2.08rem;
+      line-height: 1.02;
+    }
+
+    .eyebrow,
+    .topbar p:last-child,
+    .metric span,
+    .case-button strong,
+    .case-button span {
+      overflow-wrap: anywhere;
+    }
+  }
+
+  @media (max-width: 460px) {
+    .status-pill {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      justify-items: start;
+      gap: var(--space-1);
+    }
+
+    .status-pill > span:last-child {
+      text-align: left;
+    }
+
+    .case-select {
+      font-size: 0.92rem;
     }
   }
 
@@ -604,9 +652,9 @@
           <span class="label">Prototype</span>
           <span><span id="apiDot" class="dot"></span> <strong id="apiStatus">Checking</strong></span>
         </div>
-        <div class="status-pill">
+      <div class="status-pill">
           <span class="label">Model</span>
-          <span><strong>Shapley + audit</strong></span>
+          <span><strong>Sandbox-ready</strong></span>
         </div>
       </div>
     </header>
@@ -662,6 +710,7 @@
       msmes: [],
       portfolio: null,
       governance: null,
+      validation: null,
       activeId: "ntc_hero",
       activeScore: null,
     };
@@ -717,11 +766,12 @@
       const summary = state.portfolio?.summary;
       if (!summary) return;
       const approvalLift = summary.alternate_data_approvals - summary.traditional_approvals;
+      const pilot = state.portfolio?.pilot_metrics;
       const items = [
         ["NTC rescues", summary.ntc_rescued, "thin-file firms approved with alternate data"],
         ["Credit unlocked", formatCurrency(summary.credit_unlocked), "new viable limit from rejected cases"],
-        ["Approval lift", `+${approvalLift}`, "additional approvals in the demo cohort"],
-        ["Decision time", `${summary.decision_time_minutes} min`, `from ${summary.manual_baseline_days} day manual baseline`],
+        ["Approval lift", pilot ? `+${pilot.ntc_ntb_approval_lift_pct}%` : `+${approvalLift}`, "NTC/NTB delta against bureau-only baseline"],
+        ["Time saved", pilot ? `${pilot.decision_time_reduction_pct}%` : `${summary.decision_time_minutes} min`, `decision-time reduction from ${summary.manual_baseline_days} day baseline`],
       ];
 
       els.impactGrid.innerHTML = items.map(([label, value, detail]) => `
@@ -754,9 +804,30 @@
       });
     }
 
+    function renderFairnessRows(rows = []) {
+      return rows.map((row) => `
+        <div class="mini-row">
+          <span>${esc(row.group)} <span class="muted">(${esc(row.count)})</span></span>
+          <strong>${esc(row.alternate_approval_rate)}%</strong>
+        </div>
+      `).join("") || `<div class="mini-row"><span class="muted">No rows yet</span><strong>-</strong></div>`;
+    }
+
+    function renderFairnessSection(label, rows) {
+      return `
+        <div class="section-title" style="margin-top: 16px;">
+          <h3>${esc(label)}</h3>
+          <span class="label">approval rate</span>
+        </div>
+        <div class="mini-table">${renderFairnessRows(rows)}</div>
+      `;
+    }
+
     function renderGovernance() {
       const governance = state.governance;
       if (!governance) return;
+      const validation = state.validation?.metrics;
+      const pilot = governance.pilot_metrics || state.portfolio?.pilot_metrics;
 
       const controls = governance.controls.map((control) => `
         <div class="control-row">
@@ -766,12 +837,30 @@
         </div>
       `).join("");
 
-      const bureauRows = (governance.fairness?.by_bureau_history || []).map((row) => `
+      const validationRows = validation ? [
+        ["OOT AUC", validation.auc],
+        ["Gini", validation.gini],
+        ["KS", validation.ks],
+        ["PSI drift", validation.psi],
+        ["Reason stability", validation.reason_code_stability],
+      ].map(([label, value]) => `
         <div class="mini-row">
-          <span>${esc(row.group)} <span class="muted">(${row.count})</span></span>
-          <strong>${esc(row.alternate_approval_rate)}%</strong>
+          <span>${esc(label)}</span>
+          <strong>${esc(value)}</strong>
         </div>
-      `).join("");
+      `).join("") : "";
+
+      const pilotRows = pilot ? [
+        ["NTC/NTB lift", `+${pilot.ntc_ntb_approval_lift_pct}%`],
+        ["Decision-time reduction", `${pilot.decision_time_reduction_pct}%`],
+        ["Approved sectors", pilot.portfolio_diversification.approved_sector_count],
+        ["Approved districts", pilot.portfolio_diversification.approved_district_count],
+      ].map(([label, value]) => `
+        <div class="mini-row">
+          <span>${esc(label)}</span>
+          <strong>${esc(value)}</strong>
+        </div>
+      `).join("") : "";
 
       els.governancePanel.innerHTML = `
         <div class="mini-table">
@@ -789,9 +878,25 @@
         </div>
         <div class="control-list">${controls}</div>
         <div class="section-title" style="margin-top: 16px;">
-          <h3>Bureau-history fairness</h3>
+          <h3>OOT validation</h3>
+          <span class="label">demo fixture</span>
         </div>
-        <div class="mini-table">${bureauRows}</div>
+        <div class="mini-table">${validationRows}</div>
+        <div class="section-title" style="margin-top: 16px;">
+          <h3>Pilot KPIs</h3>
+          <span class="label">guardrails</span>
+        </div>
+        <div class="mini-table">${pilotRows}</div>
+        <div class="section-title" style="margin-top: 16px;">
+          <h3>Fairness monitor</h3>
+          <span class="label">slices</span>
+        </div>
+        <p class="muted">${esc(governance.fairness?.note || "")}</p>
+        ${renderFairnessSection("Bureau history", governance.fairness?.by_bureau_history)}
+        ${renderFairnessSection("Sector", governance.fairness?.by_sector)}
+        ${renderFairnessSection("Geography", governance.fairness?.by_geography)}
+        ${renderFairnessSection("Vintage", governance.fairness?.by_vintage)}
+        ${renderFairnessSection("Gender", governance.fairness?.by_gender)}
       `;
     }
 
@@ -989,14 +1094,16 @@
 
     async function init() {
       try {
-        const [msmes, portfolio, governance] = await Promise.all([
+        const [msmes, portfolio, governance, validation] = await Promise.all([
           api("/msmes"),
           api("/portfolio"),
           api("/governance"),
+          api("/validation/demo"),
         ]);
         state.msmes = msmes;
         state.portfolio = portfolio;
         state.governance = governance;
+        state.validation = validation;
         renderImpact();
         renderCases();
         renderGovernance();

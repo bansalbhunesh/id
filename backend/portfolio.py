@@ -1,6 +1,7 @@
 """Portfolio and governance summaries for the UdyamPulse demo."""
 from collections import defaultdict
 
+from pilot_metrics import build_pilot_metrics
 from sample_data import SAMPLE_PROFILES
 from scoring import score_profile
 
@@ -28,6 +29,31 @@ def _grouped_approval(results: list[dict], field: str) -> list[dict]:
     ]
 
 
+def _vintage_bucket(months: int) -> str:
+    if months < 24:
+        return "<24 months"
+    if months < 60:
+        return "24-59 months"
+    return "60+ months"
+
+
+def _grouped_approval_by_value(results: list[dict], label: str, values: list[str]) -> list[dict]:
+    groups: dict[str, list[dict]] = defaultdict(list)
+    for item, value in zip(results, values):
+        groups[value].append(item)
+
+    return [
+        {
+            "group": group,
+            "count": len(items),
+            "average_score": round(sum(item["score"] for item in items) / len(items), 1),
+            "alternate_approval_rate": _approval_rate(items, "alternate_data_decision"),
+            "dimension": label,
+        }
+        for group, items in sorted(groups.items())
+    ]
+
+
 def build_portfolio_snapshot() -> dict:
     scored = [
         {"id": msme_id, **score_profile(profile, record_audit=False)}
@@ -47,8 +73,8 @@ def build_portfolio_snapshot() -> dict:
         item for item in scored if item["traditional"]["decision"] == "Approved"
     ]
 
-    return {
-        "cohort_label": "Synthetic Stage-1 demo cohort",
+    snapshot = {
+        "cohort_label": "Synthetic Stage-1 demo cohort with Stage-2 sandbox contracts",
         "summary": {
             "cases": len(scored),
             "traditional_approvals": len(traditional_approvals),
@@ -66,6 +92,8 @@ def build_portfolio_snapshot() -> dict:
                 "name": item["name"],
                 "sector": item["profile"]["sector"],
                 "district": item["profile"]["district"],
+                "gender": item["profile"]["gender"],
+                "vintage_bucket": _vintage_bucket(item["profile"]["vintage_months"]),
                 "score": item["score"],
                 "grade": item["grade"],
                 "risk_band": item["risk_band"],
@@ -83,6 +111,13 @@ def build_portfolio_snapshot() -> dict:
         "fairness": {
             "note": "Demo-cohort check only; Stage 2 should run out-of-time validation and disparate-impact monitoring on IDBI sandbox data.",
             "by_sector": _grouped_approval(scored, "sector"),
+            "by_geography": _grouped_approval(scored, "district"),
+            "by_vintage": _grouped_approval_by_value(
+                scored,
+                "vintage",
+                [_vintage_bucket(item["profile"]["vintage_months"]) for item in scored],
+            ),
+            "by_gender": _grouped_approval(scored, "gender"),
             "by_bureau_history": [
                 {
                     "group": "Bureau history present",
@@ -102,6 +137,8 @@ def build_portfolio_snapshot() -> dict:
             ],
         },
     }
+    snapshot["pilot_metrics"] = build_pilot_metrics(snapshot)
+    return snapshot
 
 
 def build_governance_summary(audit_events: list[dict]) -> dict:
@@ -110,10 +147,10 @@ def build_governance_summary(audit_events: list[dict]) -> dict:
 
     return {
         "model": {
-            "name": "UdyamPulse linear PD-proxy plus five-pillar policy score",
-            "version": "0.2.0-stage1",
-            "training_data": "400 reproducible synthetic MSME profiles generated from underwriting intuition; real AA/GST/UPI/EPFO labels are Stage-2 scope.",
-            "explainability": "Exact Shapley attribution for the linear model plus plain-language pillar reason codes.",
+            "name": "UdyamPulse alternate-data MSME scorecard",
+            "version": "0.3.0-stage2-ready",
+            "training_data": "Demo cohort remains synthetic for the public build; /sandbox/score accepts consented AA/GST/UPI/EPFO/Bureau payloads for IDBI sandbox recalibration.",
+            "explainability": "Current model returns exact linear Shapley attribution plus reason codes; XGBoost/LightGBM SHAP is the production-scale upgrade path.",
         },
         "controls": [
             {
@@ -133,8 +170,13 @@ def build_governance_summary(audit_events: list[dict]) -> dict:
             },
             {
                 "control": "Fairness monitor",
-                "evidence": "Demo cohort is grouped by sector and bureau-history status; Stage 2 expands to geography and vintage.",
+                "evidence": "Demo cohort is grouped by sector, geography, vintage, gender, and bureau-history status; Stage 2 validates disparate impact on sandbox outcomes.",
                 "status": "Prototype",
+            },
+            {
+                "control": "Out-of-time validation",
+                "evidence": "Validation API reports AUC, Gini, KS, PSI drift, and reason-code stability before pilot rollout.",
+                "status": "Stage 2 ready",
             },
         ],
         "audit": {
@@ -142,6 +184,7 @@ def build_governance_summary(audit_events: list[dict]) -> dict:
             "latest_decision": latest,
         },
         "fairness": portfolio["fairness"],
+        "pilot_metrics": portfolio["pilot_metrics"],
         "deployment": {
             "surface": "Single FastAPI service serving API plus static frontend",
             "fallback": "Template memo generation keeps the demo stable without live LLM credentials.",

@@ -8,7 +8,7 @@
 ![Python](https://img.shields.io/badge/python-3.12+-blue)
 ![FastAPI](https://img.shields.io/badge/backend-FastAPI-009688)
 ![Dependencies](https://img.shields.io/badge/ML%20layer-zero%20new%20dependencies-brightgreen)
-![Status](https://img.shields.io/badge/status-working%20PoC-brightgreen)
+![Status](https://img.shields.io/badge/status-stage2--ready%20PoC-brightgreen)
 
 Built for **IDBI Innovate 2026** - Problem Statement 3: Financial Health Score - Team **Looper**
 
@@ -33,26 +33,26 @@ That reversal is reproducible, explained, audited, and visible on the first scre
 Most PS3 competitors converge on "MSME score + alternate data + SHAP." UdyamPulse pushes the demo further into what a bank judge actually scores:
 
 - A banker cockpit, not just a score card: case queue, traditional-vs-alternate decision, limit recommendation, decision path, pillar bars, memo, and improvement plan.
-- Governance is live product surface: policy guardrails, model-risk controls, source map, audit count, and fairness-by-bureau-history checks.
+- Governance is live product surface: policy guardrails, model-risk controls, source map, audit count, out-of-time validation metrics, pilot KPIs, and fairness slices.
 - The NTC money-shot is quantified at portfolio level: 2 NTC rescues and Rs 30,80,000 credit unlocked in the Stage-1 synthetic cohort.
 - The stack is intentionally deployable: one FastAPI process serves API plus static UI; no fragile frontend build step.
-- The ML layer is inspectable: a trained dependency-free linear model with exact Shapley attribution, designed as a swap point for XGBoost/LightGBM + SHAP in Stage 2.
+- The ML layer is inspectable: a trained dependency-free linear model with exact Shapley attribution, designed as a swap point for XGBoost/LightGBM + SHAP once real outcome labels arrive.
 
 ## What it does
 
-1. Ingests synthetic, consented-style MSME signals across AA, GST, UPI, EPFO, bureau, geography, sector, vintage, and employment.
+1. Ingests the demo MSME cohort and accepts IDBI sandbox-style AA, GST, UPI, EPFO, bureau, geography, sector, vintage, gender, and employment payloads through `POST /sandbox/score`.
 2. Scores five health pillars: Liquidity, Discipline, Momentum, Leverage, and Digital Footprint.
 3. Produces a 0-100 score, A-E grade, risk band, and eligible working-capital limit.
 4. Shows the rejected-vs-approved contrast between traditional bureau-only and alternate-data underwriting.
 5. Explains every decision with plain-language reason codes and exact Shapley feature attribution.
-6. Generates a stable underwriter memo and borrower improvement plan.
+6. Generates a stable underwriter memo and borrower improvement plan, with optional AWS Bedrock Runtime memo generation and deterministic fallback.
 7. Records every scoring event in `/audit-log`.
-8. Exposes portfolio impact through `/portfolio` and model-risk controls through `/governance`.
+8. Exposes portfolio impact, pilot KPIs, validation metrics, drift checks, reason-code stability, and model-risk controls through live APIs.
 
 ## Architecture
 
 ```text
-Synthetic MSME cohort / custom MSME JSON
+Synthetic MSME cohort / custom MSME JSON / IDBI sandbox-style feeds
         |
         v
 backend/scoring.py
@@ -66,10 +66,19 @@ backend/scoring.py
         |      trained linear PD-proxy with exact Shapley attribution
         |
         +--> backend/agent_memo.py
-        |      deterministic underwriter memo; Stage 2 seam for AWS Bedrock
+        |      deterministic memo plus optional AWS Bedrock Runtime provider
         |
         +--> backend/audit_log.py
         |      reconstructable decision trail
+        |
+        +--> backend/feed_ingestion.py
+        |      AA/GST/UPI/EPFO/Bureau payload normalization
+        |
+        +--> backend/validation.py
+        |      AUC, Gini, KS, PSI, and reason-code stability checks
+        |
+        +--> backend/pilot_metrics.py
+        |      NTC/NTB lift, decision-time reduction, NPA guardrail, diversification
         |
         +--> backend/portfolio.py
                portfolio impact and governance summary
@@ -97,8 +106,12 @@ Useful endpoints:
 - `GET /msmes/ntc_hero/score`
 - `GET /portfolio`
 - `GET /governance`
+- `GET /pilot-metrics`
+- `GET /validation/demo`
+- `POST /validation/report`
 - `GET /audit-log`
 - `POST /score`
+- `POST /sandbox/score`
 
 ## Testing
 
@@ -107,7 +120,7 @@ cd backend
 pytest -q
 ```
 
-Current suite: 15 tests covering scoring, traditional-vs-alternate verdicts, improvement plans, audit logging, ML Shapley invariants, portfolio impact, governance summaries, and API endpoints.
+Current suite: 21 tests covering scoring, traditional-vs-alternate verdicts, improvement plans, audit logging, ML Shapley invariants, sandbox feed mapping, validation metrics, expanded fairness monitoring, pilot KPIs, governance summaries, and API endpoints.
 
 ## Deploy
 
@@ -146,11 +159,18 @@ MODEL_CARD.md         Model purpose, training data, explainability, limitations
 render.yaml           Render Blueprint for the live web service
 ```
 
-## Stage 2 roadmap
+## Stage 2 readiness
 
-1. Replace synthetic data with IDBI sandbox AA/GST/UPI/EPFO feeds and recalibrate on real distributions.
-2. Upgrade to XGBoost/LightGBM with SHAP on production-scale data.
-3. Add out-of-time validation, KS/AUC/Gini, PSI drift monitoring, and reason-code stability checks.
-4. Wire underwriter memo generation to AWS Bedrock with the deterministic memo as fallback.
-5. Expand fairness monitoring by sector, geography, vintage, gender where available, and bureau-history status.
-6. Pilot metrics: NTC/NTB approval lift, decision-time reduction, early-NPA guardrail, and portfolio diversification.
+Implemented now:
+
+1. `/sandbox/score` accepts IDBI sandbox-style AA/GST/UPI/EPFO/Bureau payloads and normalizes them into the same scoring contract.
+2. `/validation/report` and `/validation/demo` expose AUC, Gini, KS, PSI drift, and reason-code stability.
+3. `/governance` expands fairness monitoring by sector, geography, vintage, gender where available, and bureau-history status.
+4. `/pilot-metrics` tracks NTC/NTB approval lift, decision-time reduction, early-NPA guardrail definition, and portfolio diversification.
+5. `backend/agent_memo.py` can call AWS Bedrock Runtime when configured, with deterministic memo fallback.
+
+Requires IDBI sandbox/data-room access:
+
+1. Replace the public synthetic demo cohort with live consented AA/GST/UPI/EPFO feeds and repayment outcomes.
+2. Recalibrate limits and score bands on real distributions.
+3. Train XGBoost/LightGBM with SHAP on production-scale outcomes and compare it against the transparent scorecard.

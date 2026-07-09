@@ -403,7 +403,7 @@ table.tech-table td:last-child { color: var(--ink-muted); }
     <div class="grid cols-2 cols-4-print" style="grid-template-columns:repeat(4,1fr);">
       <div class="card"><h3>Single FastAPI Service</h3><p>One process serves the API and the frontend — one Dockerfile, one deploy target.</p></div>
       <div class="card"><h3>Rule + ML Dual Engine</h3><p>Transparent 5-pillar rules alongside a trained model with exact Shapley attribution.</p></div>
-      <div class="card"><h3>Agentic Memo Layer</h3><p>Template-based today; a documented seam swaps in AWS Bedrock for Stage 2.</p></div>
+      <div class="card"><h3>Agentic Memo Layer</h3><p>Deterministic by default; optional AWS Bedrock Runtime provider is wired for Stage 2.</p></div>
       <div class="card"><h3>Audit & Compliance Log</h3><p>Every decision recorded; serverless-safe, in-memory-first design.</p></div>
     </div>
     <div class="footer-mark">UdyamPulse · IDBI Innovate 2026</div>
@@ -417,7 +417,7 @@ table.tech-table td:last-child { color: var(--ink-muted); }
       <tr><td>ML layer</td><td>Dependency-free linear regression model with closed-form Shapley attribution — no numpy, scikit-learn, or shap required</td></tr>
       <tr><td>Frontend</td><td>Vanilla HTML / CSS / JS, no build step</td></tr>
       <tr><td>Deployment &amp; CI</td><td>Docker, Render web service, render.yaml Blueprint, GitHub Actions</td></tr>
-      <tr><td>Stage 2 targets</td><td>AWS Bedrock, XGBoost / LightGBM + shap, IDBI sandbox AA/GST/UPI/EPFO APIs</td></tr>
+      <tr><td>Stage 2 targets</td><td>IDBI sandbox credentials, repayment labels, XGBoost / LightGBM + SHAP, persistent audit store</td></tr>
     </table>
     <div class="footer-mark">UdyamPulse · IDBI Innovate 2026</div>
   </section>
@@ -445,7 +445,7 @@ table.tech-table td:last-child { color: var(--ink-muted); }
         </figure>
         <figure class="shot-frame">
           <img src="assets/governance-evidence.png" alt="Governance and evidence side rail showing live controls, fairness summary, and source map" />
-          <figcaption class="shot-caption">Governance rail: 4 controls, fairness split, audit count, and 5 data-source signals.</figcaption>
+          <figcaption class="shot-caption">Governance rail: controls, validation metrics, pilot KPIs, fairness slices, audit count, and 5 data-source signals.</figcaption>
         </figure>
       </div>
     </div>
@@ -456,23 +456,23 @@ table.tech-table td:last-child { color: var(--ink-muted); }
     <div class="eyebrow"><span class="num">11</span> Performance Report / Benchmarking</div>
     <h2>Verified, not just claimed.</h2>
     <div class="stat-row">
-      <div class="stat"><div class="value">15/15</div><div class="label">Automated tests passing</div></div>
+      <div class="stat"><div class="value">21/21</div><div class="label">Automated tests passing</div></div>
       <div class="stat"><div class="value">100%</div><div class="label">Decisions with Shapley reasons</div></div>
       <div class="stat"><div class="value">5</div><div class="label">Source signals mapped</div></div>
       <div class="stat"><div class="value">4</div><div class="label">Live governance controls</div></div>
     </div>
-    <p class="kicker">Browser verification on the live Render app found no console errors and no horizontal overflow on desktop or mobile. Stage 2 will report KS, AUC, Gini, PSI drift, reason-code stability, and disparate-impact checks on real IDBI sandbox data.</p>
+    <p class="kicker">Browser verification on the live Render app found no console errors and no horizontal overflow on desktop or mobile. Validation APIs report KS, AUC, Gini, PSI drift, reason-code stability, and fairness slices, ready to run on real IDBI sandbox data.</p>
     <div class="footer-mark">UdyamPulse · IDBI Innovate 2026</div>
   </section>
 
   <section class="slide">
     <div class="eyebrow"><span class="num">12</span> Additional Details / Future Development</div>
-    <h2>The Stage 2 roadmap.</h2>
+    <h2>Stage 2 is plug-in ready.</h2>
     <div class="roadmap">
-      <div class="phase"><div class="period">Phase 1</div><div><h4>Real data integration</h4><p>Swap synthetic data for IDBI sandbox AA/GST/UPI/EPFO feeds; recalibrate on real distributions.</p></div></div>
+      <div class="phase"><div class="period">Phase 1</div><div><h4>Real data integration</h4><p>Connect authenticated IDBI sandbox AA/GST/UPI/EPFO feeds to the implemented /sandbox/score contract; recalibrate on real distributions.</p></div></div>
       <div class="phase"><div class="period">Phase 2</div><div><h4>Production ML model</h4><p>Upgrade to XGBoost/LightGBM with the shap library at production data volume.</p></div></div>
-      <div class="phase"><div class="period">Phase 3</div><div><h4>Fairness &amp; monitoring</h4><p>Disparate-impact auditing across sector and geography; score drift and PSI monitoring.</p></div></div>
-      <div class="phase"><div class="period">Phase 4</div><div><h4>Bedrock-powered memos</h4><p>Wire the underwriter memo to AWS Bedrock for richer, more nuanced narratives.</p></div></div>
+      <div class="phase"><div class="period">Phase 3</div><div><h4>Fairness &amp; monitoring</h4><p>Run the implemented fairness, PSI, and reason-code stability checks on production-scale data.</p></div></div>
+      <div class="phase"><div class="period">Phase 4</div><div><h4>Bedrock-powered memos</h4><p>Enable the optional AWS Bedrock provider in the pilot environment, with deterministic fallback.</p></div></div>
     </div>
     <div class="footer-mark">UdyamPulse · IDBI Innovate 2026</div>
   </section>

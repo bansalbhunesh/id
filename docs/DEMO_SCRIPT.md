@@ -30,7 +30,7 @@ Scroll within the decision pack.
 
 Point to the right rail.
 
-"For a bank, governance matters as much as prediction. UdyamPulse exposes live model-risk controls, audit reconstruction, a human override lane, bureau-history fairness summary, and source-level evidence. Every score call can be reconstructed from the audit log."
+"For a bank, governance matters as much as prediction. UdyamPulse exposes live model-risk controls, audit reconstruction, a human override lane, out-of-time validation metrics, pilot KPIs, fairness slices, and source-level evidence. Every score call can be reconstructed from the audit log."
 
 ## 2:35-2:55 - Borrower Actionability
 
@@ -40,4 +40,4 @@ Point to the memo and improvement plan.
 
 ## 2:55-3:00 - Close
 
-"UdyamPulse is deployable today as a single FastAPI service on Render, tested with 15 automated tests, and ready for Stage 2 integration with IDBI sandbox data."
+"UdyamPulse is deployable today as a single FastAPI service on Render, tested with 21 automated tests, and ready for Stage 2 integration with authenticated IDBI sandbox data."

@@ -12,6 +12,7 @@ class MSMEProfile(BaseModel):
     name: str
     sector: str = "General Trade"
     district: str = "Mumbai"
+    gender: str | None = None
     vintage_months: int = 24
     employees: int = 12
     avg_monthly_inflow: float
@@ -247,6 +248,7 @@ def score_profile(p: MSMEProfile, record_audit: bool = True) -> dict:
         "profile": {
             "sector": p.sector,
             "district": p.district,
+            "gender": p.gender or "Unavailable",
             "vintage_months": p.vintage_months,
             "employees": p.employees,
             "has_bureau_history": p.has_bureau_history,

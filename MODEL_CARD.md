@@ -6,7 +6,7 @@ UdyamPulse produces an explainable MSME financial health score, credit grade, ri
 
 ## Model type
 
-The Stage-1 prototype intentionally uses two auditable scoring layers:
+The public prototype intentionally uses two auditable scoring layers:
 
 1. **Rule-based pillar scorer** (`backend/scoring.py`)
    - Five pillars: Liquidity, Discipline, Momentum, Leverage, Digital Footprint.
@@ -24,7 +24,9 @@ The UI surfaces both layers together so an underwriter can cross-check a transpa
 
 Training data is synthetic only (`backend/synthetic_training.py`). It is generated from a domain-informed formula plus noise and does not contain real customer or bank data.
 
-Stage 2 should retrain and recalibrate on IDBI sandbox AA/GST/UPI/EPFO feeds under bank data-governance controls.
+`POST /sandbox/score` accepts IDBI sandbox-style AA/GST/UPI/EPFO/Bureau payloads and converts them into the same underwriting feature contract. The public cohort remains synthetic because the repository does not contain private IDBI sandbox credentials, customer data, or repayment labels.
+
+Stage 2 should retrain and recalibrate on real IDBI sandbox feeds and repayment outcomes under bank data-governance controls.
 
 ## Explainability
 
@@ -35,6 +37,7 @@ Every score returns:
 - Traditional bureau-only verdict and alternate-data verdict.
 - Policy guardrail status.
 - Decision path from bureau screen to credit-line recommendation.
+- Optional AWS Bedrock-generated underwriter memo when configured, with deterministic fallback.
 
 This directly targets model-risk expectations around explainable, verifiable AI-assisted credit decisions.
 
@@ -42,22 +45,27 @@ This directly targets model-risk expectations around explainable, verifiable AI-
 
 Every scoring call is appended to the audit log (`backend/audit_log.py`) with timestamp, borrower name, score, grade, risk band, eligible limit, traditional verdict, alternate-data verdict, and reason codes. The audit trail is exposed through `GET /audit-log`.
 
-The governance endpoint (`GET /governance`) exposes model version, live controls, audit count, fairness summary, and deployment notes.
+The governance endpoint (`GET /governance`) exposes model version, live controls, audit count, fairness summary, pilot metrics, and deployment notes.
 
 ## Fairness and monitoring
 
-The Stage-1 demo includes a small synthetic cohort fairness view grouped by bureau-history status and sector (`GET /portfolio`, `GET /governance`). This is not a production fairness certification. Stage 2 should add:
+The demo includes a small synthetic cohort fairness view grouped by sector, geography, vintage, gender where available, and bureau-history status (`GET /portfolio`, `GET /governance`). This is not a production fairness certification.
 
-- Out-of-time validation.
-- Disparate-impact checks across sector, geography, vintage, and protected/proxy variables where legally available.
-- Score drift and population stability index monitoring.
+Monitoring APIs now include:
+
+- Out-of-time validation demo/report endpoints.
+- AUC, Gini, and KS rank-order checks.
+- PSI drift monitoring.
 - Reason-code stability monitoring.
+- Pilot KPI tracking for NTC/NTB lift, decision-time reduction, early-NPA guardrail, and diversification.
+
+Production fairness sign-off still requires statistically meaningful IDBI sandbox volume and legally approved protected/proxy attributes.
 
 ## Known limitations
 
 - Synthetic training data means coefficients are illustrative, not production-calibrated.
 - The fairness view is a demo-cohort monitor, not statistically significant.
-- The deterministic underwriter memo is a stable fallback, not a live LLM call.
+- AWS Bedrock memo generation is optional and requires configured AWS credentials plus a Bedrock model ID; the deterministic underwriter memo remains the default fallback.
 - The linear model is intentionally simple; Stage 2 should evaluate XGBoost/LightGBM with SHAP on real data volume.
 
 ## Intended use

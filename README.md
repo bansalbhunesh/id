@@ -135,21 +135,38 @@ docker run -p 8000:8000 udyampulse
 
 ## Screenshots
 
-### Live cockpit
+<table>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="docs/deck/assets/live-cockpit-viewport.png" width="100%" alt="UdyamPulse first viewport with impact metrics, borrower queue, and NTC approval reversal" />
+      <br />
+      <strong>First viewport</strong><br />
+      Judge path starts with the NTC rejected-to-approved reversal, service status, model mode, and portfolio impact.
+    </td>
+    <td width="50%" valign="top">
+      <img src="docs/deck/assets/decision-pack.png" width="100%" alt="Decision pack showing score, health pillars, reason codes, memo, and policy guardrails" />
+      <br />
+      <strong>Decision pack</strong><br />
+      Health pillars, reason codes, Shapley attribution, memo, decision path, and guardrails in one review surface.
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
+      <img src="docs/deck/assets/governance-evidence.png" width="100%" alt="Governance evidence view with validation, pilot KPIs, fairness checks, and source map" />
+      <br />
+      <strong>Governance evidence</strong><br />
+      Audit count, model-risk controls, OOT validation, pilot KPIs, fairness slices, and source-map proof.
+    </td>
+    <td width="50%" valign="top">
+      <img src="docs/deck/assets/mobile-live.png" width="45%" alt="Mobile UdyamPulse review flow" />
+      <br />
+      <strong>Mobile review</strong><br />
+      Same borrower review flow compressed for a phone screen without hiding the decision evidence.
+    </td>
+  </tr>
+</table>
 
-![UdyamPulse live underwriting cockpit](docs/deck/assets/live-cockpit-viewport.png)
-
-### Decision pack
-
-![Decision pack with NTC approval reversal, health pillars, memo, and guardrails](docs/deck/assets/decision-pack.png)
-
-### Governance and evidence rail
-
-![Governance evidence rail with validation, fairness, pilot KPIs, and source map](docs/deck/assets/governance-evidence.png)
-
-### Mobile review flow
-
-![Mobile UdyamPulse cockpit](docs/deck/assets/mobile-live.png)
+Full-resolution images remain in [docs/deck/assets](docs/deck/assets) for detailed inspection.
 
 ## Judging Proof
 

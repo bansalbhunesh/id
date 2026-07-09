@@ -25,6 +25,7 @@ Built for **IDBI Innovate 2026** - Problem Statement 3: Financial Health Score -
 
 - [Overview](#overview)
 - [Demo](#demo)
+- [Backend Proof](#backend-proof)
 - [Features](#features)
 - [Architecture](#architecture)
 - [Setup](#setup)
@@ -48,6 +49,8 @@ The core demo moment is a New-to-Credit case traditional underwriting rejects be
 ## Demo
 
 - Live app: [https://id-ysm9.onrender.com](https://id-ysm9.onrender.com)
+- Live API proof: [https://id-ysm9.onrender.com/submission/proof](https://id-ysm9.onrender.com/submission/proof)
+- OpenAPI docs: [https://id-ysm9.onrender.com/docs](https://id-ysm9.onrender.com/docs)
 - Walkthrough video: [docs/demo.webm](docs/demo.webm)
 - Lightweight fallback: [docs/demo.gif](docs/demo.gif)
 - Submission deck: [docs/deck/UdyamPulse-IDBI-Submission-Deck.pdf](docs/deck/UdyamPulse-IDBI-Submission-Deck.pdf)
@@ -59,6 +62,27 @@ What to verify in under three minutes:
 2. Compare `Traditional bureau-only: Rejected` with `UdyamPulse alternate data: Approved`.
 3. Inspect the health-card pillars, reason codes, model attribution, decision path, and policy guardrails.
 4. Switch to governance/evidence and confirm audit, validation, pilot KPI, fairness, and source-map proof.
+
+## Backend Proof
+
+The backend is not a mock response behind a polished screen. The judge can verify the product through live API surfaces:
+
+| Proof surface | What it proves |
+|---|---|
+| `GET /submission/proof` | One payload summarizing the NTC reversal, truth boundary, backend capability map, API catalog, validation metrics, controls, and Stage 2 swap points. |
+| `GET /msmes/ntc_hero/score` | Full decision packet: score, grade, limit, reason codes, exact Shapley attribution, memo, guardrails, source map, and decision path. |
+| `POST /sandbox/score` | AA/GST/UPI/EPFO/Bureau-style payloads normalize into the same score contract used by the cockpit. |
+| `POST /sandbox/recalibration/report` | Sandbox feature distributions, source coverage, outcome labels, and GBM/SHAP readiness are profiled before model upgrade. |
+| `POST /validation/report` | Out-of-time AUC, Gini, KS, PSI drift, and reason-code stability are computed from supplied records. |
+| `GET /governance` | Audit count, model status, live controls, fairness slices, pilot KPIs, and deployment caveats are inspectable. |
+
+Quick backend checks:
+
+```bash
+curl https://id-ysm9.onrender.com/submission/proof
+curl https://id-ysm9.onrender.com/msmes/ntc_hero/score
+curl https://id-ysm9.onrender.com/governance
+```
 
 ## Features
 
@@ -72,20 +96,49 @@ What to verify in under three minutes:
 
 ## Architecture
 
-```text
-Synthetic demo cohort / custom MSME JSON / IDBI sandbox-style feeds
-        |
-        v
-FastAPI scoring service
-  - five-pillar scorecard and policy guardrails
-  - linear PD-proxy model with exact Shapley attribution
-  - sandbox feed normalization and recalibration reports
-  - audit log, validation, pilot metrics, governance summaries
-        |
-        v
-Static underwriter cockpit
-  - served by the same FastAPI process
-  - no frontend build step
+```mermaid
+flowchart LR
+  subgraph Inputs["Input contracts"]
+    Demo["Public synthetic MSME cohort"]
+    Custom["Custom MSME JSON"]
+    Sandbox["IDBI sandbox-style feeds<br/>AA, GST, UPI, EPFO, Bureau"]
+  end
+
+  subgraph API["FastAPI backend - single deployable service"]
+    Routes["API routes<br/>main.py"]
+    Validate["Pydantic validation<br/>impossible values rejected"]
+    Ingest["Feed normalization<br/>feed_ingestion.py"]
+    Score["Five-pillar scorecard<br/>scoring.py"]
+    Explain["Risk attribution<br/>linear_model.py + ml.py"]
+    Memo["Underwriter memo<br/>agent_memo.py"]
+    Audit["Audit event log<br/>audit_log.py"]
+    Monitor["Validation and recalibration<br/>validation.py + recalibration.py"]
+    Govern["Portfolio governance<br/>portfolio.py + pilot_metrics.py"]
+    Proof["Submission proof API<br/>submission_proof.py"]
+  end
+
+  UI["Static credit cockpit<br/>frontend/index.html"]
+  Docs["README, deck, model card"]
+
+  Demo --> Routes
+  Custom --> Routes
+  Sandbox --> Routes
+  Routes --> Validate
+  Validate --> Ingest
+  Validate --> Score
+  Ingest --> Score
+  Score --> Explain
+  Score --> Memo
+  Score --> Audit
+  Score --> Monitor
+  Score --> Govern
+  Explain --> Proof
+  Audit --> Proof
+  Monitor --> Proof
+  Govern --> Proof
+  Proof --> UI
+  Routes --> UI
+  Proof --> Docs
 ```
 
 Important endpoints:
@@ -93,6 +146,7 @@ Important endpoints:
 | Endpoint | Purpose |
 |---|---|
 | `GET /msmes` and `GET /msmes/{id}/score` | Demo cohort and score packets |
+| `GET /submission/proof` | Judge-facing backend capability, architecture, and truth-boundary proof |
 | `POST /score` | Score a custom MSME profile |
 | `POST /sandbox/score` | Normalize and score sandbox-style AA/GST/UPI/EPFO/Bureau payloads |
 | `POST /sandbox/recalibration/report` | Profile sandbox distributions and readiness for GBM/SHAP |
@@ -128,9 +182,10 @@ docker run -p 8000:8000 udyampulse
 
 ## Evidence
 
-- Test suite: 28 tests covering scoring, validation, NTC reversal, improvement plans, audit logging, ML Shapley invariants, sandbox mapping, recalibration reports, validation metrics, fairness monitoring, pilot KPIs, governance summaries, and API endpoints.
+- Test suite: 29 tests covering scoring, validation, NTC reversal, improvement plans, audit logging, ML Shapley invariants, sandbox mapping, recalibration reports, validation metrics, fairness monitoring, pilot KPIs, governance summaries, submission proof, and API endpoints.
 - Public cohort impact: 2 NTC rescues and Rs 30,80,000 credit unlocked in the synthetic demo cohort.
 - Governance evidence: policy guardrails, source map, audit count, validation metrics, pilot KPIs, fairness slices, and model status are visible in the app.
+- Backend evidence: `/submission/proof` exposes the capability map, route catalog, architecture flow, validation metrics, controls, and Stage 2 swap points directly from backend functions.
 - UI verification: desktop `1440x950` and mobile `390x900` browser smoke checks passed with no console errors, no horizontal overflow, four working review tabs, and 44px minimum interactive targets.
 - Model transparency: [MODEL_CARD.md](MODEL_CARD.md) documents synthetic training data, explainability, intended use, and limitations.
 

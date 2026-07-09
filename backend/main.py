@@ -12,6 +12,7 @@ from portfolio import build_governance_summary, build_portfolio_snapshot
 from recalibration import SandboxRecalibrationRequest, build_recalibration_report
 from scoring import MSMEProfile, score_profile
 from sample_data import SAMPLE_PROFILES
+from submission_proof import build_submission_proof
 from validation import ValidationRecord, ValidationRequest, build_validation_report
 
 FRONTEND_DIR = Path(__file__).parent.parent / "frontend"
@@ -103,6 +104,11 @@ def get_model_status():
     from ml import model_status
 
     return model_status()
+
+
+@app.get("/submission/proof")
+def get_submission_proof():
+    return build_submission_proof(audit_log.read_recent())
 
 
 @app.post("/validation/report")

@@ -24,7 +24,7 @@ UdyamPulse should not compete as "another credit score." It should compete as a 
 - Produces a health grade, eligible credit limit, reason codes, Shapley-style attribution, memo, improvement plan, source map, and policy guardrails in one screen.
 - Ships audit and governance endpoints (`/audit-log`, `/portfolio`, `/governance`) rather than only a UI mock.
 - Includes a model card, deterministic fallback logic, 15 passing tests, GitHub Actions, Render deployment, and `render.yaml` Blueprint.
-- Keeps the demo resilient: single FastAPI service, static frontend, Dockerfile, no separate frontend build pipeline, no paid API dependency for the Stage 1 prototype.
+- Keeps the prototype resilient: single FastAPI service, static frontend, Dockerfile, no separate frontend build pipeline, no paid API dependency for the public build.
 
 ## Final Submission Advantage
 

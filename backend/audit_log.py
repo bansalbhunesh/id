@@ -45,6 +45,8 @@ def record(score_result: dict) -> None:
 
 
 def read_recent(limit: int = 50) -> list[dict]:
+    limit = max(1, min(limit, 500))
+
     if _memory_log:
         return _memory_log[-limit:]
 

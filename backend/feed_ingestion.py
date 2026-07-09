@@ -1,18 +1,22 @@
 """IDBI sandbox feed contracts and normalization.
 
-The live demo still ships synthetic personas, but Stage 2 needs the same
-scoring surface to accept consented AA/GST/UPI/EPFO-style payloads. This
-module keeps raw feed handling outside the scoring engine and maps only the
-derived underwriting features into `MSMEProfile`.
+The public build ships synthetic personas, while the same scoring surface
+also accepts consented AA/GST/UPI/EPFO-style payloads. This module keeps
+raw feed handling outside the scoring engine and maps only the derived
+underwriting features into `MSMEProfile`.
 """
 from __future__ import annotations
 
 from math import sqrt
 from statistics import mean
+from typing import Annotated
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from scoring import MSMEProfile
+
+NonNegativeFloat = Annotated[float, Field(ge=0)]
+NonNegativeInt = Annotated[int, Field(ge=0)]
 
 
 class ProfileFeed(BaseModel):
@@ -20,28 +24,36 @@ class ProfileFeed(BaseModel):
     sector: str = "General Trade"
     district: str = "Mumbai"
     gender: str | None = None
-    vintage_months: int = 24
+    vintage_months: int = Field(default=24, ge=0, le=600)
 
 
 class AccountAggregatorFeed(BaseModel):
-    monthly_inflows: list[float] = Field(default_factory=list)
-    cheque_bounces: int = 0
-    cheque_presentations: int = 0
-    outstanding_debt: float = 0
+    monthly_inflows: list[NonNegativeFloat] = Field(default_factory=list)
+    cheque_bounces: NonNegativeInt = 0
+    cheque_presentations: NonNegativeInt = 0
+    outstanding_debt: NonNegativeFloat = 0
+
+    @model_validator(mode="after")
+    def cheque_bounces_cannot_exceed_presentations(self):
+        if self.cheque_bounces and self.cheque_presentations == 0:
+            raise ValueError("cheque_presentations is required when cheque_bounces is positive")
+        if self.cheque_bounces > self.cheque_presentations:
+            raise ValueError("cheque_bounces cannot exceed cheque_presentations")
+        return self
 
 
 class GSTFeed(BaseModel):
-    filing_streak_months: int = 0
-    trailing_6m_turnover: list[float] = Field(default_factory=list)
+    filing_streak_months: int = Field(default=0, ge=0, le=120)
+    trailing_6m_turnover: list[NonNegativeFloat] = Field(default_factory=list)
 
 
 class UPIFeed(BaseModel):
-    monthly_transaction_count: int = 0
-    unique_counterparties: int = 0
+    monthly_transaction_count: NonNegativeInt = 0
+    unique_counterparties: NonNegativeInt = 0
 
 
 class EPFOFeed(BaseModel):
-    employees: int = 0
+    employees: NonNegativeInt = 0
 
 
 class BureauFeed(BaseModel):

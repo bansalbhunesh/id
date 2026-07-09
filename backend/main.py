@@ -1,7 +1,7 @@
 """UdyamPulse API - MSME Financial Health Card."""
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
@@ -9,6 +9,7 @@ import audit_log
 from feed_ingestion import IDBISandboxPayload, readiness, to_profile
 from pilot_metrics import build_pilot_metrics
 from portfolio import build_governance_summary, build_portfolio_snapshot
+from recalibration import SandboxRecalibrationRequest, build_recalibration_report
 from scoring import MSMEProfile, score_profile
 from sample_data import SAMPLE_PROFILES
 from validation import ValidationRecord, ValidationRequest, build_validation_report
@@ -76,6 +77,11 @@ def score_sandbox_payload(payload: IDBISandboxPayload):
     return result
 
 
+@app.post("/sandbox/recalibration/report")
+def sandbox_recalibration_report(request: SandboxRecalibrationRequest):
+    return build_recalibration_report(request)
+
+
 @app.get("/portfolio")
 def get_portfolio():
     return build_portfolio_snapshot()
@@ -90,6 +96,13 @@ def get_pilot_metrics():
 @app.get("/governance")
 def get_governance():
     return build_governance_summary(audit_log.read_recent())
+
+
+@app.get("/model/status")
+def get_model_status():
+    from ml import model_status
+
+    return model_status()
 
 
 @app.post("/validation/report")
@@ -121,7 +134,7 @@ def validation_demo():
 
 
 @app.get("/audit-log")
-def get_audit_log(limit: int = 50):
+def get_audit_log(limit: int = Query(default=50, ge=1, le=500)):
     return audit_log.read_recent(limit)
 
 

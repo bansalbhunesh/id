@@ -8,6 +8,13 @@ def test_portfolio_snapshot_shows_ntc_credit_unlocked():
     assert snapshot["summary"]["ntc_rescued"] >= 1
     assert snapshot["summary"]["credit_unlocked"] > 0
     assert len(snapshot["fairness"]["by_bureau_history"]) == 2
+    assert {item["dimension"] for item in snapshot["fairness"]["monitors"]} == {
+        "Bureau history",
+        "Sector",
+        "Geography",
+        "Vintage",
+        "Gender",
+    }
 
 
 def test_governance_summary_exposes_live_controls():
@@ -16,4 +23,5 @@ def test_governance_summary_exposes_live_controls():
     statuses = {control["status"] for control in summary["controls"]}
     assert "Live" in statuses
     assert summary["model"]["version"]
+    assert summary["model"]["runtime"]["active_provider"]
     assert "fairness" in summary

@@ -12,7 +12,7 @@ Open: https://id-ysm9.onrender.com
 
 Point to the top impact strip:
 
-"The prototype cohort has 5 MSME cases. In this synthetic Stage 1 portfolio, alternate data rescues 2 New-to-Credit firms and unlocks Rs 30,80,000 in viable credit that a bureau-only process would miss. The decision time target drops from a 7-day manual baseline to around 3 minutes."
+"The public cohort has 5 MSME cases. In this synthetic portfolio, alternate data rescues 2 New-to-Credit firms and unlocks Rs 30,80,000 in viable credit that a bureau-only process would miss. The decision time target drops from a 7-day manual baseline to around 3 minutes."
 
 ## 0:50-1:30 - The Money-Shot Case
 
@@ -40,4 +40,4 @@ Point to the memo and improvement plan.
 
 ## 2:55-3:00 - Close
 
-"UdyamPulse is deployable today as a single FastAPI service on Render, tested with 21 automated tests, and ready for Stage 2 integration with authenticated IDBI sandbox data."
+"UdyamPulse is deployable today as a single FastAPI service on Render, tested with 28 automated tests, and ready for Stage 2 integration with authenticated IDBI sandbox data."

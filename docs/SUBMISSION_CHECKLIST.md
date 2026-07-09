@@ -23,7 +23,7 @@ Use this as the final IDBI Innovate / H2S submission source of truth.
 
 ## Verification Gates
 
-- Backend tests: `21 passed`.
+- Backend tests: `28 passed`.
 - Deck export: 13 pages, not encrypted.
 - Browser smoke test: desktop and mobile render with no console errors and no horizontal overflow.
 - Live app proof: 5 cases, 4 impact cards, 5 source signals, 5 governance controls, validation metrics, pilot KPIs, and expanded fairness slices.

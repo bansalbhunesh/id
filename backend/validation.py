@@ -87,11 +87,27 @@ def reason_code_stability(reference: list[ValidationRecord], current: list[Valid
     return round(overlap / union, 4) if union else 1.0
 
 
+def _validation_warnings(development: list[ValidationRecord], out_of_time: list[ValidationRecord]) -> list[str]:
+    warnings: list[str] = []
+    if not development:
+        warnings.append("Development sample is empty; PSI and stability are not meaningful.")
+    if not out_of_time:
+        warnings.append("Out-of-time sample is empty; rank-order metrics are not meaningful.")
+    if out_of_time:
+        outcomes = {record.defaulted for record in out_of_time}
+        if len(outcomes) < 2:
+            warnings.append("Out-of-time sample needs both defaulted and non-defaulted records for AUC/KS.")
+    if len(development) < 30 or len(out_of_time) < 30:
+        warnings.append("Sample size is below production monitoring scale; treat metrics as directional only.")
+    return warnings
+
+
 def build_validation_report(development: list[ValidationRecord], out_of_time: list[ValidationRecord]) -> dict:
     auc = _auc_for_good_label(out_of_time)
     ks = _ks_statistic(out_of_time)
     drift = psi([record.score for record in development], [record.score for record in out_of_time])
     stability = reason_code_stability(development, out_of_time)
+    warnings = _validation_warnings(development, out_of_time)
     return {
         "records": {
             "development": len(development),
@@ -104,6 +120,8 @@ def build_validation_report(development: list[ValidationRecord], out_of_time: li
             "psi": drift,
             "reason_code_stability": stability,
         },
+        "status": "insufficient_sample" if warnings else "ready",
+        "warnings": warnings,
         "thresholds": {
             "auc": ">= 0.70 before pilot rollout",
             "ks": ">= 0.30 for rank-order separation",

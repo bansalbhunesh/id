@@ -66,6 +66,61 @@ def test_sandbox_score_endpoint_marks_connected_real_feeds():
     assert {item["status"] for item in body["data_sources"]} <= {"Connected", "Present"}
 
 
+def test_sandbox_score_rejects_impossible_feed_values():
+    payload = sandbox_payload()
+    payload["account_aggregator"]["cheque_bounces"] = 4
+    payload["account_aggregator"]["cheque_presentations"] = 2
+
+    response = client.post("/sandbox/score", json=payload)
+
+    assert response.status_code == 422
+
+
+def test_sandbox_recalibration_report_profiles_real_feed_distributions():
+    development = [
+        {"payload": sandbox_payload(), "defaulted": False, "period": "2026-Q1"},
+        {"payload": sandbox_payload(), "defaulted": True, "period": "2026-Q1"},
+    ]
+    out_of_time = [
+        {"payload": sandbox_payload(), "defaulted": False, "period": "2026-Q2"},
+        {"payload": sandbox_payload(), "defaulted": True, "period": "2026-Q2"},
+    ]
+
+    response = client.post(
+        "/sandbox/recalibration/report",
+        json={"development": development, "out_of_time": out_of_time},
+    )
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["mode"] == "idbi_sandbox_recalibration_report"
+    assert body["records"]["labelled_development"] == 2
+    assert body["source_coverage"]["development"]["average_coverage_pct"] == 100.0
+    assert body["feature_distributions"]["development"]["avg_monthly_inflow"]["p50"] > 0
+    assert body["validation"]["metrics"]["auc"] == 0.5
+    assert body["model_upgrade"]["target"] == "XGBoost/LightGBM with SHAP"
+    assert body["status"] == "needs_more_sandbox_data"
+
+
+def test_custom_score_rejects_negative_underwriting_features():
+    response = client.post(
+        "/score",
+        json={
+            "name": "Bad Input Traders",
+            "avg_monthly_inflow": -1,
+            "inflow_volatility": -0.2,
+            "cheque_bounce_rate": 0.01,
+            "gst_filing_streak_months": 12,
+            "gst_turnover_growth_pct": 10,
+            "upi_txn_count_monthly": 20,
+            "unique_counterparties": 5,
+            "outstanding_debt_to_inflow": 0.2,
+        },
+    )
+
+    assert response.status_code == 422
+
+
 def test_validation_report_exposes_auc_gini_ks_psi_and_reason_stability():
     payload = {
         "development": [
@@ -91,6 +146,24 @@ def test_validation_report_exposes_auc_gini_ks_psi_and_reason_stability():
     assert metrics["ks"] >= 0.5
     assert "psi" in metrics
     assert metrics["reason_code_stability"] == 1.0
+    assert response.json()["status"] == "insufficient_sample"
+    assert response.json()["warnings"]
+
+
+def test_validation_report_flags_missing_outcome_classes():
+    payload = {
+        "development": [
+            {"score": 82, "defaulted": False, "period": "dev", "reasons": ["Strong GST"]},
+        ],
+        "out_of_time": [
+            {"score": 78, "defaulted": False, "period": "oot", "reasons": ["Strong GST"]},
+        ],
+    }
+
+    response = client.post("/validation/report", json=payload)
+
+    assert response.status_code == 200
+    assert "both defaulted and non-defaulted" in " ".join(response.json()["warnings"])
 
 
 def test_portfolio_snapshot_has_stage2_fairness_and_pilot_kpis():
@@ -114,6 +187,13 @@ def test_governance_summary_includes_validation_and_pilot_controls():
     assert "pilot_metrics" in summary
 
 
+def test_model_status_endpoint_exposes_runtime_provider():
+    response = client.get("/model/status")
+
+    assert response.status_code == 200
+    assert response.json()["active_provider"] in {"linear", "xgboost", "lightgbm"}
+
+
 def test_bedrock_memo_provider_falls_back_without_model_id(monkeypatch):
     monkeypatch.setenv("UDYAMPULSE_MEMO_PROVIDER", "bedrock")
     monkeypatch.delenv("BEDROCK_MODEL_ID", raising=False)
@@ -124,3 +204,9 @@ def test_bedrock_memo_provider_falls_back_without_model_id(monkeypatch):
 
     assert score["name"] in memo
     assert "eligible limit" in memo
+
+
+def test_audit_log_limit_is_validated():
+    response = client.get("/audit-log?limit=0")
+
+    assert response.status_code == 422

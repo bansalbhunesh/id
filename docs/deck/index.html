@@ -332,7 +332,7 @@ table.tech-table td:last-child { color: var(--ink-muted); }
     <div class="eyebrow"><span class="num">02</span> Brief About The Idea</div>
     <h2>Consented alternate data, turned into a decision a bank can defend.</h2>
     <div class="grid cols-2" style="align-items:start;">
-      <div class="brief-item"><span class="idx">01</span><div><strong>What it is.</strong><p>An AI-powered MSME Financial Health Card that scores businesses from consented alternate data.</p></div></div>
+      <div class="brief-item"><span class="idx">01</span><div><strong>What it is.</strong><p>An explainable MSME Financial Health Card that scores businesses from consented alternate data.</p></div></div>
       <div class="brief-item"><span class="idx">02</span><div><strong>Who it's for.</strong><p>New-to-Credit (NTC) and New-to-Bank (NTB) MSMEs that traditional bureau-based underwriting rejects outright.</p></div></div>
       <div class="brief-item"><span class="idx">03</span><div><strong>Inputs.</strong><p>GST filings, UPI transaction trails, Account Aggregator bank statements, EPFO records.</p></div></div>
       <div class="brief-item"><span class="idx">04</span><div><strong>Outputs.</strong><p>A 0–100 score, an A–E grade, an eligible credit limit, and a plain-language improvement plan.</p></div></div>
@@ -403,7 +403,7 @@ table.tech-table td:last-child { color: var(--ink-muted); }
     <div class="grid cols-2 cols-4-print" style="grid-template-columns:repeat(4,1fr);">
       <div class="card"><h3>Single FastAPI Service</h3><p>One process serves the API and the frontend — one Dockerfile, one deploy target.</p></div>
       <div class="card"><h3>Rule + ML Dual Engine</h3><p>Transparent 5-pillar rules alongside a trained model with exact Shapley attribution.</p></div>
-      <div class="card"><h3>Agentic Memo Layer</h3><p>Deterministic by default; optional AWS Bedrock Runtime provider is wired for Stage 2.</p></div>
+      <div class="card"><h3>Memo Layer</h3><p>Deterministic by default; optional AWS Bedrock Runtime provider is wired for Stage 2.</p></div>
       <div class="card"><h3>Audit & Compliance Log</h3><p>Every decision recorded; serverless-safe, in-memory-first design.</p></div>
     </div>
     <div class="footer-mark">UdyamPulse · IDBI Innovate 2026</div>
@@ -417,7 +417,7 @@ table.tech-table td:last-child { color: var(--ink-muted); }
       <tr><td>ML layer</td><td>Dependency-free linear regression model with closed-form Shapley attribution — no numpy, scikit-learn, or shap required</td></tr>
       <tr><td>Frontend</td><td>Vanilla HTML / CSS / JS, no build step</td></tr>
       <tr><td>Deployment &amp; CI</td><td>Docker, Render web service, render.yaml Blueprint, GitHub Actions</td></tr>
-      <tr><td>Stage 2 targets</td><td>IDBI sandbox credentials, repayment labels, XGBoost / LightGBM + SHAP, persistent audit store</td></tr>
+      <tr><td>Stage 2 targets</td><td>IDBI sandbox credentials, repayment labels, recalibration report, XGBoost / LightGBM + SHAP, persistent audit store</td></tr>
     </table>
     <div class="footer-mark">UdyamPulse · IDBI Innovate 2026</div>
   </section>
@@ -456,12 +456,12 @@ table.tech-table td:last-child { color: var(--ink-muted); }
     <div class="eyebrow"><span class="num">11</span> Performance Report / Benchmarking</div>
     <h2>Verified, not just claimed.</h2>
     <div class="stat-row">
-      <div class="stat"><div class="value">21/21</div><div class="label">Automated tests passing</div></div>
+      <div class="stat"><div class="value">28/28</div><div class="label">Automated tests passing</div></div>
       <div class="stat"><div class="value">100%</div><div class="label">Decisions with Shapley reasons</div></div>
       <div class="stat"><div class="value">5</div><div class="label">Source signals mapped</div></div>
       <div class="stat"><div class="value">4</div><div class="label">Live governance controls</div></div>
     </div>
-    <p class="kicker">Browser verification on the live Render app found no console errors and no horizontal overflow on desktop or mobile. Validation APIs report KS, AUC, Gini, PSI drift, reason-code stability, and fairness slices, ready to run on real IDBI sandbox data.</p>
+    <p class="kicker">Browser verification on the live Render app found no console errors and no horizontal overflow on desktop or mobile. Recalibration and validation APIs report source coverage, real-distribution profiles, KS, AUC, Gini, PSI drift, reason-code stability, and fairness gap checks, ready to run on IDBI sandbox data.</p>
     <div class="footer-mark">UdyamPulse · IDBI Innovate 2026</div>
   </section>
 
@@ -469,9 +469,9 @@ table.tech-table td:last-child { color: var(--ink-muted); }
     <div class="eyebrow"><span class="num">12</span> Additional Details / Future Development</div>
     <h2>Stage 2 is plug-in ready.</h2>
     <div class="roadmap">
-      <div class="phase"><div class="period">Phase 1</div><div><h4>Real data integration</h4><p>Connect authenticated IDBI sandbox AA/GST/UPI/EPFO feeds to the implemented /sandbox/score contract; recalibrate on real distributions.</p></div></div>
-      <div class="phase"><div class="period">Phase 2</div><div><h4>Production ML model</h4><p>Upgrade to XGBoost/LightGBM with the shap library at production data volume.</p></div></div>
-      <div class="phase"><div class="period">Phase 3</div><div><h4>Fairness &amp; monitoring</h4><p>Run the implemented fairness, PSI, and reason-code stability checks on production-scale data.</p></div></div>
+      <div class="phase"><div class="period">Phase 1</div><div><h4>Real data integration</h4><p>Connect authenticated IDBI sandbox AA/GST/UPI/EPFO feeds to /sandbox/score and /sandbox/recalibration/report; recalibrate on real distributions.</p></div></div>
+      <div class="phase"><div class="period">Phase 2</div><div><h4>Production ML model</h4><p>Enable the optional XGBoost/LightGBM runtime with the shap library at production data volume.</p></div></div>
+      <div class="phase"><div class="period">Phase 3</div><div><h4>Fairness &amp; monitoring</h4><p>Run the implemented fairness gap, PSI, and reason-code stability checks on production-scale data.</p></div></div>
       <div class="phase"><div class="period">Phase 4</div><div><h4>Bedrock-powered memos</h4><p>Enable the optional AWS Bedrock provider in the pilot environment, with deterministic fallback.</p></div></div>
     </div>
     <div class="footer-mark">UdyamPulse · IDBI Innovate 2026</div>

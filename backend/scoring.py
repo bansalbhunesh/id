@@ -1,11 +1,11 @@
 """Rule-based MSME financial health scoring engine.
 
 Five pillars, each 0-20, summed to a 0-100 score with an A-E grade.
-Deliberately simple and dependency-free for the first working version;
-an ML model (XGBoost + SHAP) replaces the pillar weights in a later phase
-without changing this module's public interface.
+Deliberately simple and dependency-free for the public build; the ML
+attribution layer can switch to optional XGBoost/LightGBM + SHAP without
+changing this module's public interface.
 """
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class MSMEProfile(BaseModel):
@@ -13,16 +13,16 @@ class MSMEProfile(BaseModel):
     sector: str = "General Trade"
     district: str = "Mumbai"
     gender: str | None = None
-    vintage_months: int = 24
-    employees: int = 12
-    avg_monthly_inflow: float
-    inflow_volatility: float  # coefficient of variation, 0-1+
-    cheque_bounce_rate: float  # 0-1
-    gst_filing_streak_months: int
+    vintage_months: int = Field(default=24, ge=0, le=600)
+    employees: int = Field(default=12, ge=0)
+    avg_monthly_inflow: float = Field(ge=0)
+    inflow_volatility: float = Field(ge=0)  # coefficient of variation, 0-1+
+    cheque_bounce_rate: float = Field(ge=0, le=1)  # 0-1
+    gst_filing_streak_months: int = Field(ge=0, le=120)
     gst_turnover_growth_pct: float  # trailing 6mo, can be negative
-    upi_txn_count_monthly: int
-    unique_counterparties: int
-    outstanding_debt_to_inflow: float  # ratio
+    upi_txn_count_monthly: int = Field(ge=0)
+    unique_counterparties: int = Field(ge=0)
+    outstanding_debt_to_inflow: float = Field(ge=0)  # ratio
     has_bureau_history: bool = True  # False = New-to-Credit / New-to-Bank
 
 
@@ -140,7 +140,7 @@ def policy_guardrails(p: MSMEProfile, pillars: dict[str, int], total: int) -> li
         {
             "control": "Consent data boundary",
             "status": "Pass",
-            "detail": "Prototype uses synthetic AA/GST/UPI/EPFO-like fields; Stage 2 swaps to IDBI sandbox consent rails.",
+            "detail": "Public cohort uses synthetic AA/GST/UPI/EPFO-like fields; authenticated sandbox feeds use the same scoring contract.",
         },
         {
             "control": "Debt-load cap",

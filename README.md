@@ -28,15 +28,15 @@ A New-to-Credit business with zero bureau history gets declined by a traditional
 
 That reversal is reproducible, explained, audited, and visible on the first screen of the live app.
 
-## Why this can beat the field
+## Why judges can verify it quickly
 
 Most PS3 competitors converge on "MSME score + alternate data + SHAP." UdyamPulse pushes the demo further into what a bank judge actually scores:
 
 - A banker cockpit, not just a score card: case queue, traditional-vs-alternate decision, limit recommendation, decision path, pillar bars, memo, and improvement plan.
 - Governance is live product surface: policy guardrails, model-risk controls, source map, audit count, out-of-time validation metrics, pilot KPIs, and fairness slices.
-- The NTC money-shot is quantified at portfolio level: 2 NTC rescues and Rs 30,80,000 credit unlocked in the Stage-1 synthetic cohort.
+- The NTC reversal is quantified at portfolio level: 2 NTC rescues and Rs 30,80,000 credit unlocked in the public synthetic cohort.
 - The stack is intentionally deployable: one FastAPI process serves API plus static UI; no fragile frontend build step.
-- The ML layer is inspectable: a trained dependency-free linear model with exact Shapley attribution, designed as a swap point for XGBoost/LightGBM + SHAP once real outcome labels arrive.
+- The ML layer is inspectable: a trained dependency-free linear model with exact Shapley attribution plus an optional XGBoost/LightGBM + SHAP runtime path once real labelled outcome files arrive.
 
 ## What it does
 
@@ -120,7 +120,7 @@ cd backend
 pytest -q
 ```
 
-Current suite: 21 tests covering scoring, traditional-vs-alternate verdicts, improvement plans, audit logging, ML Shapley invariants, sandbox feed mapping, validation metrics, expanded fairness monitoring, pilot KPIs, governance summaries, and API endpoints.
+Current suite: 28 tests covering scoring, input validation, traditional-vs-alternate verdicts, improvement plans, audit logging, ML Shapley invariants, sandbox feed mapping, recalibration reports, validation metrics, expanded fairness monitoring, pilot KPIs, governance summaries, and API endpoints.
 
 ## Deploy
 
@@ -164,13 +164,15 @@ render.yaml           Render Blueprint for the live web service
 Implemented now:
 
 1. `/sandbox/score` accepts IDBI sandbox-style AA/GST/UPI/EPFO/Bureau payloads and normalizes them into the same scoring contract.
-2. `/validation/report` and `/validation/demo` expose AUC, Gini, KS, PSI drift, and reason-code stability.
-3. `/governance` expands fairness monitoring by sector, geography, vintage, gender where available, and bureau-history status.
-4. `/pilot-metrics` tracks NTC/NTB approval lift, decision-time reduction, early-NPA guardrail definition, and portfolio diversification.
-5. `backend/agent_memo.py` can call AWS Bedrock Runtime when configured, with deterministic memo fallback.
+2. `/sandbox/recalibration/report` profiles real sandbox feature distributions, source coverage, outcome labels, validation metrics, and GBM/SHAP readiness thresholds.
+3. `/validation/report` and `/validation/demo` expose AUC, Gini, KS, PSI drift, and reason-code stability.
+4. `/governance` expands fairness monitoring by sector, geography, vintage, gender where available, and bureau-history status, including approval-rate gap checks.
+5. `/pilot-metrics` tracks NTC/NTB approval lift, decision-time reduction, early-NPA guardrail definition, and portfolio diversification.
+6. `/model/status` exposes the active linear or optional XGBoost/LightGBM runtime and explainability mode.
+7. `backend/agent_memo.py` can call AWS Bedrock Runtime when configured, with deterministic memo fallback.
 
 Requires IDBI sandbox/data-room access:
 
 1. Replace the public synthetic demo cohort with live consented AA/GST/UPI/EPFO feeds and repayment outcomes.
-2. Recalibrate limits and score bands on real distributions.
-3. Train XGBoost/LightGBM with SHAP on production-scale outcomes and compare it against the transparent scorecard.
+2. Recalibrate limits and score bands through `/sandbox/recalibration/report` once real distributions and outcomes are available.
+3. Set `UDYAMPULSE_MODEL_PROVIDER=xgboost|lightgbm` and `UDYAMPULSE_TRAINING_DATA` to train the optional SHAP-backed runtime on production-scale outcomes, then compare it against the transparent scorecard.

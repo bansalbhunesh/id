@@ -29,6 +29,27 @@ def _grouped_approval(results: list[dict], field: str) -> list[dict]:
     ]
 
 
+def _fairness_monitor(dimension: str, rows: list[dict]) -> dict:
+    if not rows:
+        return {
+            "dimension": dimension,
+            "status": "Unavailable",
+            "max_gap_pct": 0.0,
+            "min_approval_rate": 0.0,
+            "max_approval_rate": 0.0,
+        }
+
+    rates = [row["alternate_approval_rate"] for row in rows]
+    gap = round(max(rates) - min(rates), 1)
+    return {
+        "dimension": dimension,
+        "status": "Review" if gap > 20 else "Monitor",
+        "max_gap_pct": gap,
+        "min_approval_rate": min(rates),
+        "max_approval_rate": max(rates),
+    }
+
+
 def _vintage_bucket(months: int) -> str:
     if months < 24:
         return "<24 months"
@@ -73,8 +94,34 @@ def build_portfolio_snapshot() -> dict:
         item for item in scored if item["traditional"]["decision"] == "Approved"
     ]
 
+    by_sector = _grouped_approval(scored, "sector")
+    by_geography = _grouped_approval(scored, "district")
+    by_vintage = _grouped_approval_by_value(
+        scored,
+        "vintage",
+        [_vintage_bucket(item["profile"]["vintage_months"]) for item in scored],
+    )
+    by_gender = _grouped_approval(scored, "gender")
+    by_bureau_history = [
+        {
+            "group": "Bureau history present",
+            "count": len([item for item in scored if item["profile"]["has_bureau_history"]]),
+            "alternate_approval_rate": _approval_rate(
+                [item for item in scored if item["profile"]["has_bureau_history"]],
+                "alternate_data_decision",
+            ),
+        },
+        {
+            "group": "New-to-Credit/New-to-Bank",
+            "count": len(ntc_cases),
+            "alternate_approval_rate": _approval_rate(
+                ntc_cases, "alternate_data_decision"
+            ),
+        },
+    ]
+
     snapshot = {
-        "cohort_label": "Synthetic Stage-1 demo cohort with Stage-2 sandbox contracts",
+        "cohort_label": "Public synthetic cohort with sandbox feed contracts",
         "summary": {
             "cases": len(scored),
             "traditional_approvals": len(traditional_approvals),
@@ -109,32 +156,19 @@ def build_portfolio_snapshot() -> dict:
             for item in scored
         ],
         "fairness": {
-            "note": "Demo-cohort check only; Stage 2 should run out-of-time validation and disparate-impact monitoring on IDBI sandbox data.",
-            "by_sector": _grouped_approval(scored, "sector"),
-            "by_geography": _grouped_approval(scored, "district"),
-            "by_vintage": _grouped_approval_by_value(
-                scored,
-                "vintage",
-                [_vintage_bucket(item["profile"]["vintage_months"]) for item in scored],
-            ),
-            "by_gender": _grouped_approval(scored, "gender"),
-            "by_bureau_history": [
-                {
-                    "group": "Bureau history present",
-                    "count": len([item for item in scored if item["profile"]["has_bureau_history"]]),
-                    "alternate_approval_rate": _approval_rate(
-                        [item for item in scored if item["profile"]["has_bureau_history"]],
-                        "alternate_data_decision",
-                    ),
-                },
-                {
-                    "group": "New-to-Credit/New-to-Bank",
-                    "count": len(ntc_cases),
-                    "alternate_approval_rate": _approval_rate(
-                        ntc_cases, "alternate_data_decision"
-                    ),
-                },
+            "note": "Public cohort check only; production pilot requires outcome-linked disparate-impact monitoring on IDBI sandbox data.",
+            "monitors": [
+                _fairness_monitor("Bureau history", by_bureau_history),
+                _fairness_monitor("Sector", by_sector),
+                _fairness_monitor("Geography", by_geography),
+                _fairness_monitor("Vintage", by_vintage),
+                _fairness_monitor("Gender", by_gender),
             ],
+            "by_sector": by_sector,
+            "by_geography": by_geography,
+            "by_vintage": by_vintage,
+            "by_gender": by_gender,
+            "by_bureau_history": by_bureau_history,
         },
     }
     snapshot["pilot_metrics"] = build_pilot_metrics(snapshot)
@@ -144,13 +178,15 @@ def build_portfolio_snapshot() -> dict:
 def build_governance_summary(audit_events: list[dict]) -> dict:
     portfolio = build_portfolio_snapshot()
     latest = audit_events[-1] if audit_events else None
+    from ml import model_status
 
     return {
         "model": {
             "name": "UdyamPulse alternate-data MSME scorecard",
             "version": "0.3.0-stage2-ready",
-            "training_data": "Demo cohort remains synthetic for the public build; /sandbox/score accepts consented AA/GST/UPI/EPFO/Bureau payloads for IDBI sandbox recalibration.",
+            "training_data": "Public cohort remains synthetic; /sandbox/score accepts consented AA/GST/UPI/EPFO/Bureau payloads for IDBI sandbox recalibration.",
             "explainability": "Current model returns exact linear Shapley attribution plus reason codes; XGBoost/LightGBM SHAP is the production-scale upgrade path.",
+            "runtime": model_status(),
         },
         "controls": [
             {
@@ -170,8 +206,8 @@ def build_governance_summary(audit_events: list[dict]) -> dict:
             },
             {
                 "control": "Fairness monitor",
-                "evidence": "Demo cohort is grouped by sector, geography, vintage, gender, and bureau-history status; Stage 2 validates disparate impact on sandbox outcomes.",
-                "status": "Prototype",
+                "evidence": "Public cohort is grouped by sector, geography, vintage, gender, and bureau-history status; production pilot validates disparate impact on sandbox outcomes.",
+                "status": "Monitor",
             },
             {
                 "control": "Out-of-time validation",
@@ -187,7 +223,7 @@ def build_governance_summary(audit_events: list[dict]) -> dict:
         "pilot_metrics": portfolio["pilot_metrics"],
         "deployment": {
             "surface": "Single FastAPI service serving API plus static frontend",
-            "fallback": "Template memo generation keeps the demo stable without live LLM credentials.",
-            "stage2_swap": "AWS Bedrock memo and IDBI sandbox data can replace the current seams without changing the UI contract.",
+            "fallback": "Deterministic memo generation keeps underwriting stable without live LLM credentials.",
+            "stage2_swap": "AWS Bedrock memos and IDBI sandbox data plug into the current API contracts without changing the cockpit.",
         },
     }

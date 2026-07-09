@@ -18,7 +18,7 @@ It is built for New-to-Credit and New-to-Bank MSMEs that traditional bureau-firs
 ## Slide 3 - Opportunities
 
 - Difference from existing ideas: most teams and fintech demos stop at a score. UdyamPulse exposes the decision path, reason codes, Shapley attribution, audit trail, policy guardrails, source map, validation metrics, pilot KPIs, and fairness monitor.
-- Problem solved: it makes viable thin-file MSMEs visible to IDBI without turning AI into a black box.
+- Problem solved: it makes viable thin-file MSMEs visible to IDBI without turning model-assisted underwriting into a black box.
 - USP: the rejected-to-approved NTC reversal is visible in the first minute and backed by regulator-ready evidence.
 
 ## Slide 4 - List Of Features
@@ -57,8 +57,9 @@ Single-service architecture:
 
 - FastAPI backend serving REST API and static frontend.
 - `backend/scoring.py` for five-pillar policy scoring and guardrails.
-- `backend/ml.py` and `backend/linear_model.py` for trained Shapley attribution.
+- `backend/ml.py` and `backend/linear_model.py` for trained Shapley attribution plus optional XGBoost/LightGBM runtime switching.
 - `backend/feed_ingestion.py` for AA/GST/UPI/EPFO/Bureau payload normalization.
+- `backend/recalibration.py` for sandbox distribution profiling, outcome-label validation, and GBM/SHAP readiness checks.
 - `backend/validation.py` for AUC, Gini, KS, PSI, and reason-code stability.
 - `backend/pilot_metrics.py` for NTC/NTB lift, decision time, NPA guardrail, and diversification.
 - `backend/agent_memo.py` for deterministic underwriter memo with optional AWS Bedrock Runtime provider.
@@ -70,11 +71,11 @@ Single-service architecture:
 
 Python, FastAPI, Pydantic, pytest, vanilla HTML/CSS/JS, Docker, Render web service, render.yaml Blueprint, GitHub Actions.
 
-Stage 2 targets: live IDBI sandbox credentials and repayment labels, XGBoost/LightGBM, SHAP, Postgres audit store, and production monitoring. The repo already includes sandbox-style feed contracts, validation metrics, fairness slices, pilot KPIs, and optional Bedrock fallback wiring.
+Stage 2 targets: live IDBI sandbox credentials and repayment labels, XGBoost/LightGBM, SHAP, Postgres audit store, and production monitoring. The repo already includes sandbox-style feed contracts, a recalibration report endpoint, validation metrics, fairness gap checks, pilot KPIs, and optional Bedrock fallback wiring.
 
 ## Slide 9 - Estimated Implementation Cost
 
-- Stage 1 prototype: single service, lightweight infra, synthetic data.
+- Public prototype: single service, lightweight infra, synthetic data.
 - Stage 2 pilot: cloud container service, managed Postgres, Bedrock usage, monitoring, and authenticated sandbox API integration.
 - Cost control: deterministic memo fallback and dependency-light ML keep demo/pilot resilient.
 
@@ -88,17 +89,17 @@ Use the committed screenshots from `docs/deck/assets/`:
 
 ## Slide 11 - Prototype Performance Report / Benchmarking
 
-- 21 automated tests passing.
-- Coverage includes scoring, grade boundaries, NTC reversal, improvement plan, audit logging, ML Shapley invariant, known linear coefficient recovery, sandbox feed mapping, validation metrics, portfolio impact, governance summary, and API endpoints.
-- Stage-1 portfolio impact: 5 synthetic MSME files, 4 alternate-data approvals, 2 NTC rescues, Rs 30,80,000 credit unlocked.
+- 28 automated tests passing.
+- Coverage includes scoring, input validation, grade boundaries, NTC reversal, improvement plan, audit logging, ML Shapley invariant, known linear coefficient recovery, sandbox feed mapping, recalibration reports, validation metrics, portfolio impact, governance summary, and API endpoints.
+- Public cohort impact: 5 synthetic MSME files, 4 alternate-data approvals, 2 NTC rescues, Rs 30,80,000 credit unlocked.
 - Runtime browser verification: no console errors and no horizontal overflow at desktop or mobile widths.
 - Stage 2 validation APIs: KS, AUC, Gini, PSI drift, reason-code stability, and disparate-impact slices.
 
 ## Slide 12 - Additional Details / Future Development
 
 1. Connect authenticated IDBI sandbox AA/GST/UPI/EPFO feeds to the implemented `/sandbox/score` contract.
-2. Recalibrate score and limits on real repayment/portfolio outcomes.
-3. Benchmark XGBoost/LightGBM + SHAP against the transparent scorecard.
+2. Recalibrate score and limits through `/sandbox/recalibration/report` on real repayment/portfolio outcomes.
+3. Enable `UDYAMPULSE_MODEL_PROVIDER=xgboost|lightgbm` and benchmark SHAP-backed GBM output against the transparent scorecard.
 4. Enable AWS Bedrock memo generation in the pilot environment, with deterministic fallback already present.
 5. Add RBAC and persistent audit storage.
 6. Use the implemented pilot metrics to track NTC/NTB approval lift, decision-time reduction, early-NPA guardrail, and portfolio diversification.

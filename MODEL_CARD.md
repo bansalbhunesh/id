@@ -13,10 +13,11 @@ The public prototype intentionally uses two auditable scoring layers:
    - Each pillar is 0-20; total is 0-100 with A-E grade and risk band.
    - Also emits data-source signals, policy guardrails, decision path, and improvement plan.
 
-2. **Linear PD-proxy model** (`backend/linear_model.py`, `backend/ml.py`)
+2. **Linear PD-proxy model with optional GBM runtime** (`backend/linear_model.py`, `backend/ml.py`)
    - OLS regression fit on a synthetic training set.
    - Exact Shapley attribution for a linear model: `weight_i * (x_i - mean_i)`.
    - Dependency-free implementation so the PoC remains transparent and easy to run.
+   - Optional `UDYAMPULSE_MODEL_PROVIDER=xgboost|lightgbm` plus `UDYAMPULSE_TRAINING_DATA` enables a production-scale SHAP-backed runtime when approved labelled data and packages are present.
 
 The UI surfaces both layers together so an underwriter can cross-check a transparent policy score against a learned risk model.
 
@@ -26,7 +27,7 @@ Training data is synthetic only (`backend/synthetic_training.py`). It is generat
 
 `POST /sandbox/score` accepts IDBI sandbox-style AA/GST/UPI/EPFO/Bureau payloads and converts them into the same underwriting feature contract. The public cohort remains synthetic because the repository does not contain private IDBI sandbox credentials, customer data, or repayment labels.
 
-Stage 2 should retrain and recalibrate on real IDBI sandbox feeds and repayment outcomes under bank data-governance controls.
+`POST /sandbox/recalibration/report` accepts batches of sandbox payloads with optional repayment labels, profiles real feature distributions, reports source coverage, and checks whether labelled development/out-of-time volume is sufficient for GBM/SHAP mode. Stage 2 should retrain and recalibrate on real IDBI sandbox feeds and repayment outcomes under bank data-governance controls.
 
 ## Explainability
 
@@ -45,11 +46,11 @@ This directly targets model-risk expectations around explainable, verifiable AI-
 
 Every scoring call is appended to the audit log (`backend/audit_log.py`) with timestamp, borrower name, score, grade, risk band, eligible limit, traditional verdict, alternate-data verdict, and reason codes. The audit trail is exposed through `GET /audit-log`.
 
-The governance endpoint (`GET /governance`) exposes model version, live controls, audit count, fairness summary, pilot metrics, and deployment notes.
+The governance endpoint (`GET /governance`) exposes model version, runtime provider, live controls, audit count, fairness summary, pilot metrics, and deployment notes. `GET /model/status` returns the active model provider and fallback reason when optional GBM/SHAP mode is not available.
 
 ## Fairness and monitoring
 
-The demo includes a small synthetic cohort fairness view grouped by sector, geography, vintage, gender where available, and bureau-history status (`GET /portfolio`, `GET /governance`). This is not a production fairness certification.
+The demo includes a small synthetic cohort fairness view grouped by sector, geography, vintage, gender where available, and bureau-history status (`GET /portfolio`, `GET /governance`). It also reports approval-rate gaps for each dimension. This is not a production fairness certification.
 
 Monitoring APIs now include:
 
@@ -66,7 +67,7 @@ Production fairness sign-off still requires statistically meaningful IDBI sandbo
 - Synthetic training data means coefficients are illustrative, not production-calibrated.
 - The fairness view is a demo-cohort monitor, not statistically significant.
 - AWS Bedrock memo generation is optional and requires configured AWS credentials plus a Bedrock model ID; the deterministic underwriter memo remains the default fallback.
-- The linear model is intentionally simple; Stage 2 should evaluate XGBoost/LightGBM with SHAP on real data volume.
+- The default linear model is intentionally simple; optional XGBoost/LightGBM + SHAP mode still requires approved production-scale labelled data and installed ML packages.
 
 ## Intended use
 

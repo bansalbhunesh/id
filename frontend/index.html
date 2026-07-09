@@ -100,6 +100,15 @@
     text-decoration: none;
   }
 
+  code {
+    padding: 1px 5px;
+    border: 1px solid var(--line);
+    border-radius: 5px;
+    background: color-mix(in oklch, var(--panel-soft) 70%, transparent);
+    font-family: "Cascadia Code", "Aptos Mono", monospace;
+    font-size: 0.88em;
+  }
+
   .app {
     width: min(1480px, 100%);
     margin: 0 auto;
@@ -161,6 +170,18 @@
     letter-spacing: 0;
   }
 
+  .topbar > *,
+  .hero > *,
+  .workspace > *,
+  .stage > *,
+  .grid-2 > *,
+  .grid-3 > *,
+  .rail > *,
+  .impact-grid > *,
+  .verdict-strip > * {
+    min-width: 0;
+  }
+
   .top-actions {
     display: flex;
     flex-wrap: wrap;
@@ -172,7 +193,7 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    min-height: 40px;
+    min-height: 44px;
     padding: 0 var(--space-3);
     border: 1px solid var(--line);
     border-radius: var(--radius);
@@ -398,6 +419,7 @@
 
   .spotlight {
     overflow: hidden;
+    max-width: 100%;
     border: 1px solid color-mix(in oklch, var(--green-deep) 22%, var(--line));
     border-radius: var(--radius);
     background: color-mix(in oklch, var(--panel) 84%, transparent);
@@ -550,6 +572,7 @@
   }
 
   .tab-shell {
+    max-width: 100%;
     border: 1px solid color-mix(in oklch, var(--line) 84%, transparent);
     border-radius: var(--radius);
     background: color-mix(in oklch, var(--panel) 78%, transparent);
@@ -566,7 +589,7 @@
 
   .tab-button {
     flex: 0 0 auto;
-    min-height: 40px;
+    min-height: 44px;
     padding: 0 var(--space-3);
     border: 1px solid transparent;
     border-radius: var(--radius);
@@ -875,6 +898,15 @@
     .badge {
       white-space: normal;
     }
+
+    h1,
+    h2,
+    h3,
+    p,
+    span,
+    strong {
+      overflow-wrap: anywhere;
+    }
   }
 
   @media (prefers-reduced-motion: reduce) {
@@ -923,6 +955,10 @@
         <div class="status-row">
           <span class="label">Data mode</span>
           <strong>Public synthetic cohort</strong>
+        </div>
+        <div class="status-row">
+          <span class="label">Sandbox contracts</span>
+          <strong>Stage 2 ready</strong>
         </div>
       </aside>
     </section>
@@ -1338,7 +1374,7 @@
               <div class="stack-item">
                 ${badge("Stage 2 ready", "good")}
                 <strong>Feed contract</strong>
-                <span class="muted">`POST /sandbox/score` accepts AA/GST/UPI/EPFO/Bureau-style payloads and maps them into the same score packet.</span>
+                <span class="muted"><code>POST /sandbox/score</code> accepts AA/GST/UPI/EPFO/Bureau-style payloads and maps them into the same score packet.</span>
               </div>
               <div class="stack-item">
                 ${badge("Optional upgrade", "warn")}

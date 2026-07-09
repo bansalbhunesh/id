@@ -131,6 +131,7 @@ docker run -p 8000:8000 udyampulse
 - Test suite: 28 tests covering scoring, validation, NTC reversal, improvement plans, audit logging, ML Shapley invariants, sandbox mapping, recalibration reports, validation metrics, fairness monitoring, pilot KPIs, governance summaries, and API endpoints.
 - Public cohort impact: 2 NTC rescues and Rs 30,80,000 credit unlocked in the synthetic demo cohort.
 - Governance evidence: policy guardrails, source map, audit count, validation metrics, pilot KPIs, fairness slices, and model status are visible in the app.
+- UI verification: desktop `1440x950` and mobile `390x900` browser smoke checks passed with no console errors, no horizontal overflow, four working review tabs, and 44px minimum interactive targets.
 - Model transparency: [MODEL_CARD.md](MODEL_CARD.md) documents synthetic training data, explainability, intended use, and limitations.
 
 ## Screenshots

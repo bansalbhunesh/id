@@ -20,12 +20,15 @@ Use this as the final IDBI Innovate / H2S submission source of truth.
 - Demo video: captioned WebM walkthrough recorded from the live Render app.
 - Screenshots: live cockpit, decision pack, governance/evidence rail, proof tab, and mobile flow.
 - Model governance: `MODEL_CARD.md`, audit log endpoint, source map, policy guardrails, validation metrics, pilot KPIs, fairness summary.
+- Architecture and security posture: `docs/ARCHITECTURE.md`, `docs/SECURITY_COMPLIANCE.md`.
 - Competitor research: `docs/COMPETITIVE_RESEARCH.md`.
 
 ## Verification Gates
 
-- Backend tests: `30 passed`.
-- Deck export: 13 pages, not encrypted.
+- Backend tests: `40 passed` (clean-venv reproducible; see `backend/requirements.txt` pinned versions).
+- Real model evidence: `GET /model/evaluation` reports held-out OOT AUC 0.745, Gini 0.489, KS 0.418, reproducible via `python backend/model_training/train_pd_model.py`.
+- Security: `GET /audit-log` requires the `auditor` role (bearer token); CORS restricted to an explicit origin allowlist. See `docs/SECURITY_COMPLIANCE.md`.
+- Deck export: 13 pages, not encrypted. **Re-export after the model/auth rewrite** -- the committed PDF predates it; `docs/deck/index.html` slide 11 already shows the updated 40/40 stat.
 - Browser smoke test: desktop and mobile render with no console errors and no horizontal overflow.
 - Live app proof: 5 cases, 4 impact cards, 5 source signals, 5 governance controls, validation metrics, pilot KPIs, and expanded fairness slices.
 - Proof tab: Decision, Evidence, Governance, Proof, and Sources views render from live API state.

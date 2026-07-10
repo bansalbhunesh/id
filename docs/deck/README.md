@@ -2,7 +2,7 @@
 
 `index.html` is the full 13-slide UdyamPulse pitch deck, mapped 1:1 to the official IDBI Innovate template's required sections: Team Details, Brief, Opportunities, Features, Process Flow, Wireframes, Architecture, Technologies, Cost, Snapshots, Performance Report, Additional Details, and Links.
 
-It includes live Render screenshots under `docs/deck/assets/`, current repository and product links, and 28-test verification evidence. The generated PDF is committed as `docs/deck/UdyamPulse-IDBI-Submission-Deck.pdf`.
+It includes live Render screenshots under `docs/deck/assets/`, current repository and product links, and 40-test verification evidence. The generated PDF is committed as `docs/deck/UdyamPulse-IDBI-Submission-Deck.pdf`, but was last exported before the real PD model / auth rewrite -- re-export after reviewing the refreshed `index.html` (see slide 11's stat).
 
 ## To Get The Mandatory PDF
 

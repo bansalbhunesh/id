@@ -13,11 +13,11 @@ What is in the repo:
 - Portfolio impact endpoint (`GET /portfolio`) showing 2 NTC rescues and Rs 30,80,000 credit unlocked in the synthetic cohort.
 - Governance endpoint (`GET /governance`) exposing model controls, audit count, fairness-by-bureau-history summary, and deployment notes.
 - Audit log endpoint (`GET /audit-log`) for reconstructable decisions.
-- Dependency-free trained linear model with exact Shapley attribution.
+- Dependency-free logistic PD model trained on a real default-outcome label (public proxy dataset), with exact Shapley attribution -- see MODEL_CARD.md and docs/ARCHITECTURE.md.
 - `MODEL_CARD.md`, `docs/COMPETITIVE_RESEARCH.md`, `docs/SUBMISSION_CHECKLIST.md`, and `docs/DEMO_SCRIPT.md`.
 - Submission deck source and PDF under `docs/deck/`.
 - Render Blueprint at `render.yaml`.
-- 15 passing tests.
+- 40 passing tests; bearer-token/RBAC auth on `/audit-log`; hash-chained audit log; enforced consent; real held-out PD model evidence at `GET /model/evaluation` (OOT AUC 0.745). See `docs/ARCHITECTURE.md` and `docs/SECURITY_COMPLIANCE.md`.
 
 ## Verified
 
@@ -26,7 +26,15 @@ Backend tests:
 ```bash
 cd backend
 ..\.venv\Scripts\python -m pytest -q --basetemp ..\.pytest_tmp
-# 15 passed, 1 Starlette/httpx deprecation warning
+# 40 passed, 2 warnings (both third-party: Starlette's own TestClient deprecation notice, a Windows pytest-cache path collision)
+```
+
+Full model-evidence pipeline (reproducible, byte-identical on re-run):
+
+```bash
+cd backend/model_training
+pip install -r requirements-training.txt
+python train_pd_model.py
 ```
 
 Deck/export checks:

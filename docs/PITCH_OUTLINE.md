@@ -26,7 +26,7 @@ It is built for New-to-Credit and New-to-Bank MSMEs that traditional bureau-firs
 - Five-pillar score: Liquidity, Discipline, Momentum, Leverage, Digital Footprint.
 - Traditional bureau-only verdict vs alternate-data verdict.
 - Eligible working-capital limit.
-- Exact Shapley attribution from a trained dependency-free linear model.
+- Exact Shapley attribution from a dependency-free logistic PD model trained on a real default-outcome label (not a synthetic proxy).
 - Plain-language reason codes.
 - Underwriter memo.
 - Borrower improvement plan.
@@ -56,15 +56,17 @@ Use the first viewport of the current underwriter cockpit:
 Single-service architecture:
 
 - FastAPI backend serving REST API and static frontend.
-- `backend/scoring.py` for five-pillar policy scoring and guardrails.
-- `backend/ml.py` and `backend/linear_model.py` for trained Shapley attribution plus optional XGBoost/LightGBM runtime switching.
-- `backend/feed_ingestion.py` for AA/GST/UPI/EPFO/Bureau payload normalization.
+- `backend/scoring.py` for five-pillar policy scoring, versioned policy object, and guardrails.
+- `backend/ml.py` and `backend/pd_model.py` for the real outcome-trained logistic PD model and exact Shapley attribution, plus optional XGBoost/LightGBM runtime switching.
+- `backend/model_training/` for the offline, reproducible dataset-to-artifact training and held-out evaluation pipeline (never imported by the serving app).
+- `backend/auth.py` and `backend/rate_limit.py` for bearer-token/RBAC access control and rate limiting.
+- `backend/feed_ingestion.py` for AA/GST/UPI/EPFO/Bureau payload normalization and enforced consent (purpose/scope/expiry).
 - `backend/recalibration.py` for sandbox distribution profiling, outcome-label validation, and GBM/SHAP readiness checks.
 - `backend/validation.py` for AUC, Gini, KS, PSI, and reason-code stability.
-- `backend/pilot_metrics.py` for NTC/NTB lift, decision time, NPA guardrail, and diversification.
+- `backend/pilot_metrics.py` for NTC/NTB lift, decision time, NPA guardrail, and diversification (all tagged as pilot targets, not measured results).
 - `backend/agent_memo.py` for deterministic underwriter memo with optional AWS Bedrock Runtime provider.
-- `backend/audit_log.py` for reconstructable decision events.
-- `backend/portfolio.py` for impact and governance summaries.
+- `backend/audit_log.py` for a hash-chained, tamper-evident, reconstructable decision log.
+- `backend/portfolio.py` for impact and governance summaries with PII redaction on public routes.
 - `frontend/index.html` for the no-build underwriter cockpit.
 
 ## Slide 8 - Technologies Used
@@ -89,20 +91,21 @@ Use the committed screenshots from `docs/deck/assets/`:
 
 ## Slide 11 - Prototype Performance Report / Benchmarking
 
-- 28 automated tests passing.
-- Coverage includes scoring, input validation, grade boundaries, NTC reversal, improvement plan, audit logging, ML Shapley invariant, known linear coefficient recovery, sandbox feed mapping, recalibration reports, validation metrics, portfolio impact, governance summary, and API endpoints.
-- Public cohort impact: 5 synthetic MSME files, 4 alternate-data approvals, 2 NTC rescues, Rs 30,80,000 credit unlocked.
+- 40 automated tests passing, reproducible from a clean venv with pinned dependency versions.
+- Real held-out model evidence: OOT ROC-AUC 0.745, Gini 0.489, KS 0.418 on 4,500 rows the model never trained or calibrated on, reproducible in one command (`python backend/model_training/train_pd_model.py`).
+- Coverage includes scoring, input validation, grade boundaries, NTC reversal, improvement plan, hash-chained audit logging and tamper detection, consent enforcement, auth/RBAC, ML Shapley invariants, sandbox feed mapping, recalibration reports, validation metrics, portfolio impact, governance summary, and API endpoints.
+- Public cohort impact (pilot targets, not measured lift): 5 synthetic MSME files, 4 alternate-data approvals, 2 NTC rescues, Rs 30,80,000 credit unlocked.
 - Runtime browser verification: no console errors and no horizontal overflow at desktop or mobile widths.
-- Stage 2 validation APIs: KS, AUC, Gini, PSI drift, reason-code stability, and disparate-impact slices.
+- Stage 2 validation APIs: KS, AUC, Gini, PSI drift, reason-code stability, and disparate-impact slices, all computed on the real trained model's own outputs via `GET /model/evaluation`.
 
 ## Slide 12 - Additional Details / Future Development
 
 1. Connect authenticated IDBI sandbox AA/GST/UPI/EPFO feeds to the implemented `/sandbox/score` contract.
-2. Recalibrate score and limits through `/sandbox/recalibration/report` on real repayment/portfolio outcomes.
+2. Retrain the PD model on real repayment/portfolio outcomes via `/sandbox/recalibration/report` and `train_pd_model.py`, replacing the public proxy dataset.
 3. Enable `UDYAMPULSE_MODEL_PROVIDER=xgboost|lightgbm` and benchmark SHAP-backed GBM output against the transparent scorecard.
 4. Enable AWS Bedrock memo generation in the pilot environment, with deterministic fallback already present.
-5. Add RBAC and persistent audit storage.
-6. Use the implemented pilot metrics to track NTC/NTB approval lift, decision-time reduction, early-NPA guardrail, and portfolio diversification.
+5. Move policy from grade-based to PD-threshold-based (`policy-v2`), and move RBAC/audit storage from the current public-demo scope (bearer-token roles, in-memory hash-chained log) to full IDBI SSO and persistent multi-instance storage -- see `docs/SECURITY_COMPLIANCE.md` for what's already implemented versus deferred.
+6. Use the implemented pilot metrics to track NTC/NTB approval lift, decision-time reduction, early-NPA guardrail, and portfolio diversification against real, not target, numbers.
 
 ## Slide 13 - Links
 

@@ -39,6 +39,7 @@ from metrics import (  # noqa: E402
     confusion_at_threshold,
     ks_statistic,
     pr_auc,
+    psi,
     roc_auc,
 )
 from pd_model import LogisticModel  # noqa: E402
@@ -171,6 +172,29 @@ def main() -> None:
         evaluation["splits"][name] = evaluate_split(model, split_rows, split_targets)
         s = evaluation["splits"][name]
         print(f"{name}: n={s['n']} AUC={s['auc']} Gini={s['gini']} KS={s['ks']} PR-AUC={s['pr_auc']} Brier={s['brier_score']}")
+
+    train_scores = [model.predict_proba(rows[i]) for i in splits["train"]]
+    oot_scores = [model.predict_proba(rows[i]) for i in splits["out_of_time"]]
+    evaluation["drift"] = {
+        "psi_train_vs_oot": round(psi(train_scores, oot_scores), 4),
+        "thresholds": {"stable": "< 0.10", "watch": "0.10-0.25", "drift": "> 0.25"},
+        "note": "Real PSI on the trained model's own predicted-PD distribution (train vs true OOT split).",
+    }
+    evaluation["disclosed_gaps"] = {
+        "ntc_ntb_slice_validation": (
+            "Not computed. The public proxy dataset (UCI credit-card clients) has no "
+            "New-to-Credit/New-to-Bank concept -- every row already has a bureau file. "
+            "A real NTC/NTB slice breakdown requires labelled IDBI sandbox outcomes and "
+            "is not faked here with the small synthetic demo cohort (5-10 rows), which "
+            "would just recreate the fixture-as-evidence problem this pipeline exists to fix."
+        ),
+        "demographic_slice_validation": (
+            "Not computed by design -- SEX/EDUCATION/MARRIAGE/AGE were excluded from model "
+            "inputs (see dataset_manifest.json). Demographic fairness is monitored on the "
+            "live app's synthetic cohort by sector/geography/vintage/gender/bureau-history "
+            "(GET /portfolio, GET /governance), not on this proxy training set."
+        ),
+    }
 
     ARTIFACT_DIR.mkdir(exist_ok=True)
     artifact = model.to_dict()

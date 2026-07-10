@@ -99,11 +99,11 @@ Rubric coverage is implemented as backend data, not only README copy:
 
 - Underwriter cockpit with borrower queue, score, grade, risk band, credit-line recommendation, and decision comparison.
 - Five-pillar financial health card: Liquidity, Discipline, Momentum, Leverage, and Digital Footprint.
-- Exact linear Shapley attribution plus plain-language reason codes.
+- A real, outcome-trained PD (probability-of-default) model with exact Shapley attribution, plus plain-language reason codes -- not a regressor fit against a synthetic score. See [MODEL_CARD.md](MODEL_CARD.md).
 - Deterministic underwriter memo and borrower improvement plan; optional AWS Bedrock memo generation is a Stage 2 configuration path.
-- Audit log for scoring events and governance summary endpoints.
-- Sandbox-ready ingestion via `POST /sandbox/score` for AA/GST/UPI/EPFO/Bureau-style payloads.
-- Recalibration and monitoring APIs for AUC, Gini, KS, PSI drift, reason-code stability, pilot KPIs, and fairness slices.
+- Bearer-token/RBAC-gated, hash-chained audit log and governance summary endpoints.
+- Sandbox-ready ingestion via `POST /sandbox/score` for AA/GST/UPI/EPFO/Bureau-style payloads, with enforced purpose/scope/expiry consent.
+- Recalibration and monitoring APIs for real held-out AUC, Gini, KS, PSI drift, reason-code stability, pilot KPIs, and fairness slices -- see `GET /model/evaluation`.
 
 ## Architecture
 
@@ -224,12 +224,13 @@ docker run -p 8000:8000 udyampulse
 
 ## Evidence
 
-- Test suite: 30 tests covering scoring, validation, NTC reversal, improvement plans, audit logging, ML Shapley invariants, sandbox mapping, recalibration reports, validation metrics, fairness monitoring, pilot KPIs, governance summaries, submission proof, and API endpoints.
-- Public cohort impact: 2 NTC rescues and Rs 30,80,000 credit unlocked in the synthetic demo cohort.
-- Governance evidence: policy guardrails, source map, audit count, validation metrics, pilot KPIs, fairness slices, and model status are visible in the app.
-- Backend evidence: `/submission/proof` exposes the capability map, judge runbook, route catalog, rubric scorecard, competitor gap map, architecture flow, validation metrics, controls, and Stage 2 swap points directly from backend functions.
-- UI verification: desktop `1440x950` and mobile `390x900` browser smoke checks passed with no console errors, no horizontal overflow, five working review tabs, and 44px minimum interactive targets.
-- Model transparency: [MODEL_CARD.md](MODEL_CARD.md) documents synthetic training data, explainability, intended use, and limitations.
+- Test suite: 40 tests covering scoring, validation, NTC reversal, improvement plans, audit logging and hash-chain integrity, ML Shapley invariants, sandbox mapping, consent enforcement, recalibration reports, validation metrics, fairness monitoring, pilot KPIs, governance summaries, submission proof, auth/RBAC, and API endpoints.
+- Real model evidence: `GET /model/evaluation` reports a true held-out (out-of-time) ROC-AUC of 0.745, Gini 0.489, KS 0.418, reproducible in one command (`python backend/model_training/train_pd_model.py`) -- see [MODEL_CARD.md](MODEL_CARD.md).
+- Public cohort impact: 2 NTC rescues and Rs 30,80,000 credit unlocked in the synthetic demo cohort (pilot targets, not measured lift -- see `GET /pilot-metrics`).
+- Governance evidence: policy guardrails with real consent-verification detail, source map, hash-chained audit count, real validation metrics, pilot KPI targets, and fairness slices are visible in the app.
+- Backend evidence: `/submission/proof` exposes the capability map, judge runbook, route catalog, rubric scorecard, competitor gap map, architecture flow, real held-out validation metrics, controls, and Stage 2 swap points directly from backend functions.
+- Security: `GET /audit-log` requires the `auditor` role (bearer token); CORS is restricted to an explicit origin allowlist, not wildcard. See [docs/SECURITY_COMPLIANCE.md](docs/SECURITY_COMPLIANCE.md).
+- Model transparency: [MODEL_CARD.md](MODEL_CARD.md) documents the real training data/label, the domain-bridge feature mapping, explainability, intended use, and limitations. [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) documents module responsibilities, model versioning, and security boundaries.
 
 ## Screenshots
 
@@ -290,7 +291,8 @@ Full-resolution images remain in [docs/deck/assets](docs/deck/assets) for detail
 ## Limitations
 
 - Public data is synthetic and illustrative; it is not IDBI customer, sandbox, or repayment-outcome data.
-- The default ML model is a transparent linear PD-proxy trained on synthetic data; optional XGBoost/LightGBM + SHAP requires approved labelled data and installed production ML packages.
-- Fairness slices are demo-cohort monitors, not statistically significant production fairness certification.
+- The default PD model is trained on a real default-outcome label from a public proxy dataset (UCI credit-card defaults), not real Indian MSME repayment data -- see MODEL_CARD.md's "What this proxy model does and does not prove". Optional XGBoost/LightGBM + SHAP requires approved IDBI-sandbox labelled data and installed production ML packages.
+- Fairness slices are demo-cohort monitors, not statistically significant production fairness certification; true NTC/NTB and demographic slice validation on the PD model is a disclosed gap pending real sandbox data (see `evaluation.json`'s `disclosed_gaps`).
+- API authentication is a real, enforced bearer-token/role scheme sized for a public demo (no login flow or per-underwriter identity), not full IDBI SSO -- see docs/SECURITY_COMPLIANCE.md.
 - AWS Bedrock memo generation is optional and requires configured credentials and a model ID; deterministic memo generation remains the default fallback.
 - UdyamPulse is decision support for underwriters, not a fully automated approve/decline system without human review.

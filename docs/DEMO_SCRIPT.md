@@ -24,7 +24,7 @@ Select Shree Ganesh Textiles if it is not already active.
 
 Scroll within the decision pack.
 
-"The decision is not a black-box score. The five-pillar card shows liquidity, discipline, momentum, leverage, and digital footprint. The right side gives exact Shapley-style attribution from the trained linear model, and the plain-language reason codes are written for credit officers and borrowers."
+"The decision is not a black-box score. The five-pillar card shows liquidity, discipline, momentum, leverage, and digital footprint. The right side gives exact Shapley-style attribution from a logistic PD model trained on a real default-outcome label, not a synthetic proxy, and the plain-language reason codes are written for credit officers and borrowers."
 
 ## 2:05-2:35 - Governance
 
@@ -40,4 +40,4 @@ Point to the memo and improvement plan.
 
 ## 2:55-3:00 - Close
 
-"UdyamPulse is deployable today as a single FastAPI service on Render, tested with 28 automated tests, and ready for Stage 2 integration with authenticated IDBI sandbox data."
+"UdyamPulse is deployable today as a single FastAPI service on Render, tested with 40 automated tests, and ready for Stage 2 integration with authenticated IDBI sandbox data."

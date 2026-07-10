@@ -72,6 +72,15 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
+def _write_json(path: Path, payload: dict) -> None:
+    """Write committed JSON with stable bytes across operating systems."""
+    path.write_text(
+        json.dumps(payload, indent=2) + "\n",
+        encoding="utf-8",
+        newline="\n",
+    )
+
+
 def load_manifest() -> dict:
     with (HERE / "dataset_manifest.json").open("r", encoding="utf-8") as handle:
         return json.load(handle)
@@ -325,7 +334,7 @@ def train_xgboost(
         },
         "tree_shap": "native pred_contribs, exact in calibrated logit space",
     }
-    XGB_METADATA_PATH.write_text(json.dumps(metadata, indent=2), encoding="utf-8")
+    _write_json(XGB_METADATA_PATH, metadata)
     return XGBoostPDModel.load(XGB_MODEL_PATH, XGB_METADATA_PATH), metadata
 
 
@@ -410,14 +419,14 @@ def main() -> None:
         }
     )
     ARTIFACT_DIR.mkdir(exist_ok=True)
-    LOGISTIC_PATH.write_text(json.dumps(logistic_artifact, indent=2), encoding="utf-8")
+    _write_json(LOGISTIC_PATH, logistic_artifact)
     xgboost_metadata.update(
         {
             "trained_at_utc": trained_at,
             "dataset_sha256": manifest["sha256"],
         }
     )
-    XGB_METADATA_PATH.write_text(json.dumps(xgboost_metadata, indent=2), encoding="utf-8")
+    _write_json(XGB_METADATA_PATH, xgboost_metadata)
 
     champion_manifest = {
         "provider": champion_provider,
@@ -434,7 +443,7 @@ def main() -> None:
             "xgboost_metadata": XGB_METADATA_PATH.name,
         },
     }
-    CHAMPION_PATH.write_text(json.dumps(champion_manifest, indent=2), encoding="utf-8")
+    _write_json(CHAMPION_PATH, champion_manifest)
 
     holdout_targets = split_targets["holdout"]
     holdout_probabilities = champion_probabilities["holdout"]
@@ -514,7 +523,7 @@ def main() -> None:
             ),
         },
     }
-    EVALUATION_PATH.write_text(json.dumps(evaluation, indent=2), encoding="utf-8")
+    _write_json(EVALUATION_PATH, evaluation)
 
     holdout = evaluation["splits"]["holdout"]
     print(

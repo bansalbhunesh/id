@@ -7,7 +7,7 @@
     "liquidity"
   ],
   "policy_review_threshold": 0.258,
-  "trained_at_utc": "2026-07-10T21:27:51.145041+00:00",
+  "trained_at_utc": "2026-07-10T22:20:26.885750+00:00",
   "dataset_sha256": "30c6be3abd8dcfd3e6096c828bad8c2f011238620f5369220bd60cfc82700933",
   "selection_split": "calibration",
   "selection_reason": "AUC difference was immaterial; XGBoost won the calibration Brier tie-break.",

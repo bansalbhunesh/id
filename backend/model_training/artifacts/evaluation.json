@@ -13,7 +13,7 @@
     "holdout": 0.15
   },
   "validation_design": "Stratified random development/calibration/holdout on a cross-sectional public proxy dataset. The holdout is untouched during fitting, calibration, threshold selection and champion selection; it is not an out-of-time sample.",
-  "trained_at_utc": "2026-07-10T21:27:51.145041+00:00",
+  "trained_at_utc": "2026-07-10T22:20:26.885750+00:00",
   "dataset": {
     "name": "default_of_credit_card_clients",
     "sha256": "30c6be3abd8dcfd3e6096c828bad8c2f011238620f5369220bd60cfc82700933",
@@ -691,10 +691,10 @@
     }
   },
   "artifacts": {
-    "champion_manifest_sha256": "18b71b2dc2735b571632413c024bc7300e3d9933be28e330ad4798a79d450e36",
-    "logistic_sha256": "29254a16b5214d3c9c3583f198019dc6656ff05b66ce27f956bce42ea2c0ef90",
+    "champion_manifest_sha256": "453cfeaa5d105af608a0e4d243491e1e676c806e2cbd256b56466c787294f0ae",
+    "logistic_sha256": "3a6540d25a68734f5a0bfc141c71f8ab1747c17761922525630722e6fac76ad9",
     "xgboost_model_sha256": "1d27f276ad8a7f56c7e01a4e5c3821c34e8cf92c28911659c394dddc4a05c00b",
-    "xgboost_metadata_sha256": "2c91de88a571666d5962b420a5298c5b3f88e62aa3b2580a80e8d094c22d0c02"
+    "xgboost_metadata_sha256": "39b2661b13b8ec4a217a8ef530016d12b396bbe721bafe781f4347f26fd9d843"
   },
   "disclosed_gaps": {
     "out_of_time_validation": "Not available in the cross-sectional UCI source. A genuine dated OOT window remains mandatory once IDBI sandbox repayment outcomes arrive; this report does not relabel a random holdout as OOT.",

@@ -20,6 +20,6 @@
   "baseline_logit": -1.3781518548020535,
   "baseline_probability": 0.20130598399012303,
   "model_type": "logistic_pd_v2",
-  "trained_at_utc": "2026-07-10T21:27:51.145041+00:00",
+  "trained_at_utc": "2026-07-10T22:20:26.885750+00:00",
   "dataset_sha256": "30c6be3abd8dcfd3e6096c828bad8c2f011238620f5369220bd60cfc82700933"
 }

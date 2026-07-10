@@ -1334,10 +1334,16 @@
     }
 
     function renderEvidenceTab(score) {
+      const pd = score.pd_estimate;
+      const pdLine = typeof pd === "number"
+        ? `<p class="muted">PD estimate (probability of default, model <code>${esc(score.ml?.provider)}</code>): <strong>${(pd * 100).toFixed(1)}%</strong>, vs baseline ${((score.ml?.pd_baseline ?? pd) * 100).toFixed(1)}%.</p>
+           <p class="truth-note">Trained on a real default-outcome label from a public proxy dataset (not real MSME data) -- trust this for ranking risk between cases, not as a production-calibrated percentage. See MODEL_CARD.md.</p>`
+        : "";
       return `
         <section class="detail-section">
           <h3 class="section-title">Model attribution</h3>
-          <p class="muted">Baseline ${esc(score.ml?.baseline_score)} with exact linear Shapley-equivalent contributions in the public model.</p>
+          <p class="muted">Baseline score ${esc(score.ml?.baseline_score)} with exact Shapley-equivalent contributions from the active PD model.</p>
+          ${pdLine}
           <div class="reason-list spaced">${renderReasons(score.ml?.top_reasons || [])}</div>
         </section>
         <section class="detail-section">

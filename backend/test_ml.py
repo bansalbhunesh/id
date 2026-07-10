@@ -50,6 +50,40 @@ def test_explain_returns_pd_estimate_for_sample_profile():
     assert result["provider"] == model_status()["active_provider"]
 
 
+def test_top_reasons_sign_matches_pd_direction_not_inverted():
+    """Regression test: top_reasons must say a feature increases risk when it
+    actually pushes pd_estimate above baseline, and decreases risk when it
+    pulls pd_estimate below baseline -- not the other way around."""
+    from ml import explain
+    from scoring import score_liquidity, score_discipline, score_momentum, score_leverage, score_digital_footprint
+    from sample_data import SAMPLE_PROFILES
+
+    profile = SAMPLE_PROFILES["ntc_hero"]
+    pillars = {
+        "liquidity": score_liquidity(profile),
+        "discipline": score_discipline(profile),
+        "momentum": score_momentum(profile),
+        "leverage": score_leverage(profile),
+        "digital_footprint": score_digital_footprint(profile),
+    }
+
+    result = explain(profile, pillars)
+    points = result["shap_contributions_approx_probability_points"]
+    reasons_text = " ".join(result["top_reasons"])
+
+    # Internal consistency: the signed points must sum close to the actual
+    # pd_estimate - pd_baseline gap (first-order approximation, so allow slack).
+    actual_gap_pts = (result["pd_estimate"] - result["pd_baseline"]) * 100
+    assert abs(sum(points.values()) - actual_gap_pts) < 5.0
+
+    # Each feature's displayed sign must match its computed sign -- this is
+    # exactly the bug this test guards against (a prior version negated the
+    # displayed number while flipping the prefix on the wrong branch).
+    for name, value in points.items():
+        signed = f"+{value:.1f}" if value >= 0 else f"{value:.1f}"
+        assert f"{signed} pts of default risk from {name}" in reasons_text
+
+
 def test_model_status_reports_active_provider_contract():
     from ml import model_status
 

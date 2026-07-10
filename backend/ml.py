@@ -166,7 +166,11 @@ def _pd_explain(pillars: dict[str, int]) -> dict:
 
     ranked = sorted(logit_contributions.items(), key=lambda kv: abs(kv[1]), reverse=True)
     top_reasons = [
-        f"{'+' if approx_probability_points[name] <= 0 else ''}{-approx_probability_points[name]:.1f} pts "
+        # Positive == this feature pushed the PD estimate up (more risk);
+        # negative == it pulled the estimate down (less risk). Do not flip
+        # the sign here -- approx_probability_points is already signed
+        # correctly relative to pd_probability - baseline_probability.
+        f"{'+' if approx_probability_points[name] >= 0 else ''}{approx_probability_points[name]:.1f} pts "
         f"of default risk from {name}"
         for name, _ in ranked
     ]

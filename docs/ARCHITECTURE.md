@@ -1,75 +1,85 @@
 # Architecture
 
-This is the engineering-depth companion to the README's judge-facing diagram: module responsibilities, model versioning, deployment topology, and security boundaries.
+## Runtime
 
-## Runtime topology
+One Python 3.12 Docker service runs FastAPI and serves the static review cockpit. The zero-build frontend and API stay same-origin; API route definitions are mounted before `StaticFiles`.
 
-One FastAPI process serves both the JSON API and the static frontend (`backend/main.py` mounts `frontend/` as `StaticFiles` after all API routes, so it never shadows them). This is intentional for a hackathon deployable: one Render service, one Dockerfile, no separate frontend build step, and no CORS requirement in production because the frontend and API are same-origin. `UDYAMPULSE_ALLOWED_ORIGINS` exists only for local dev (opening the frontend on a different port) and any future external API consumer.
-
-```
-Browser (judge)
-   |
-   v
-FastAPI process (single Render/Docker deployable)
-   |-- StaticFiles: frontend/index.html
-   `-- API routes: backend/main.py
-          |
-          v
-   Request pipeline (per scoring call)
-   Pydantic validation (feed_ingestion.py / scoring.py)
-     -> consent enforcement (sandbox path only)
-     -> rate limiting (rate_limit.py, scoring endpoints)
-     -> scoring.py: 5-pillar rule score (descriptive)
-     -> ml.py: pd_model.LogisticModel.predict_proba (risk estimate)
-     -> policy object (decision, versioned)
-     -> agent_memo.py: deterministic memo (+ optional Bedrock)
-     -> audit_log.py: hash-chained append
+```mermaid
+flowchart LR
+  User["Judge / underwriter"] --> UI["Static review cockpit"]
+  UI --> Public["Public synthetic GET routes"]
+  User --> Auth["Bearer role check"]
+  Auth --> Write["Custom / sandbox / validation writes"]
+  Write --> Consent["Purpose + scope + expiry consent"]
+  Public --> Score["Five-pillar health score"]
+  Consent --> Score
+  Score --> PD["Calibrated XGBoost champion"]
+  PD --> SHAP["Native exact TreeSHAP"]
+  SHAP --> Policy["Policy v2: approve / review / reject"]
+  Policy --> Memo["Deterministic memo / optional Bedrock"]
+  Memo --> Audit["Pseudonymised SHA256 event chain"]
+  PD --> Evidence["Holdout metrics + intervals + fairness + PSI"]
+  Audit --> Governance["Governance and submission proof"]
+  Evidence --> Governance
 ```
 
-## Module map
+## Decision Contract
 
-| Module | Responsibility | Depends on |
-|---|---|---|
-| `main.py` | Route definitions, auth/rate-limit wiring, CORS config | everything below |
-| `auth.py` | Bearer-token role check (`require_role`) | stdlib + FastAPI |
-| `rate_limit.py` | In-memory sliding-window limiter | stdlib + FastAPI |
-| `scoring.py` | `MSMEProfile` contract, 5-pillar rule score, policy object, guardrails | `ml.py`, `agent_memo.py`, `audit_log.py` (local imports to avoid a cycle) |
-| `feed_ingestion.py` | IDBI sandbox feed contracts, `ConsentRecord`, normalization to `MSMEProfile` | `scoring.py` |
-| `ml.py` | Loads the committed PD artifact, exposes `explain()` / `model_status()` / `model_evaluation()`; optional GBM+SHAP upgrade gate | `pd_model.py`, `feature_bridge.py`, `linear_model.py` (fallback only) |
-| `pd_model.py` | Dependency-free logistic regression + exact logit-space Shapley | stdlib only |
-| `feature_bridge.py` | Runtime half of the universal-feature mapping (MSME pillars -> 0-1 features the PD model expects) | stdlib only |
-| `model_training/` | Offline-only: dataset fetch+verify, training, evaluation. Never imported by the serving app. | pandas/xlrd (training-only, see `requirements-training.txt`) |
-| `portfolio.py` | Synthetic-cohort aggregates, fairness slices, governance summary, PII redaction for public views | `pilot_metrics.py`, `sample_data.py`, `scoring.py`, `ml.py`, `audit_log.py` |
-| `audit_log.py` | Append-only, hash-chained decision log | stdlib only |
-| `validation.py` | AUC/KS/PSI/reason-stability calculators used by `/validation/*` | stdlib only |
-| `recalibration.py` | Sandbox distribution/coverage profiling and GBM-readiness checks | `feed_ingestion.py`, `ml.py`, `validation.py` |
-| `submission_proof.py` | Judge-facing evidence packet; pulls real numbers from the modules above, never its own fixtures | `portfolio.py`, `ml.py`, `scoring.py` |
+UdyamPulse intentionally avoids one opaque “AI score”:
 
-## Model versioning
+1. `scoring.py` computes five descriptive pillars, grade and proposed limit.
+2. `ml.py` loads the committed champion manifest and returns PD plus exact attribution.
+3. `apply_decision_policy` combines grade and the calibrated PD review threshold.
+4. The public proxy may route an A/B disagreement to review, but cannot auto-decline.
+5. Grade C is always reviewed; D/E remains a transparent scorecard-policy decline.
 
-Three layers are versioned independently so upgrading one never silently changes the meaning of another:
+## Champion/Challenger Training
 
-1. **Rule-based score**: implicit version via `scoring.py`'s pillar formulas (no separate version tag today; changes are visible via the git history of `scoring.py`).
-2. **PD model**: `ml.model_status()["active_provider"]` reports which model is live (`logistic_pd_v1` by default, `xgboost`/`lightgbm` when configured with real sandbox labels, `linear_synthetic_fallback` only if no artifact is committed). The artifact itself carries `trained_at_utc` and `dataset_sha256` so any served prediction is traceable to an exact training run and exact input data.
-3. **Policy**: `policy.version` (`"policy-v1"` today) on every score response. A future PD-threshold-based policy becomes `"policy-v2"` without touching the score or PD fields.
+`model_training/train_pd_model.py` verifies the 30,000-row source hash, creates development/calibration/holdout splits, fits calibrated logistic and monotonic XGBoost candidates, selects on calibration, and evaluates once on holdout. It writes:
 
-**Retraining is one command** (`python backend/model_training/train_pd_model.py`) and is deterministic (fixed split seed). It overwrites `artifacts/artifact.json` and `artifacts/evaluation.json` together, so the served model and its published evaluation numbers can never drift apart.
-
-## Deployment
-
-- `Dockerfile` + `render.yaml`: single-service deploy, same image serves API and static assets.
-- No database: audit log is in-memory (source of truth) with best-effort append to `audit_log.jsonl` on disk; both are ephemeral on typical serverless/PaaS filesystems by design (see `audit_log.py`'s module docstring). A pilot deployment swaps this for a persistent store behind the same `record`/`read_recent`/`verify_chain` interface.
-- No secrets are required to run the public demo: the PD model artifact is committed (not fetched from a secret store), and `auth.py` ships a published demo credential (see `docs/SECURITY_COMPLIANCE.md`) so judges can exercise the auditor-gated endpoint without provisioning anything.
-
-## Security boundaries
-
-See `docs/SECURITY_COMPLIANCE.md` for the full control-by-control breakdown. Summary of what crosses a trust boundary and how it's handled:
-
-| Boundary | Control |
+| Artifact | Purpose |
 |---|---|
-| Public internet -> scoring endpoints | Rate-limited (`rate_limit.py`), Pydantic-validated, no auth required (synthetic/caller-owned data only) |
-| Public internet -> `/audit-log` | Bearer-token, `auditor`-role-gated (`auth.py`) -- this is the endpoint the external audit named as a bank-grade risk |
-| Public internet -> `/governance`, `/submission/proof` | Public, but PII-redacted (`portfolio._redact_latest_decision`) |
-| Sandbox feed -> scoring | `ConsentRecord` (purpose/scope/expiry) required and enforced; expired consent is a 403, not a warning |
-| Browser -> API | CORS restricted to an explicit origin allowlist (`UDYAMPULSE_ALLOWED_ORIGINS`), not wildcard |
-| Past audit entries -> tampering | SHA-256 hash chain (`audit_log.verify_chain`), surfaced live in `/governance`'s "Audit reconstruction" control |
+| `artifact.json` | Calibrated logistic fallback |
+| `xgboost_model.json` | Monotonic XGBoost trees |
+| `xgboost_metadata.json` | Calibration and exact TreeSHAP contract |
+| `champion.json` | Serving provider, threshold and artifact map |
+| `evaluation.json` | Candidate comparison, holdout metrics, intervals, fairness, PSI, gaps and hashes |
+
+The cross-sectional source cannot provide OOT validation. `evaluation.json` states this explicitly and reserves the term OOT for future dated IDBI outcomes.
+
+## Module Map
+
+| Module | Responsibility |
+|---|---|
+| `main.py` | Routes, role wiring, CORS, rate limits, security headers and static mount |
+| `auth.py` | API-key role hierarchy |
+| `feed_ingestion.py` | AA/GST/UPI/EPFO/Bureau contracts and consent enforcement |
+| `scoring.py` | Health score, proposed limit, decision policy, reasons and guardrails |
+| `feature_bridge.py` | Explicit MSME-to-universal risk mapping |
+| `ml.py` | Champion loading, fallback, PD and explanation response |
+| `xgb_pd_model.py` | XGBoost inference and exact calibrated TreeSHAP reconstruction |
+| `pd_model.py` | Calibrated dependency-free logistic fallback and exact linear Shapley |
+| `model_training/` | Offline training, metrics, selection, uncertainty and fairness evidence |
+| `audit_log.py` | HMAC pseudonyms, restart-safe persistence, migration and hash chain |
+| `portfolio.py` | Synthetic portfolio views, public redaction and governance controls |
+| `submission_proof.py` | Judge-facing proof assembled from live backend state |
+
+## Security Boundaries
+
+| Boundary | Enforcement |
+|---|---|
+| Public browser to sample data | Fixed synthetic GET responses only |
+| Caller data to API | Underwriter bearer role, rate limit and Pydantic validation |
+| Sandbox sources to scoring | Active purpose-bound consent with complete source scope |
+| Audit reader | Auditor role |
+| Audit subject identity | HMAC pseudonym; no raw borrower name retained |
+| Historical event mutation | SHA256 chain verified after restart and on governance reads |
+| Model evidence | Dataset/artifact hashes and deterministic retraining command |
+
+## Stage 2 Swap Points
+
+- Replace the public proxy loader with approved dated IDBI MSME outcomes while preserving the universal serving contract.
+- Add true temporal development/calibration/OOT windows and NTC/NTB, sector, geography and vintage outcome slices.
+- Calibrate policy thresholds to IDBI loss economics and early-NPA guardrails.
+- Replace demo API keys with IDBI SSO and JSONL with a durable WORM-capable audit store.
+- Enable Bedrock only behind approved prompts, output schema checks and the deterministic fallback.

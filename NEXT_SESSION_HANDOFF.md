@@ -13,11 +13,11 @@ What is in the repo:
 - Portfolio impact endpoint (`GET /portfolio`) showing 2 NTC rescues and Rs 30,80,000 credit unlocked in the synthetic cohort.
 - Governance endpoint (`GET /governance`) exposing model controls, audit count, fairness-by-bureau-history summary, and deployment notes.
 - Audit log endpoint (`GET /audit-log`) for reconstructable decisions.
-- Dependency-free logistic PD model trained on a real default-outcome label (public proxy dataset), with exact Shapley attribution -- see MODEL_CARD.md and docs/ARCHITECTURE.md.
+- Calibrated monotonic XGBoost champion with native exact TreeSHAP, calibrated logistic fallback, and score/PD/policy separation -- see MODEL_CARD.md and docs/ARCHITECTURE.md.
 - `MODEL_CARD.md`, `docs/COMPETITIVE_RESEARCH.md`, `docs/SUBMISSION_CHECKLIST.md`, and `docs/DEMO_SCRIPT.md`.
 - Submission deck source and PDF under `docs/deck/`.
 - Render Blueprint at `render.yaml`.
-- 40 passing tests; bearer-token/RBAC auth on `/audit-log`; hash-chained audit log; enforced consent; real held-out PD model evidence at `GET /model/evaluation` (OOT AUC 0.745). See `docs/ARCHITECTURE.md` and `docs/SECURITY_COMPLIANCE.md`.
+- 50 passing tests; underwriter/auditor RBAC; scoped consent; restart-safe pseudonymised hash-chain audit; random-holdout proxy evidence at `GET /model/evaluation` (AUC 0.7497, explicitly not OOT). See `docs/ARCHITECTURE.md` and `docs/SECURITY_COMPLIANCE.md`.
 
 ## Verified
 
@@ -26,7 +26,7 @@ Backend tests:
 ```bash
 cd backend
 ..\.venv\Scripts\python -m pytest -q --basetemp ..\.pytest_tmp
-# 40 passed, 2 warnings (both third-party: Starlette's own TestClient deprecation notice, a Windows pytest-cache path collision)
+# 50 passed, 1 warning (third-party Starlette TestClient deprecation notice)
 ```
 
 Full model-evidence pipeline (reproducible, byte-identical on re-run):

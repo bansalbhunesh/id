@@ -25,10 +25,10 @@ Use this as the final IDBI Innovate / H2S submission source of truth.
 
 ## Verification Gates
 
-- Backend tests: `40 passed` (clean-venv reproducible; see `backend/requirements.txt` pinned versions).
-- Real model evidence: `GET /model/evaluation` reports held-out OOT AUC 0.745, Gini 0.489, KS 0.418, reproducible via `python backend/model_training/train_pd_model.py`.
+- Backend tests: `50 passed` (clean-venv reproducible; see `backend/requirements.txt` pinned versions).
+- Public proxy evidence: `GET /model/evaluation` reports random-holdout AUC 0.7497 (95% bootstrap 0.7314-0.7678), Gini 0.4993, KS 0.4225, Brier 0.1415, ECE 0.0122, and explicit no-OOT-yet disclosure; reproducible via `python backend/model_training/train_pd_model.py`.
 - Security: `GET /audit-log` requires the `auditor` role (bearer token); CORS restricted to an explicit origin allowlist. See `docs/SECURITY_COMPLIANCE.md`.
-- Deck export: 13 pages, not encrypted. **Re-export after the model/auth rewrite** -- the committed PDF predates it; `docs/deck/index.html` slide 11 already shows the updated 40/40 stat.
+- Deck export: 13 pages, not encrypted. Re-export from the refreshed `docs/deck/index.html` after changing model evidence or screenshots.
 - Browser smoke test: desktop and mobile render with no console errors and no horizontal overflow.
 - Live app proof: 5 cases, 4 impact cards, 5 source signals, 5 governance controls, validation metrics, pilot KPIs, and expanded fairness slices.
 - Proof tab: Decision, Evidence, Governance, Proof, and Sources views render from live API state.

@@ -26,7 +26,7 @@ It is built for New-to-Credit and New-to-Bank MSMEs that traditional bureau-firs
 - Five-pillar score: Liquidity, Discipline, Momentum, Leverage, Digital Footprint.
 - Traditional bureau-only verdict vs alternate-data verdict.
 - Eligible working-capital limit.
-- Exact Shapley attribution from a dependency-free logistic PD model trained on a real default-outcome label (not a synthetic proxy).
+- Native exact TreeSHAP from a calibrated monotonic XGBoost champion, with a calibrated dependency-free logistic fallback.
 - Plain-language reason codes.
 - Underwriter memo.
 - Borrower improvement plan.
@@ -57,7 +57,7 @@ Single-service architecture:
 
 - FastAPI backend serving REST API and static frontend.
 - `backend/scoring.py` for five-pillar policy scoring, versioned policy object, and guardrails.
-- `backend/ml.py` and `backend/pd_model.py` for the real outcome-trained logistic PD model and exact Shapley attribution, plus optional XGBoost/LightGBM runtime switching.
+- `backend/ml.py`, `backend/xgb_pd_model.py`, and `backend/pd_model.py` for the calibrated monotonic XGBoost champion, native exact TreeSHAP, and calibrated logistic fallback.
 - `backend/model_training/` for the offline, reproducible dataset-to-artifact training and held-out evaluation pipeline (never imported by the serving app).
 - `backend/auth.py` and `backend/rate_limit.py` for bearer-token/RBAC access control and rate limiting.
 - `backend/feed_ingestion.py` for AA/GST/UPI/EPFO/Bureau payload normalization and enforced consent (purpose/scope/expiry).
@@ -91,8 +91,8 @@ Use the committed screenshots from `docs/deck/assets/`:
 
 ## Slide 11 - Prototype Performance Report / Benchmarking
 
-- 40 automated tests passing, reproducible from a clean venv with pinned dependency versions.
-- Real held-out model evidence: OOT ROC-AUC 0.745, Gini 0.489, KS 0.418 on 4,500 rows the model never trained or calibrated on, reproducible in one command (`python backend/model_training/train_pd_model.py`).
+- 50 automated tests passing, reproducible from a clean venv with pinned dependency versions.
+- Public proxy holdout evidence: ROC-AUC 0.7497 (bootstrap 95% interval 0.7314-0.7678), Gini 0.4993, KS 0.4225, Brier 0.1415, ECE 0.0122 on 4,500 untouched rows. Cross-sectional random holdout, not OOT; reproducible with `python backend/model_training/train_pd_model.py`.
 - Coverage includes scoring, input validation, grade boundaries, NTC reversal, improvement plan, hash-chained audit logging and tamper detection, consent enforcement, auth/RBAC, ML Shapley invariants, sandbox feed mapping, recalibration reports, validation metrics, portfolio impact, governance summary, and API endpoints.
 - Public cohort impact (pilot targets, not measured lift): 5 synthetic MSME files, 4 alternate-data approvals, 2 NTC rescues, Rs 30,80,000 credit unlocked.
 - Runtime browser verification: no console errors and no horizontal overflow at desktop or mobile widths.

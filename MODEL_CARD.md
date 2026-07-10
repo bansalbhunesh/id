@@ -1,117 +1,121 @@
-# Model Card - UdyamPulse MSME Financial Health Model
+# Model Card: UdyamPulse Public Proxy Champion
 
 ## Purpose
 
-UdyamPulse produces an explainable MSME financial health score, credit grade, risk band, eligible limit, PD (probability-of-default) estimate, reason codes, and underwriter memo from consented alternate-data signals. It is aimed at New-to-Credit and New-to-Bank enterprises that traditional bureau-based underwriting cannot evaluate fairly.
+UdyamPulse is decision support for MSME underwriting. It produces a descriptive financial-health score, a separately labelled probability-of-default proxy, a versioned policy route, reason codes, a proposed limit, and an underwriter memo. It is not a production auto-decision system.
 
-## Model type
+## Three Separate Layers
 
-The public prototype ships three separately-labeled layers so a health score, a risk estimate, and a policy decision are never conflated into one opaque number:
+1. **Health score (`scoring.py`)**
+   - Five transparent 0-20 pillars: liquidity, discipline, momentum, leverage, and digital footprint.
+   - Produces a 0-100 score, A-E grade, proposed limit, improvement plan, and rule reason codes.
 
-1. **Rule-based pillar scorer** (`backend/scoring.py`) -- descriptive
-   - Five pillars: Liquidity, Discipline, Momentum, Leverage, Digital Footprint.
-   - Each pillar is 0-20; total is 0-100 with A-E grade and risk band.
-   - Also emits data-source signals, policy guardrails, decision path, and improvement plan.
+2. **PD champion/challenger (`model_training/`, `ml.py`)**
+   - Calibrated monotonic XGBoost champion with native exact TreeSHAP in logit space.
+   - Calibrated dependency-free logistic regression fallback with exact linear Shapley attribution.
+   - Both use the same three universal risk concepts and a real observed binary default label from a public proxy dataset.
 
-2. **Logistic-regression PD model** (`backend/pd_model.py`, `backend/ml.py`) -- risk estimate
-   - Trained on a **real binary default-outcome label** from a public dataset (UCI "default of credit card clients", 30,000 rows), not a synthetic score proxy. See "Training data" below for exactly how this is bridged to the MSME feature space and what it does and doesn't prove.
-   - Dependency-free at serve time: `backend/pd_model.py` is stdlib-only gradient-descent logistic regression, loaded from a committed JSON artifact (`backend/model_training/artifacts/artifact.json`). No scikit-learn/numpy is required to run the API.
-   - Exact Shapley attribution in logit space (`weight_i * (x_i - mean_i)`), plus a first-order probability-scale approximation for display, both returned by every score.
-   - Optional `UDYAMPULSE_MODEL_PROVIDER=xgboost|lightgbm` plus `UDYAMPULSE_TRAINING_DATA` still enables a production-scale SHAP-backed runtime once real IDBI sandbox repayment labels exist -- unchanged from the prior design, now layered on top of a real default-model baseline instead of a synthetic one.
+3. **Policy (`apply_decision_policy`)**
+   - `policy-v2-score-pd-separation` keeps score, PD and lending action distinct.
+   - Grade D/E is a scorecard-policy decline; Grade C is mandatory review.
+   - A PD above the calibrated proxy threshold routes an A/B case to human review, but the cross-domain proxy can never auto-decline.
 
-3. **Versioned policy** (`policy` field on every score response) -- decision
-   - `policy_version: "policy-v1"`: approve grades A-C, grade C routed to human review.
-   - Kept separate from both the score and the PD estimate so a future PD-threshold-based policy can be introduced without silently changing what "score" or "PD" mean.
+## Training Data
 
-The UI surfaces all three together so an underwriter can cross-check a transparent policy score against a learned risk model and see the actual decision rule applied.
+The model uses the UCI **Default of Credit Card Clients** dataset: 30,000 anonymised Taiwan consumer-credit accounts with an observed next-month default label. The file is SHA256-verified against `backend/model_training/dataset_manifest.json`.
 
-## Training data
+This is not IDBI data, Indian MSME data, GST/UPI/EPFO data, or evidence of production MSME performance. It proves that the training, calibration, model-selection, explanation, monitoring and serving contracts are real and reproducible while labelled IDBI sandbox outcomes are unavailable.
 
-**Real default-outcome label, public proxy dataset.** No public dataset of real Indian MSME GST/UPI/EPFO alternate-data with an observed default outcome exists -- that gap is exactly what the IDBI sandbox (available post-shortlisting) is for. `backend/model_training/train_pd_model.py` instead trains on the UCI "default of credit card clients" dataset (Yeh & Lien, 2009; SHA256-verified against `backend/model_training/dataset_manifest.json`), which has a real, observed binary default label.
+### Universal Feature Bridge
 
-**How the domain bridge works** (`backend/feature_bridge.py` + `backend/model_training/uci_feature_bridge.py`): both the UCI dataset and MSMEProfile are reduced to the same 3 "universal risk concepts", each 0-1:
-
-| Universal feature | UCI signal | MSME signal |
+| Feature | UCI construction | Runtime MSME construction |
 |---|---|---|
-| `discipline` | Repayment-status columns (PAY_0..PAY_6) | Cheque bounce rate + GST filing streak (scoring.py pillar) |
-| `leverage` | Average bill / credit limit (utilization) | Outstanding debt / monthly inflow (scoring.py pillar) |
-| `liquidity` | Coefficient of variation of monthly bill amounts | Coefficient of variation of monthly inflow (scoring.py pillar) |
+| `discipline` | Repayment delinquency history | GST continuity plus cheque conduct; score 17+/20 maps to the no-adverse-conduct state |
+| `leverage` | Average bill utilisation | Debt relative to monthly inflow |
+| `liquidity` | Bill-amount stability | Cash-inflow stability |
 
-**Deliberately excluded from the PD model**, with reasoning kept in the code, not hidden:
+Higher values always mean lower risk. XGBoost enforces monotonic constraints `(-1, -1, -1)`, and tests verify that strengthening any universal feature cannot increase PD.
 
-- `momentum` (GST turnover growth pillar): a rising credit-card bill in the UCI data means *more borrowing* (higher risk); rising GST turnover for an MSME means business growth (lower risk). The sign flips between domains, so there is no honest single mapping. It remains a descriptive-only pillar in the rule-based score, pending real GST trend data from the IDBI sandbox.
-- `digital_footprint` (UPI breadth/velocity pillar): the UCI dataset has no transaction-count/counterparty-breadth analog at all.
-- **Demographic columns** (SEX, EDUCATION, MARRIAGE, AGE in UCI; gender/district in MSMEProfile): excluded from model inputs on both sides, by design -- fair-lending practice is to never use protected/proxy-for-protected attributes as risk-model inputs. Demographic parity is instead monitored on model *outputs* (`GET /portfolio`, `GET /governance` fairness slices), not baked into training features.
+Momentum and digital footprint remain descriptive scorecard pillars because the UCI source has no economically honest equivalent. Gender, age, education, marital status and geography are excluded from model inputs.
 
-`POST /sandbox/score` still accepts IDBI sandbox-style AA/GST/UPI/EPFO/Bureau payloads and converts them into the same underwriting feature contract; the public cohort remains synthetic because the repository does not contain private IDBI sandbox credentials, customer data, or repayment labels. `POST /sandbox/recalibration/report` profiles real feature distributions and coverage from submitted sandbox payloads and checks whether labelled volume is sufficient for GBM/SHAP mode.
+## Training And Selection
 
-**What this proxy model does and does not prove**: it proves the training/evaluation *pipeline* -- real label, real split, real held-out metrics, reproducible end to end -- works correctly and produces a well-discriminating model (OOT ROC-AUC 0.745, real rank-ordering power). It does **not** prove Indian MSME default risk is predicted by these exact coefficients, and its *absolute* PD outputs are not calibrated when applied to MSME-derived inputs; that requires retraining on real IDBI sandbox repayment outcomes, which is the documented Stage 2 swap (same `train_pd_model.py` entry point, real data source).
+`python backend/model_training/train_pd_model.py` performs one deterministic run:
 
-**A specific, verified calibration caveat**: `discipline` dominates the model (weight -8.15, far larger than `leverage` or `liquidity`), and the UCI training population's mean discipline is 0.953 -- most cardholders in that dataset have a near-perfect repayment record, so the distribution is tightly concentrated near 1.0. The rule-based scorer's own "Strong" threshold (`reasons_codes()`, pillar >= 16/20 = 0.80 universal) sits *below* that training-population mean. A borrower the rule-based scorer calls a strong performer can therefore get a higher `pd_estimate` than intuition suggests, purely because the two domains' "discipline" distributions have different shapes, not because of any error in the arithmetic (verified: `sigmoid(intercept + sum(weight_i * feature_i))` reproduces the served `pd_estimate` exactly). Trust `pd_estimate` for its rank-ordering (which case is riskier than another) more than for its absolute percentage until it is recalibrated on real MSME outcome data.
+1. Verify the source dataset hash.
+2. Make a stratified 70/15/15 development/calibration/holdout split.
+3. Fit logistic and monotonic XGBoost candidates on development only.
+4. Fit Platt calibration on calibration only.
+5. Select the champion on calibration using an AUC materiality guardrail and Brier tie-break.
+6. Select a human-review PD threshold on calibration, targeting at least 60% bad capture.
+7. Open the untouched holdout once for final metrics, bootstrap intervals and protected-group monitoring.
 
-## Reproducing the evidence
+The source is cross-sectional. The final 15% is an untouched **random holdout, not an out-of-time split**. Genuine OOT validation requires dated IDBI repayment outcomes and remains explicitly pending.
 
-```bash
-cd backend/model_training
-pip install -r requirements-training.txt   # training-time only; never required to serve
-python train_pd_model.py
-```
+## Current Evidence
 
-This downloads the dataset (SHA256-checked against the manifest), fits the model with a fixed seed, and rewrites `artifacts/artifact.json` (served by `ml.py`) and `artifacts/evaluation.json` (served by `GET /model/evaluation`). Re-running it is deterministic.
+Champion: `xgboost_pd_proxy_v1`
 
-**Current held-out (true out-of-time split, 4,500 rows the model never trained or calibrated on) results:**
+Holdout: 4,500 rows
 
-| Metric | Value |
+Review threshold: PD 0.258, selected on calibration only
+
+| Metric | Holdout result |
 |---|---:|
-| ROC-AUC | 0.745 |
-| Gini | 0.489 |
-| KS | 0.418 |
-| PR-AUC | 0.498 |
-| Brier score | 0.146 |
-| PSI (train vs OOT) | see `GET /model/evaluation` -- stable by construction (same seeded split) |
+| ROC-AUC | 0.7497 |
+| ROC-AUC bootstrap 95% interval | 0.7314-0.7678 |
+| Gini | 0.4993 |
+| KS | 0.4225 |
+| PR-AUC | 0.4948 |
+| Brier score | 0.1415 |
+| Expected calibration error | 0.0122 |
+| Development-vs-holdout PSI | 0.0003 |
 
-Calibration bins in `evaluation.json` show predicted-PD tracking observed default rate closely across all 10 deciles (e.g. bottom decile: predicted 13.0%, actual 12.7%; top decile: predicted 63.6%, actual 65.6%).
+The null Brier benchmark, log loss, decile calibration, confusion matrix, 200-replicate intervals, candidate comparison, artifact hashes and group slices are committed in `backend/model_training/artifacts/evaluation.json` and served by `GET /model/evaluation`.
 
 ## Explainability
 
-Every score returns:
+XGBoost explanations use native `pred_contribs`, which is exact TreeSHAP in margin/logit space. Platt calibration is linear in that space, so applying the calibration slope to feature contributions and the calibration intercept to the bias preserves exact reconstruction. Every response exposes `shap_sum_check_logit`; tests require absolute error below `1e-5`.
 
-- Plain-language pillar reason codes (rule-based layer).
-- `pd_estimate`: the PD model's probability of default, plus exact logit-space Shapley contributions and a probability-scale approximation.
-- Traditional bureau-only verdict and alternate-data verdict.
-- A versioned `policy` object describing the actual decision rule.
-- Policy guardrail status, including a real consent-verification detail (not a hardcoded pass).
-- Decision path from bureau screen to credit-line recommendation.
-- Optional AWS Bedrock-generated underwriter memo when configured, with deterministic fallback.
+Probability-point contributions are a first-order display approximation at the baseline and are labelled as such. The exact audit invariant is always the logit-space sum.
 
-## Auditability
+## Fairness Monitoring
 
-Every scoring call is appended to a **hash-chained** audit log (`backend/audit_log.py`): each entry's hash covers its own fields plus the previous entry's hash, so `audit_log.verify_chain()` detects retroactive edits to any past decision. `GET /audit-log` (full records, including borrower name) requires the `auditor` role via bearer-token auth (`backend/auth.py`); every public surface that touches audit data (e.g. `GET /governance`'s `latest_decision`) redacts the borrower name first.
+Protected fields are excluded from training and inference, then used only for post-model monitoring on the untouched proxy holdout. `evaluation.json` reports, by gender and age band:
 
-`GET /governance` reports model version, runtime provider, live controls (including current chain-integrity status), audit count, fairness summary, pilot KPI *targets*, and deployment notes. `GET /model/status` returns the active model provider. `GET /model/evaluation` returns the real held-out metrics above.
+- sample size and observed default rate;
+- average predicted PD;
+- AUC and Brier score;
+- bad-capture/recall and false-positive rate;
+- maximum between-group gaps.
 
-## Fairness and monitoring
+The current gender AUC gap is 0.0175. Age-band recall gaps are larger and remain a review signal, not a fairness certification. Sector, geography, vintage and NTC/NTB slices are unavailable in the proxy source and require IDBI sandbox outcomes. The small live synthetic-cohort views are illustrative only.
 
-The demo includes a small synthetic-cohort fairness view grouped by sector, geography, vintage, gender where available, and bureau-history status (`GET /portfolio`, `GET /governance`). This is not a production fairness certification, and is separate from the PD model's own excluded-demographic-inputs design (see "Training data" above).
+## Audit And Security
 
-Monitoring APIs:
+- Custom, sandbox, recalibration and submitted-validation routes require the `underwriter` role.
+- Audit access requires the `auditor` role.
+- Sandbox consent enforces underwriting purpose, active status, expiry, maximum duration, supported scopes, and coverage of every supplied feed.
+- Audit events contain a stable HMAC pseudonym instead of borrower name, persist across restarts, and form a SHA256 chain. Mixed legacy logs are pseudonymised and re-chained during one-time migration.
+- CORS is allowlisted, write routes are rate-limited, and security headers are emitted.
 
-- `GET /model/evaluation`: real held-out AUC, Gini, KS, PR-AUC, Brier, calibration bins, and train-vs-OOT PSI drift on the trained model's own scores.
-- `GET /validation/demo`: an explicitly-tagged (`evidence_type: illustrative_fixture`) 6+6 hand-built fixture, kept only to demonstrate the validation-report contract shape -- never shown next to real model claims.
-- `POST /validation/report`: computes the same metrics on caller-submitted records (`evidence_type: submitted_batch_validation`).
-- Pilot KPI tracking (`GET /pilot-metrics`): every field is tagged `status: pilot_target` with its formula and the minimum real sample size a measured claim would need -- these are not observed results.
+## Reproduction
 
-**Disclosed, not faked**: true NTC/NTB slice validation and demographic-slice validation on the PD model are not computed, because the public proxy dataset has no NTC/NTB concept (every UCI row already has a bureau file) and demographic columns are deliberately excluded from training inputs. Faking either on the 5-10-row synthetic demo cohort would recreate the exact "fixture presented as evidence" problem this rewrite exists to fix. See `evaluation.json`'s `disclosed_gaps` field.
+```bash
+pip install -r backend/model_training/requirements-training.txt
+python backend/model_training/train_pd_model.py
+pytest backend -q
+```
 
-Production fairness sign-off still requires statistically meaningful IDBI sandbox volume and legally approved protected/proxy attributes.
+The retraining command rewrites the logistic artifact, XGBoost model, XGBoost metadata, champion manifest and evaluation report. Evaluation contains hashes for every committed artifact.
 
-## Known limitations
+## Known Limitations
 
-- The PD model's real default label comes from a public proxy dataset (personal credit-card defaults), not real Indian MSME outcomes -- see "What this proxy model does and does not prove" above. Coefficients are illustrative of a correctly-built pipeline, not production-calibrated for MSME lending.
-- The fairness view is a demo-cohort monitor, not statistically significant.
-- AWS Bedrock memo generation is optional and requires configured AWS credentials plus a Bedrock model ID; the deterministic underwriter memo remains the default fallback.
-- API authentication (`backend/auth.py`) is a real, enforced bearer-token/role scheme sized for a public hackathon demo (no login flow, no per-underwriter session/identity), not full multi-tenant IDBI SSO -- see `docs/SECURITY_COMPLIANCE.md` for the disclosed scope and sandbox-phase upgrade path.
+- Cross-domain transfer from Taiwan consumer credit to Indian MSMEs is unvalidated. Absolute PD must not be treated as bank calibration.
+- There is no true OOT window, NTC/NTB outcome slice, sector/geography/vintage outcome slice, or early-NPA evidence before sandbox labels arrive.
+- The public demo uses published scoped credentials and an in-process rate limiter. IDBI SSO, per-user tenancy, KMS-managed secrets, durable shared audit storage and distributed rate limiting remain pilot work.
+- AWS Bedrock memo generation is optional; deterministic generation is the default fallback.
 
-## Intended use
+## Intended Use
 
-Decision support for MSME credit underwriting. The current prototype should not be treated as a fully automated approve/decline system without human review.
+Underwriter decision support and model-governance demonstration. Any live credit decision requires IDBI-approved data, policy, threshold calibration, validation and human oversight.

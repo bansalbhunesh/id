@@ -471,6 +471,10 @@
     color: var(--entry-red);
   }
 
+  .decision-word.review {
+    color: var(--marigold-audit);
+  }
+
   .source-glance {
     grid-column: 1 / -1;
     display: grid;
@@ -865,11 +869,7 @@
     }
 
     .drawer-launch {
-      right: 14px;
-      bottom: 14px;
-      min-width: 0;
-      padding: 12px 18px;
-      font-size: 0.85rem;
+      display: none;
     }
 
     .stage-title {
@@ -962,7 +962,7 @@
           <p>MSME credit review, without hiding the audit trail.</p>
           <span class="status-line" aria-label="System status">
             <span id="apiStatus" data-state="checking">Checking API</span>
-            <span id="modelStatus">linear</span>
+            <span id="modelStatus">loading model</span>
             <span id="cohortStatus">public synthetic</span>
           </span>
         </span>
@@ -1119,7 +1119,11 @@
 
     function setModelStatusText() {
       const runtime = state.model || state.governance?.model?.runtime || {};
-      return runtime.active_provider || "linear";
+      return (runtime.active_provider || "fallback").replaceAll("_", " ");
+    }
+
+    function holdoutMetrics() {
+      return state.validation?.splits?.holdout || state.validation?.metrics || null;
     }
 
     function updateStatusLine() {
@@ -1141,7 +1145,7 @@
       }
       const pilot = state.portfolio?.pilot_metrics;
       const items = [
-        ["NTC rescues", summary.ntc_rescues, "thin-file files approved with alternate data"],
+        ["NTC rescues", summary.ntc_rescued, "thin-file files approved with alternate data"],
         ["Credit unlocked", formatCurrency(summary.credit_unlocked), "public demo cohort"],
         ["Approval lift (target)", pilot ? `+${pilot.ntc_ntb_approval_lift_pct.value}%` : `+${summary.alternate_data_approvals - summary.traditional_approvals}`, "pilot target, not a measured benchmark"],
         ["Decision time (target)", pilot ? `${pilot.decision_time_reduction_pct.value}% saved` : `${summary.decision_time_minutes} min`, `assumed vs ${summary.manual_baseline_days} day manual baseline, not timed`],
@@ -1195,11 +1199,15 @@
       const profile = score.profile || {};
       const fileId = state.activeId.replace(/_/g, "-");
       const traditionalClass = score.traditional.decision === "Approved" ? "approved" : "rejected";
-      const alternateClass = score.alternate_data_decision === "Approved" ? "approved" : "rejected";
+      const alternateClass = score.alternate_data_decision.toLowerCase();
       const ntcLabel = profile.has_bureau_history ? "Bureau history present" : "New-to-Credit / New-to-Bank";
-      const title = score.traditional.decision === "Rejected"
+      const title = score.traditional.decision === "Rejected" && score.alternate_data_decision === "Approved"
         ? "Bureau rejection reversed."
-        : "Governed credit decision ready.";
+        : score.alternate_data_decision === "Review"
+          ? "Evidence moved to review."
+          : score.alternate_data_decision === "Rejected"
+            ? "Risk evidence confirms decline."
+            : "Governed credit decision ready.";
 
       els.caseSummary.innerHTML = `
         <div class="stage-copy">
@@ -1229,7 +1237,7 @@
             <div class="decision-line">
               <div><span>Traditional bureau screen</span><strong class="decision-word ${traditionalClass}">${esc(score.traditional.decision)}</strong></div>
               <div><span>UdyamPulse alternate-data review</span><strong class="decision-word ${alternateClass}">${esc(score.alternate_data_decision)}</strong></div>
-              <div><span>Runtime</span><strong class="mono">${esc(setModelStatusText())} / synthetic demo</strong></div>
+              <div><span>Runtime</span><strong class="mono">${esc(setModelStatusText())}</strong></div>
             </div>
           </div>
         </aside>
@@ -1242,7 +1250,7 @@
     }
 
     function renderDecisionStamp(score) {
-      const validation = state.validation?.metrics;
+      const validation = holdoutMetrics();
       const governance = state.governance;
       if (!score) {
         els.decisionStamp.innerHTML = `<div class="skeleton">Decision summary unavailable.</div>`;
@@ -1256,7 +1264,7 @@
           <div><span>Limit</span><strong>${formatCurrency(score.eligible_limit)}</strong></div>
           <div><span>Model</span><strong>${esc(setModelStatusText())}</strong></div>
           <div><span>Audit</span><strong>${esc(governance?.audit?.events_recorded ?? "-")} events</strong></div>
-          <div><span>OOT AUC</span><strong>${esc(validation?.auc ?? "-")}</strong></div>
+          <div><span>Holdout AUC</span><strong>${esc(validation?.auc ?? "-")}</strong></div>
         </div>
       `;
     }
@@ -1336,8 +1344,8 @@
     function renderEvidenceTab(score) {
       const pd = score.pd_estimate;
       const pdLine = typeof pd === "number"
-        ? `<p class="muted">PD estimate (probability of default, model <code>${esc(score.ml?.provider)}</code>): <strong>${(pd * 100).toFixed(1)}%</strong>, vs baseline ${((score.ml?.pd_baseline ?? pd) * 100).toFixed(1)}%.</p>
-           <p class="truth-note">Trained on a real default-outcome label from a public proxy dataset (not real MSME data) -- trust this for ranking risk between cases, not as a production-calibrated percentage. See MODEL_CARD.md.</p>`
+        ? `<p class="muted">Proxy PD <strong>${(pd * 100).toFixed(1)}%</strong> via <code>${esc(score.ml?.provider)}</code>; review threshold ${((score.ml?.pd_review_threshold ?? 0) * 100).toFixed(1)}%.</p>
+           <p class="truth-note">Public consumer-credit proxy, not IDBI/MSME calibration. It may route a scorecard/model disagreement to human review, but it cannot auto-decline.</p>`
         : "";
       return `
         <section class="detail-section">
@@ -1352,6 +1360,11 @@
         </section>
         <section class="detail-section">
           <h3 class="section-title">Policy guardrails</h3>
+          ${miniLedger([
+            ["Policy version", score.policy?.version || "-"],
+            ["Decision route", score.policy?.route || "-"],
+            ["Policy decision", score.policy?.decision || score.alternate_data_decision],
+          ])}
           <div class="journal-list">${renderJournal(score.policy_guardrails, "No guardrail rows available.")}</div>
         </section>
       `;
@@ -1359,8 +1372,8 @@
 
     function renderGovernanceTab() {
       const governance = state.governance;
-      const validation = state.validation?.metrics;
-      const warnings = state.validation?.warnings || [];
+      const validation = holdoutMetrics();
+      const validationDesign = state.validation?.validation_design;
       const pilot = governance?.pilot_metrics || state.portfolio?.pilot_metrics;
       const fairness = governance?.fairness || {};
       const runtime = governance?.model?.runtime || {};
@@ -1376,15 +1389,17 @@
           ])}
         </section>
         <section class="detail-section">
-          <h3 class="section-title">Out-of-time validation</h3>
+          <h3 class="section-title">Public proxy holdout</h3>
           ${validation ? miniLedger([
             ["AUC", validation.auc],
             ["Gini", validation.gini],
             ["KS", validation.ks],
-            ["PSI drift", validation.psi],
-            ["Reason stability", validation.reason_code_stability],
+            ["PR-AUC", validation.pr_auc],
+            ["Brier", validation.brier_score],
+            ["Calibration error", validation.expected_calibration_error],
+            ["PSI stability", state.validation?.drift?.psi_development_vs_holdout ?? "-"],
           ]) : `<div class="empty-state">No validation report.</div>`}
-          ${warnings.length ? `<p class="truth-note">${esc(warnings[0])}</p>` : ""}
+          ${validationDesign ? `<p class="truth-note">${esc(validationDesign)}</p>` : ""}
         </section>
         <section class="detail-section">
           <h3 class="section-title">Pilot KPI targets</h3>
@@ -1501,9 +1516,9 @@
               <p class="muted">${code("POST /sandbox/score")} accepts sandbox-style payloads and maps them into this same score packet.</p>
             </article>
             <article class="journal-row">
-              <span class="journal-state">Optional Stage 2</span>
-              <strong>GBM/SHAP and Bedrock</strong>
-              <p class="muted">XGBoost/LightGBM SHAP and Bedrock memos are enabled only when approved data, packages, and credentials are supplied.</p>
+              <span class="journal-state">Stage 2 boundary</span>
+              <strong>IDBI-calibrated retraining and Bedrock</strong>
+              <p class="muted">Retrain the shipped XGBoost/logistic pipeline on dated IDBI MSME outcomes, validate a true out-of-time window, and enable Bedrock memos only with approved credentials.</p>
             </article>
           </div>
         </section>
@@ -1571,7 +1586,7 @@
           api("/msmes"),
           api("/portfolio"),
           api("/governance"),
-          api("/validation/demo"),
+          api("/model/evaluation"),
           api("/model/status"),
           api("/submission/proof"),
         ]);

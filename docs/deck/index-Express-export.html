@@ -393,20 +393,20 @@ table.tech-table td:last-child { color: #51655f; }
       <div class="card"><h3>Single FastAPI Service</h3><p>One process serves the API and the frontend — one Dockerfile, one deploy target.</p></div>
       <div class="card"><h3>Rule + ML Dual Engine</h3><p>Transparent 5-pillar rules alongside a trained model with exact Shapley attribution.</p></div>
       <div class="card"><h3>Memo Layer</h3><p>Deterministic by default; optional AWS Bedrock Runtime provider is wired for Stage 2.</p></div>
-      <div class="card"><h3>Audit & Compliance Log</h3><p>Every decision recorded; serverless-safe, in-memory-first design.</p></div>
+      <div class="card"><h3>Audit & Compliance Log</h3><p>Pseudonymous HMAC subjects, restart-safe SHA-256 chaining, role-gated access.</p></div>
     </div>
     <div class="footer-mark">UdyamPulse · IDBI Innovate 2026</div>
   </section>
 
   <section class="slide" data-canvas-width="1280" data-canvas-height="720">
     <div class="eyebrow"><span class="num">08</span> Technologies Used</div>
-    <h2>A stack chosen for zero dependency risk.</h2>
+    <h2>A reproducible, inspectable open stack.</h2>
     <table class="tech-table">
       <tr><td>Backend</td><td>Python, FastAPI, Pydantic, pytest</td></tr>
-      <tr><td>ML layer</td><td>Dependency-free linear regression model with closed-form Shapley attribution — no numpy, scikit-learn, or shap required</td></tr>
+      <tr><td>ML layer</td><td>Calibrated monotonic XGBoost champion with native exact TreeSHAP; calibrated logistic fallback</td></tr>
       <tr><td>Frontend</td><td>Vanilla HTML / CSS / JS, no build step</td></tr>
       <tr><td>Deployment &amp; CI</td><td>Docker, Render web service, render.yaml Blueprint, GitHub Actions</td></tr>
-      <tr><td>Stage 2 targets</td><td>IDBI sandbox credentials, repayment labels, recalibration report, XGBoost / LightGBM + SHAP, persistent audit store</td></tr>
+      <tr><td>Stage 2 targets</td><td>IDBI sandbox credentials, dated MSME repayment labels, SSO/KMS, durable shared audit storage</td></tr>
     </table>
     <div class="footer-mark">UdyamPulse · IDBI Innovate 2026</div>
   </section>
@@ -421,7 +421,7 @@ table.tech-table td:last-child { color: #51655f; }
   <section class="slide" data-canvas-width="1280" data-canvas-height="720">
     <div class="eyebrow"><span class="num">10</span> Snapshots Of The Prototype</div>
     <h2>The live underwriter cockpit.</h2>
-    <p class="kicker">Captured from the Render deployment: portfolio impact, case queue, explainable health card, audit controls, source map, and borrower plan in one surface.</p>
+    <p class="kicker">Captured from the verified submission build: portfolio impact, case queue, explainable health card, audit controls, source map, and borrower plan in one surface.</p>
     <div class="snapshot-grid">
       <figure class="shot-frame featured">
         <img src="assets/live-cockpit-viewport.png" alt="UdyamPulse live cockpit with portfolio impact, case queue, and approved NTC health card" />
@@ -445,12 +445,12 @@ table.tech-table td:last-child { color: #51655f; }
     <div class="eyebrow"><span class="num">11</span> Performance Report / Benchmarking</div>
     <h2>Verified, not just claimed.</h2>
     <div class="stat-row">
-      <div class="stat"><div class="value">28/28</div><div class="label">Automated tests passing</div></div>
-      <div class="stat"><div class="value">100%</div><div class="label">Decisions with Shapley reasons</div></div>
-      <div class="stat"><div class="value">5</div><div class="label">Source signals mapped</div></div>
-      <div class="stat"><div class="value">4</div><div class="label">Live governance controls</div></div>
+      <div class="stat"><div class="value">50/50</div><div class="label">Automated tests passing</div></div>
+      <div class="stat"><div class="value">0.750</div><div class="label">Untouched holdout AUC</div></div>
+      <div class="stat"><div class="value">0.499</div><div class="label">Holdout Gini</div></div>
+      <div class="stat"><div class="value">0.012</div><div class="label">Calibration error</div></div>
     </div>
-    <p class="kicker">Browser verification on the live Render app found no console errors and no horizontal overflow on desktop or mobile. Recalibration and validation APIs report source coverage, real-distribution profiles, KS, AUC, Gini, PSI drift, reason-code stability, and fairness gap checks, ready to run on IDBI sandbox data.</p>
+    <p class="kicker">Measured on a locked 4,500-row public-proxy holdout: AUC 0.7497 (95% bootstrap CI 0.7314-0.7678), KS 0.4225, Brier 0.1415, and PSI 0.0003. This is cross-sectional evidence, not IDBI calibration or true out-of-time proof.</p>
     <div class="footer-mark">UdyamPulse · IDBI Innovate 2026</div>
   </section>
 
@@ -459,7 +459,7 @@ table.tech-table td:last-child { color: #51655f; }
     <h2>Stage 2 is plug-in ready.</h2>
     <div class="roadmap">
       <div class="phase"><div class="period">Phase 1</div><div><h4>Real data integration</h4><p>Connect authenticated IDBI sandbox AA/GST/UPI/EPFO feeds to /sandbox/score and /sandbox/recalibration/report; recalibrate on real distributions.</p></div></div>
-      <div class="phase"><div class="period">Phase 2</div><div><h4>Production ML model</h4><p>Enable the optional XGBoost/LightGBM runtime with the shap library at production data volume.</p></div></div>
+      <div class="phase"><div class="period">Phase 2</div><div><h4>IDBI-calibrated champion</h4><p>Retrain the shipped XGBoost/logistic champion-challenger pipeline on dated sandbox outcomes and validate a true OOT window.</p></div></div>
       <div class="phase"><div class="period">Phase 3</div><div><h4>Fairness &amp; monitoring</h4><p>Run the implemented fairness gap, PSI, and reason-code stability checks on production-scale data.</p></div></div>
       <div class="phase"><div class="period">Phase 4</div><div><h4>Bedrock-powered memos</h4><p>Enable the optional AWS Bedrock provider in the pilot environment, with deterministic fallback.</p></div></div>
     </div>

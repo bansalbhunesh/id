@@ -3,96 +3,83 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>UdyamPulse - MSME Financial Health Card</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23084c3f'/%3E%3Cpath d='M8 8h4v10c0 3 1.5 5 4 5s4-2 4-5V8h4v10c0 5.2-3.1 8-8 8s-8-2.8-8-8V8z' fill='%23f7f4ea'/%3E%3C/svg%3E" />
+<title>UdyamPulse - Credit Review Desk</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%230c3f36'/%3E%3Cpath d='M8 8h4v10c0 3 1.5 5 4 5s4-2 4-5V8h4v10c0 5.2-3.1 8-8 8s-8-2.8-8-8V8z' fill='%23fbfaf6'/%3E%3C/svg%3E" />
 <style>
   :root {
     color-scheme: light;
-    --ink: oklch(20% 0.027 210);
-    --ink-soft: oklch(34% 0.026 210);
-    --muted: oklch(48% 0.023 205);
-    --paper: oklch(96.5% 0.012 103);
-    --panel: oklch(99% 0.008 103);
-    --panel-soft: oklch(94% 0.017 104);
-    --line: oklch(82% 0.018 112);
-    --line-strong: oklch(67% 0.048 152);
-    --green: oklch(40% 0.116 158);
-    --green-deep: oklch(26% 0.07 164);
-    --green-ink: oklch(19% 0.064 164);
-    --green-soft: oklch(91% 0.052 154);
-    --amber: oklch(64% 0.148 73);
-    --amber-soft: oklch(92% 0.055 78);
-    --red: oklch(50% 0.168 28);
-    --red-soft: oklch(94% 0.046 28);
-    --blue: oklch(42% 0.08 235);
-    --blue-soft: oklch(92% 0.034 235);
-    --shadow: 0 18px 44px color-mix(in oklch, var(--ink) 11%, transparent);
-    --shadow-tight: 0 8px 22px color-mix(in oklch, var(--ink) 8%, transparent);
-    --radius: 8px;
+    --background: oklch(97.8% 0.008 92);
+    --foreground: oklch(20% 0.025 210);
+    --muted: oklch(49% 0.018 210);
+    --muted-foreground: oklch(39% 0.018 210);
+    --card: oklch(99% 0.005 95);
+    --card-foreground: var(--foreground);
+    --popover: oklch(100% 0.004 95);
+    --border: oklch(84% 0.018 92);
+    --input: oklch(89% 0.012 92);
+    --ring: oklch(47% 0.095 162);
+    --primary: oklch(32% 0.072 162);
+    --primary-foreground: oklch(98.5% 0.006 95);
+    --secondary: oklch(92% 0.015 88);
+    --accent: oklch(70% 0.122 78);
+    --accent-foreground: oklch(24% 0.04 68);
+    --good: oklch(42% 0.11 152);
+    --good-soft: oklch(93% 0.045 152);
+    --danger: oklch(46% 0.14 28);
+    --danger-soft: oklch(94% 0.048 38);
+    --warn: oklch(53% 0.122 70);
+    --warn-soft: oklch(94% 0.045 75);
+    --sidebar: oklch(95.5% 0.012 88);
+    --sidebar-ink: oklch(24% 0.025 210);
+    --shadow: 0 18px 48px oklch(20% 0.03 210 / 0.08);
+    --shadow-tight: 0 8px 22px oklch(20% 0.03 210 / 0.07);
+    --radius: 10px;
+    --radius-sm: 7px;
     --space-1: 4px;
     --space-2: 8px;
     --space-3: 12px;
     --space-4: 16px;
     --space-5: 24px;
     --space-6: 32px;
-    --font-display: Bahnschrift, "Aptos Display", "Segoe UI", sans-serif;
-    --font-body: Aptos, "Segoe UI", sans-serif;
+    --space-7: 48px;
+    --font-body: "Aptos", "Segoe UI", ui-sans-serif, system-ui, sans-serif;
+    --font-display: "Iowan Old Style", "Sitka Text", Georgia, ui-serif, serif;
   }
 
-  * { box-sizing: border-box; }
+  * {
+    box-sizing: border-box;
+  }
 
   html {
     min-width: 320px;
-    scroll-behavior: smooth;
+    background: var(--background);
   }
 
   body {
     margin: 0;
     min-height: 100vh;
-    color: var(--ink);
-    background:
-      linear-gradient(180deg, color-mix(in oklch, var(--green-soft) 42%, var(--paper)) 0, var(--paper) 360px),
-      var(--paper);
+    color: var(--foreground);
+    background: var(--background);
     font-family: var(--font-body);
     font-size: 15px;
-    line-height: 1.45;
-  }
-
-  body::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    pointer-events: none;
-    background-image:
-      linear-gradient(color-mix(in oklch, var(--green-deep) 8%, transparent) 1px, transparent 1px),
-      linear-gradient(90deg, color-mix(in oklch, var(--green-deep) 6%, transparent) 1px, transparent 1px);
-    background-size: 76px 76px;
-    mask-image: linear-gradient(180deg, black 0%, transparent 74%);
+    line-height: 1.5;
+    text-rendering: geometricPrecision;
   }
 
   button,
   select,
-  a {
+  input {
     font: inherit;
+  }
+
+  button,
+  a,
+  select {
+    min-height: 44px;
   }
 
   button {
     cursor: pointer;
-  }
-
-  button:focus-visible,
-  select:focus-visible,
-  a:focus-visible {
-    outline: 3px solid color-mix(in oklch, var(--amber) 70%, white);
-    outline-offset: 3px;
-  }
-
-  h1,
-  h2,
-  h3,
-  p {
-    margin: 0;
   }
 
   a {
@@ -101,834 +88,702 @@
   }
 
   code {
-    padding: 1px 5px;
-    border: 1px solid var(--line);
-    border-radius: 5px;
-    background: color-mix(in oklch, var(--panel-soft) 70%, transparent);
-    font-family: "Cascadia Code", "Aptos Mono", monospace;
-    font-size: 0.88em;
+    padding: 2px 6px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    background: var(--secondary);
+    color: var(--foreground);
+    font-family: "Cascadia Code", "Aptos Mono", ui-monospace, monospace;
+    font-size: 0.86em;
+    overflow-wrap: anywhere;
   }
 
-  .app {
-    width: min(1480px, 100%);
-    margin: 0 auto;
-    padding: var(--space-4) var(--space-5) var(--space-6);
-  }
-
-  .topbar {
-    position: sticky;
-    top: var(--space-3);
-    z-index: 30;
+  .app-shell {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-columns: 312px minmax(0, 1fr);
+    min-height: 100vh;
+  }
+
+  .sidebar {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
     gap: var(--space-5);
-    align-items: center;
-    padding: var(--space-3);
-    border: 1px solid color-mix(in oklch, var(--line) 72%, transparent);
-    border-radius: var(--radius);
-    background: color-mix(in oklch, var(--panel) 84%, transparent);
-    box-shadow: var(--shadow-tight);
-    backdrop-filter: blur(16px);
+    padding: var(--space-5);
+    border-right: 1px solid var(--border);
+    background: var(--sidebar);
   }
 
   .brand {
-    display: flex;
+    display: grid;
+    grid-template-columns: 44px minmax(0, 1fr);
     gap: var(--space-3);
     align-items: center;
-    min-width: 0;
   }
 
   .brand-mark {
     display: grid;
     place-items: center;
-    flex: 0 0 44px;
     width: 44px;
     height: 44px;
     border-radius: var(--radius);
-    color: oklch(96% 0.012 105);
-    background: var(--green-deep);
-    font-family: var(--font-display);
-    font-size: 1.15rem;
+    background: var(--primary);
+    color: var(--primary-foreground);
     font-weight: 900;
   }
 
-  .eyebrow,
+  .brand small,
   .label,
-  .kicker {
-    color: var(--muted);
-    font-size: 0.73rem;
-    font-weight: 850;
+  .eyebrow {
+    color: var(--muted-foreground);
+    font-size: 0.72rem;
+    font-weight: 800;
     letter-spacing: 0.08em;
     text-transform: uppercase;
   }
 
-  h1 {
-    margin-top: 2px;
+  .brand h1 {
+    margin: 0;
     font-family: var(--font-display);
-    font-size: clamp(1.25rem, 1.9vw, 2rem);
+    font-size: 1.35rem;
     line-height: 1.05;
-    letter-spacing: 0;
   }
 
-  .topbar > *,
-  .hero > *,
-  .workspace > *,
-  .stage > *,
-  .grid-2 > *,
-  .grid-3 > *,
-  .rail > *,
-  .impact-grid > *,
-  .verdict-strip > * {
-    min-width: 0;
-  }
-
-  .top-actions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-2);
-    justify-content: flex-end;
-  }
-
-  .button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    min-height: 44px;
-    padding: 0 var(--space-3);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    color: var(--ink);
-    background: color-mix(in oklch, var(--panel) 82%, transparent);
-    font-weight: 800;
-    transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
-  }
-
-  .button:hover {
-    border-color: color-mix(in oklch, var(--green) 45%, var(--line));
-    background: color-mix(in oklch, var(--green-soft) 52%, var(--panel));
-    transform: translateY(-1px);
-  }
-
-  .button.primary {
-    border-color: var(--green-deep);
-    color: oklch(96% 0.012 105);
-    background: var(--green-deep);
-  }
-
-  .button.primary:hover {
-    background: color-mix(in oklch, var(--green-deep) 90%, black);
-  }
-
-  .hero {
+  .sidebar-block {
     display: grid;
-    grid-template-columns: minmax(0, 1fr) 430px;
-    gap: var(--space-5);
-    align-items: stretch;
-    margin-top: var(--space-4);
-  }
-
-  .hero-copy {
-    padding: var(--space-6);
-    border: 1px solid color-mix(in oklch, var(--line) 72%, transparent);
-    border-radius: var(--radius);
-    background: color-mix(in oklch, var(--panel) 76%, transparent);
-    box-shadow: var(--shadow);
-    backdrop-filter: blur(10px);
-  }
-
-  .hero-copy h2 {
-    max-width: 900px;
-    margin-top: var(--space-2);
-    font-family: var(--font-display);
-    font-size: clamp(2.05rem, 4vw, 4.35rem);
-    line-height: 0.96;
-    letter-spacing: 0;
-  }
-
-  .hero-copy p:not(.eyebrow) {
-    max-width: 740px;
-    margin-top: var(--space-4);
-    color: var(--ink-soft);
-    font-size: 1.03rem;
-  }
-
-  .readiness {
-    display: grid;
-    gap: var(--space-2);
-    padding: var(--space-4);
-    border: 1px solid color-mix(in oklch, var(--line) 72%, transparent);
-    border-radius: var(--radius);
-    background: color-mix(in oklch, var(--panel) 82%, transparent);
-    box-shadow: var(--shadow-tight);
-  }
-
-  .status-row {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) auto;
     gap: var(--space-3);
-    align-items: center;
-    min-height: 48px;
-    padding: var(--space-2) var(--space-3);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    background: color-mix(in oklch, var(--paper) 72%, transparent);
-  }
-
-  .dot {
-    display: inline-block;
-    width: 9px;
-    height: 9px;
-    margin-right: var(--space-1);
-    border-radius: 50%;
-    background: var(--amber);
-  }
-
-  .dot.ok { background: var(--green); }
-  .dot.bad { background: var(--red); }
-
-  .impact-grid {
-    display: grid;
-    grid-template-columns: repeat(4, minmax(0, 1fr));
-    margin-top: var(--space-4);
-    overflow: hidden;
-    border: 1px solid color-mix(in oklch, var(--line) 84%, transparent);
-    border-radius: var(--radius);
-    background: color-mix(in oklch, var(--panel) 72%, transparent);
-    box-shadow: var(--shadow-tight);
-  }
-
-  .metric {
-    min-height: 104px;
-    padding: var(--space-4) var(--space-5);
-    border-right: 1px solid var(--line);
-  }
-
-  .metric:last-child {
-    border-right: 0;
-  }
-
-  .metric strong {
-    display: block;
-    margin-top: var(--space-2);
-    font-family: var(--font-display);
-    font-size: 1.8rem;
-    line-height: 1;
-  }
-
-  .metric span {
-    display: block;
-    margin-top: var(--space-2);
-    color: var(--muted);
-    font-size: 0.86rem;
-  }
-
-  .workspace {
-    display: grid;
-    grid-template-columns: 300px minmax(0, 1fr) 330px;
-    gap: var(--space-4);
-    align-items: start;
-    margin-top: var(--space-4);
-  }
-
-  .surface {
-    border: 1px solid color-mix(in oklch, var(--line) 84%, transparent);
-    border-radius: var(--radius);
-    background: color-mix(in oklch, var(--panel) 80%, transparent);
-    box-shadow: var(--shadow-tight);
-  }
-
-  .borrower-panel,
-  .rail {
-    position: sticky;
-    top: 92px;
-  }
-
-  .panel-head {
-    padding: var(--space-4);
-    border-bottom: 1px solid var(--line);
-  }
-
-  .panel-head h2,
-  .panel-head h3 {
-    margin-top: 2px;
-    font-family: var(--font-display);
-    font-size: 1rem;
-    line-height: 1.15;
-  }
-
-  .panel-body {
-    padding: var(--space-4);
   }
 
   .case-select {
     width: 100%;
-    min-height: 44px;
-    margin-top: var(--space-3);
+    min-width: 0;
     padding: 0 var(--space-3);
-    border: 1px solid var(--line-strong);
-    border-radius: var(--radius);
-    color: var(--ink);
-    background: color-mix(in oklch, var(--paper) 80%, transparent);
+    border: 1px solid var(--input);
+    border-radius: var(--radius-sm);
+    background: var(--card);
+    color: var(--foreground);
   }
 
   .case-list {
     display: grid;
     gap: var(--space-2);
-    margin-top: var(--space-4);
+    min-height: 0;
+    overflow: auto;
+    padding-right: 2px;
   }
 
   .case-button {
-    display: grid;
-    gap: var(--space-1);
     width: 100%;
     min-height: 72px;
+    display: grid;
+    gap: var(--space-1);
     padding: var(--space-3);
-    border: 1px solid var(--line);
+    border: 1px solid transparent;
     border-radius: var(--radius);
-    color: var(--ink);
-    background: color-mix(in oklch, var(--panel) 48%, transparent);
+    background: transparent;
+    color: var(--sidebar-ink);
     text-align: left;
     transition: background 160ms ease, border-color 160ms ease, transform 160ms ease;
   }
 
-  .case-button:hover {
-    border-color: color-mix(in oklch, var(--green) 50%, var(--line));
-    background: color-mix(in oklch, var(--green-soft) 44%, transparent);
-    transform: translateY(-1px);
+  .case-button:hover,
+  .case-button[aria-pressed="true"] {
+    border-color: var(--border);
+    background: var(--card);
   }
 
   .case-button[aria-pressed="true"] {
-    border-color: var(--green);
-    background: color-mix(in oklch, var(--green-soft) 70%, transparent);
+    box-shadow: var(--shadow-tight);
   }
 
   .case-button strong {
-    font-weight: 850;
+    font-size: 0.95rem;
+    line-height: 1.25;
   }
 
   .case-button span {
     color: var(--muted);
-    font-size: 0.84rem;
+    font-size: 0.86rem;
   }
 
-  .stage {
+  .sidebar-footer {
+    margin-top: auto;
     display: grid;
-    gap: var(--space-4);
-    min-width: 0;
-  }
-
-  .spotlight {
-    overflow: hidden;
-    max-width: 100%;
-    border: 1px solid color-mix(in oklch, var(--green-deep) 22%, var(--line));
-    border-radius: var(--radius);
-    background: color-mix(in oklch, var(--panel) 84%, transparent);
-    box-shadow: var(--shadow);
-  }
-
-  .spotlight-hero {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 178px;
-    gap: var(--space-5);
-    align-items: center;
-    padding: var(--space-5);
-    color: oklch(96% 0.012 105);
-    background: var(--green-deep);
-  }
-
-  .spotlight-hero h2 {
-    max-width: 620px;
-    margin-top: var(--space-2);
-    font-family: var(--font-display);
-    font-size: clamp(1.75rem, 3.1vw, 3.1rem);
-    line-height: 0.98;
-    letter-spacing: 0;
-  }
-
-  .spotlight-hero p:not(.kicker) {
-    max-width: 680px;
-    margin-top: var(--space-3);
-    color: color-mix(in oklch, oklch(96% 0.012 105) 82%, transparent);
-  }
-
-  .spotlight-hero .kicker,
-  .spotlight-hero .badge {
-    color: color-mix(in oklch, oklch(96% 0.012 105) 84%, transparent);
-  }
-
-  .badge-line {
-    display: flex;
-    flex-wrap: wrap;
     gap: var(--space-2);
-    margin-top: var(--space-3);
   }
 
+  .subtle-link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--space-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--muted-foreground);
+    background: color-mix(in oklch, var(--card) 70%, transparent);
+    font-weight: 750;
+  }
+
+  .main {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: grid;
+    grid-template-columns: minmax(280px, 1fr) auto;
+    align-items: center;
+    gap: var(--space-4);
+    min-height: 72px;
+    padding: var(--space-4) var(--space-6);
+    border-bottom: 1px solid var(--border);
+    background: color-mix(in oklch, var(--background) 92%, var(--card));
+  }
+
+  .command {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    width: min(680px, 100%);
+    min-height: 44px;
+    padding: 0 var(--space-4);
+    border: 1px solid var(--input);
+    border-radius: var(--radius);
+    background: var(--card);
+    color: var(--muted-foreground);
+  }
+
+  .command strong {
+    color: var(--foreground);
+    font-weight: 850;
+  }
+
+  .top-meta {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+  }
+
+  .status-pill,
   .badge {
     display: inline-flex;
     align-items: center;
+    gap: 6px;
+    width: fit-content;
     min-height: 28px;
-    width: max-content;
-    max-width: 100%;
-    padding: 0 var(--space-2);
-    border: 1px solid color-mix(in oklch, currentColor 20%, transparent);
+    padding: 0 10px;
+    border: 1px solid var(--border);
     border-radius: 999px;
-    color: var(--ink-soft);
-    background: color-mix(in oklch, var(--panel) 78%, transparent);
+    background: var(--card);
+    color: var(--foreground);
     font-size: 0.78rem;
     font-weight: 850;
     white-space: nowrap;
   }
 
-  .badge.good {
-    color: var(--green);
-    background: var(--green-soft);
+  .badge.good,
+  .status-pill.good {
+    border-color: color-mix(in oklch, var(--good) 26%, var(--border));
+    background: var(--good-soft);
+    color: var(--good);
   }
 
-  .badge.warn {
-    color: color-mix(in oklch, var(--amber) 72%, black);
-    background: var(--amber-soft);
+  .badge.danger,
+  .status-pill.danger {
+    border-color: color-mix(in oklch, var(--danger) 25%, var(--border));
+    background: var(--danger-soft);
+    color: var(--danger);
   }
 
-  .badge.danger {
-    color: var(--red);
-    background: var(--red-soft);
+  .badge.warn,
+  .status-pill.warn {
+    border-color: color-mix(in oklch, var(--warn) 28%, var(--border));
+    background: var(--warn-soft);
+    color: var(--warn);
   }
 
-  .score-ring {
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 999px;
+    background: var(--warn);
+  }
+
+  .dot.ok {
+    background: var(--good);
+  }
+
+  .dot.bad {
+    background: var(--danger);
+  }
+
+  .content {
     display: grid;
-    place-items: center;
-    justify-self: end;
-    width: 154px;
-    aspect-ratio: 1;
-    border: 1px solid color-mix(in oklch, white 20%, transparent);
-    border-radius: 50%;
-    background:
-      radial-gradient(circle at center, color-mix(in oklch, var(--green-ink) 94%, black) 0 58%, transparent 59%),
-      conic-gradient(oklch(78% 0.14 154) var(--score-angle), color-mix(in oklch, white 18%, transparent) 0);
+    gap: var(--space-5);
+    width: min(1480px, 100%);
+    margin: 0 auto;
+    padding: var(--space-6);
   }
 
-  .score-ring strong {
-    display: block;
+  .dossier {
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(300px, 0.85fr);
+    gap: var(--space-5);
+    align-items: stretch;
+  }
+
+  .case-summary,
+  .decision-stamp,
+  .review-board,
+  .panel,
+  .metric,
+  .empty-state,
+  .error-state {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--card);
+  }
+
+  .case-summary {
+    min-width: 0;
+    display: grid;
+    gap: var(--space-5);
+    padding: var(--space-5);
+  }
+
+  .case-heading {
+    display: grid;
+    gap: var(--space-3);
+    max-width: 820px;
+  }
+
+  .case-heading h2 {
+    margin: 0;
     font-family: var(--font-display);
-    font-size: 2.65rem;
-    line-height: 0.9;
-    text-align: center;
+    font-size: clamp(2.2rem, 4vw, 4.6rem);
+    line-height: 0.96;
+    letter-spacing: 0;
   }
 
-  .score-ring span {
-    display: block;
-    margin-top: var(--space-1);
-    color: color-mix(in oklch, white 74%, transparent);
-    font-size: 0.74rem;
-    font-weight: 850;
-    letter-spacing: 0.08em;
-    text-align: center;
-    text-transform: uppercase;
+  .case-heading p {
+    margin: 0;
+    max-width: 68ch;
+    color: var(--muted-foreground);
+    font-size: 1rem;
   }
 
-  .verdict-strip {
+  .meta-row,
+  .action-row {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+  }
+
+  .verdict-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: var(--space-3);
-    padding: var(--space-4);
-    background: color-mix(in oklch, var(--panel) 88%, transparent);
   }
 
   .verdict {
+    min-width: 0;
     display: grid;
-    align-content: start;
     gap: var(--space-2);
-    min-height: 132px;
     padding: var(--space-4);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    background: color-mix(in oklch, var(--paper) 74%, transparent);
-  }
-
-  .verdict.approved {
-    background: color-mix(in oklch, var(--green-soft) 78%, var(--panel));
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--background);
   }
 
   .verdict.rejected {
-    background: color-mix(in oklch, var(--red-soft) 82%, var(--panel));
+    background: var(--danger-soft);
   }
 
-  .decision-word {
-    display: block;
+  .verdict.approved {
+    background: var(--good-soft);
+  }
+
+  .verdict .word {
     font-family: var(--font-display);
-    font-size: 1.8rem;
-    font-weight: 900;
+    font-size: 2rem;
+    font-weight: 850;
     line-height: 1;
   }
 
-  .approved .decision-word { color: var(--green); }
-  .rejected .decision-word { color: var(--red); }
+  .verdict.rejected .word {
+    color: var(--danger);
+  }
+
+  .verdict.approved .word {
+    color: var(--good);
+  }
 
   .amount {
-    color: var(--green-deep);
-    font-family: var(--font-display);
-    font-size: 1.28rem;
+    margin: 0;
+    color: var(--foreground);
     font-weight: 900;
   }
 
-  .tab-shell {
-    max-width: 100%;
-    border: 1px solid color-mix(in oklch, var(--line) 84%, transparent);
-    border-radius: var(--radius);
-    background: color-mix(in oklch, var(--panel) 78%, transparent);
+  .muted {
+    color: var(--muted-foreground);
+  }
+
+  .decision-stamp {
+    display: grid;
+    align-content: start;
+    gap: var(--space-4);
+    padding: var(--space-5);
+  }
+
+  .score-block {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: end;
+    gap: var(--space-4);
+    padding-bottom: var(--space-4);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .score-block .grade {
+    font-family: var(--font-display);
+    font-size: 5.2rem;
+    font-weight: 900;
+    line-height: 0.85;
+  }
+
+  .score-block .score {
+    color: var(--muted-foreground);
+    font-weight: 900;
+    text-align: right;
+  }
+
+  .ledger {
+    display: grid;
+  }
+
+  .ledger-row {
+    display: grid;
+    grid-template-columns: minmax(120px, 0.9fr) minmax(0, 1.1fr);
+    gap: var(--space-3);
+    align-items: center;
+    min-height: 42px;
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .ledger-row:last-child {
+    border-bottom: 0;
+  }
+
+  .ledger-row span:first-child {
+    color: var(--muted-foreground);
+  }
+
+  .ledger-row strong {
+    text-align: right;
+    overflow-wrap: anywhere;
+  }
+
+  .metrics-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: var(--space-3);
+  }
+
+  .metric {
+    min-width: 0;
+    display: grid;
+    gap: var(--space-2);
+    padding: var(--space-4);
+  }
+
+  .metric strong {
+    font-family: var(--font-display);
+    font-size: 2.1rem;
+    line-height: 1;
+  }
+
+  .metric span {
+    color: var(--muted-foreground);
+    font-size: 0.86rem;
+  }
+
+  .review-board {
+    min-width: 0;
+    overflow: hidden;
     box-shadow: var(--shadow-tight);
+  }
+
+  .review-head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: var(--space-4);
+    align-items: center;
+    padding: var(--space-4) var(--space-5);
+    border-bottom: 1px solid var(--border);
+    background: color-mix(in oklch, var(--card) 88%, var(--secondary));
+  }
+
+  .review-head h3 {
+    margin: 0;
+    font-family: var(--font-display);
+    font-size: 1.35rem;
   }
 
   .tabs {
     display: flex;
-    gap: var(--space-2);
-    padding: var(--space-2);
-    border-bottom: 1px solid var(--line);
-    overflow-x: auto;
+    gap: var(--space-1);
+    padding: 4px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--background);
   }
 
   .tab-button {
     flex: 0 0 auto;
     min-height: 44px;
-    padding: 0 var(--space-3);
-    border: 1px solid transparent;
-    border-radius: var(--radius);
-    color: var(--muted);
+    padding: 0 12px;
+    border: 0;
+    border-radius: 8px;
     background: transparent;
+    color: var(--muted-foreground);
+    font-size: 0.9rem;
     font-weight: 850;
-    transition: color 160ms ease, background 160ms ease, border-color 160ms ease;
   }
 
   .tab-button:hover {
-    color: var(--ink);
-    background: color-mix(in oklch, var(--panel-soft) 70%, transparent);
+    color: var(--foreground);
+    background: var(--secondary);
   }
 
   .tab-button[aria-selected="true"] {
-    border-color: var(--line);
-    color: var(--ink);
-    background: var(--panel);
+    color: var(--foreground);
+    background: var(--card);
+    box-shadow: 0 1px 2px oklch(20% 0.02 210 / 0.12);
   }
 
   .tab-panel {
-    padding: var(--space-4);
-    animation: panel-in 180ms ease-out;
-  }
-
-  @keyframes panel-in {
-    from { opacity: 0; transform: translateY(4px); }
-    to { opacity: 1; transform: translateY(0); }
+    padding: var(--space-5);
   }
 
   .grid-2,
   .grid-3 {
     display: grid;
-    gap: var(--space-3);
+    gap: var(--space-4);
   }
 
-  .grid-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .grid-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
-
-  .card,
-  .table-card {
-    padding: var(--space-4);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    background: color-mix(in oklch, var(--panel) 70%, transparent);
+  .grid-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .card h3,
-  .table-card h3 {
-    margin-bottom: var(--space-3);
-    font-family: var(--font-display);
-    font-size: 1rem;
+  .grid-3 {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .muted {
-    color: var(--muted);
-  }
-
-  .row-list {
-    display: grid;
-    gap: var(--space-2);
-  }
-
-  .data-row {
-    display: grid;
-    grid-template-columns: minmax(104px, 0.85fr) minmax(0, 1.15fr);
-    gap: var(--space-3);
-    align-items: center;
-    min-height: 42px;
-    padding: var(--space-2) 0;
-    border-bottom: 1px solid var(--line);
-  }
-
-  .data-row:last-child {
-    border-bottom: 0;
-  }
-
-  .data-row strong,
-  .row-title {
-    font-weight: 850;
-  }
-
-  .data-row span,
-  .data-row strong {
+  .panel {
     min-width: 0;
+    display: grid;
+    align-content: start;
+    gap: var(--space-3);
+    padding: var(--space-4);
   }
 
-  .data-row strong {
-    text-align: right;
-    overflow-wrap: anywhere;
+  .panel h3,
+  .panel h4 {
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 900;
   }
 
+  .row-list,
   .stack-list {
     display: grid;
     gap: var(--space-2);
   }
 
-  .stack-item {
-    display: grid;
-    gap: var(--space-1);
-    padding: var(--space-3);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    background: color-mix(in oklch, var(--paper) 66%, transparent);
-  }
-
-  .reason-item {
-    display: grid;
-    grid-template-columns: 30px minmax(0, 1fr);
-    gap: var(--space-3);
-    align-items: start;
-    min-height: 50px;
-    padding: var(--space-3);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    background: color-mix(in oklch, var(--paper) 66%, transparent);
-  }
-
-  .reason-mark {
-    display: grid;
-    place-items: center;
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    color: var(--green);
-    background: var(--green-soft);
-    font-weight: 900;
-  }
-
-  .reason-mark.warn {
-    color: color-mix(in oklch, var(--amber) 72%, black);
-    background: var(--amber-soft);
-  }
-
-  .pillar {
+  .pillar-row {
     display: grid;
     gap: var(--space-2);
-    padding: var(--space-3);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    background: color-mix(in oklch, var(--paper) 66%, transparent);
   }
 
   .pillar-head {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
     gap: var(--space-3);
-    align-items: center;
+    color: var(--muted-foreground);
+    font-size: 0.9rem;
   }
 
-  .bar-track {
-    height: 9px;
+  .bar {
+    height: 8px;
     overflow: hidden;
     border-radius: 999px;
-    background: color-mix(in oklch, var(--line) 68%, white);
+    background: var(--secondary);
   }
 
-  .bar-fill {
-    width: calc(var(--value) * 5%);
+  .bar span {
+    display: block;
+    width: var(--value);
     height: 100%;
     border-radius: inherit;
-    background: var(--green);
+    background: var(--primary);
   }
 
-  .bar-fill.watch { background: var(--amber); }
-  .bar-fill.risk { background: var(--red); }
+  .stack-item,
+  .reason-item {
+    display: grid;
+    gap: var(--space-1);
+    padding: var(--space-3);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--background);
+  }
+
+  .reason-item strong,
+  .stack-item strong {
+    line-height: 1.32;
+  }
+
+  .memo-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-4);
+    margin-top: var(--space-4);
+  }
 
   .memo {
-    display: grid;
-    gap: var(--space-2);
+    min-width: 0;
     padding: var(--space-4);
-    border: 1px solid color-mix(in oklch, var(--blue) 45%, var(--line));
+    border: 1px solid var(--border);
     border-radius: var(--radius);
-    background: color-mix(in oklch, var(--blue-soft) 58%, var(--panel));
+    background: var(--secondary);
   }
 
-  .rail {
-    display: grid;
-    gap: var(--space-4);
-  }
-
-  .rail-section {
-    border: 1px solid color-mix(in oklch, var(--line) 84%, transparent);
-    border-radius: var(--radius);
-    background: color-mix(in oklch, var(--panel) 80%, transparent);
-    box-shadow: var(--shadow-tight);
-  }
-
-  .rail-body {
-    display: grid;
-    gap: var(--space-2);
-    padding: var(--space-4);
+  .memo p {
+    margin: var(--space-2) 0 0;
   }
 
   .empty-state,
-  .skeleton,
-  .error {
-    display: grid;
-    place-items: center;
-    min-height: 260px;
+  .error-state,
+  .skeleton {
     padding: var(--space-5);
-    border: 1px solid var(--line);
-    border-radius: var(--radius);
-    color: var(--muted);
-    background: color-mix(in oklch, var(--panel) 74%, transparent);
-    text-align: center;
+    color: var(--muted-foreground);
   }
 
-  .error {
-    border-color: color-mix(in oklch, var(--red) 60%, var(--line));
-    color: var(--red);
-    background: var(--red-soft);
+  .error-state {
+    border-color: color-mix(in oklch, var(--danger) 35%, var(--border));
+    background: var(--danger-soft);
+    color: var(--danger);
     font-weight: 850;
   }
 
+  .skeleton {
+    border: 1px dashed var(--border);
+    border-radius: var(--radius);
+    background: color-mix(in oklch, var(--card) 68%, var(--secondary));
+  }
+
+  .mobile-only {
+    display: none;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--ring);
+    outline-offset: 2px;
+  }
+
   @media (max-width: 1180px) {
-    .hero {
+    .app-shell {
       grid-template-columns: 1fr;
     }
 
-    .workspace {
-      grid-template-columns: 280px minmax(0, 1fr);
+    .sidebar {
+      position: static;
+      height: auto;
+      border-right: 0;
+      border-bottom: 1px solid var(--border);
     }
 
-    .rail {
-      grid-column: 1 / -1;
+    .case-list {
       grid-template-columns: repeat(2, minmax(0, 1fr));
-      position: static;
+      max-height: none;
+      overflow: visible;
+    }
+
+    .sidebar-footer {
+      display: none;
+    }
+
+    .dossier {
+      grid-template-columns: 1fr;
+    }
+
+    .metrics-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
     }
   }
 
-  @media (max-width: 840px) {
-    .app {
-      padding: var(--space-3);
+  @media (max-width: 760px) {
+    .topbar,
+    .review-head {
+      grid-template-columns: 1fr;
+      align-items: stretch;
     }
 
+    .content,
     .topbar,
-    .hero,
-    .workspace,
-    .spotlight-hero,
-    .verdict-strip,
+    .sidebar {
+      padding: var(--space-4);
+    }
+
+    .case-list {
+      display: none;
+    }
+
+    .mobile-only {
+      display: grid;
+    }
+
+    .case-heading h2 {
+      font-size: 2.25rem;
+    }
+
+    .verdict-grid,
     .grid-2,
     .grid-3,
-    .rail,
-    .impact-grid {
+    .memo-grid,
+    .metrics-grid {
       grid-template-columns: 1fr;
-    }
-
-    .topbar,
-    .borrower-panel {
-      position: static;
-    }
-
-    .top-actions {
-      justify-content: flex-start;
-    }
-
-    .hero-copy {
-      padding: var(--space-5);
-    }
-
-    .hero-copy h2 {
-      font-size: 2.28rem;
-      line-height: 1;
-    }
-
-    .metric {
-      border-right: 0;
-      border-bottom: 1px solid var(--line);
-    }
-
-    .metric:last-child {
-      border-bottom: 0;
-    }
-
-    .score-ring {
-      justify-self: start;
-      width: 138px;
     }
 
     .tabs {
-      position: sticky;
-      top: 0;
-      z-index: 10;
-      background: color-mix(in oklch, var(--panel) 92%, transparent);
-      backdrop-filter: blur(12px);
-    }
-  }
-
-  @media (max-width: 480px) {
-    .brand {
-      align-items: start;
+      flex-wrap: wrap;
     }
 
-    .brand-mark {
-      width: 40px;
-      height: 40px;
-      flex-basis: 40px;
+    .tab-button {
+      flex: 1 1 calc(50% - var(--space-1));
     }
 
-    .button {
-      width: 100%;
-    }
-
-    .top-actions {
-      width: 100%;
-    }
-
-    .status-row,
-    .data-row,
+    .ledger-row,
+    .score-block,
     .pillar-head {
       grid-template-columns: 1fr;
       justify-items: start;
     }
 
-    .tabs {
-      flex-wrap: wrap;
-      overflow-x: visible;
-    }
-
-    .tab-button {
-      flex: 1 1 calc(50% - var(--space-2));
-    }
-
-    .data-row strong {
+    .ledger-row strong,
+    .score-block .score {
       text-align: left;
-    }
-
-    .badge {
-      white-space: normal;
-    }
-
-    h1,
-    h2,
-    h3,
-    p,
-    span,
-    strong {
-      overflow-wrap: anywhere;
     }
   }
 
@@ -944,97 +799,84 @@
 </style>
 </head>
 <body>
-  <div class="app">
-    <header class="topbar">
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Case queue">
       <div class="brand">
         <div class="brand-mark" aria-hidden="true">U</div>
         <div>
-          <p class="eyebrow">IDBI Innovate 2026 &middot; PS3 MSME Financial Health Score</p>
-          <h1>UdyamPulse credit cockpit</h1>
+          <small>IDBI Innovate PS3</small>
+          <h1>UdyamPulse</h1>
         </div>
       </div>
-      <nav class="top-actions" aria-label="Submission links">
-        <a class="button primary" href="https://github.com/bansalbhunesh/id/blob/main/docs/deck/UdyamPulse-IDBI-Submission-Deck.pdf">Deck</a>
-        <a class="button" href="https://github.com/bansalbhunesh/id/blob/main/docs/demo.webm">Demo video</a>
-        <a class="button" href="https://github.com/bansalbhunesh/id/blob/main/MODEL_CARD.md">Model card</a>
-      </nav>
-    </header>
 
-    <section class="hero" aria-label="Product summary">
-      <div class="hero-copy">
-        <p class="eyebrow">Bank-grade alternate-data underwriting</p>
-        <h2>One thin-file MSME. One defensible approval.</h2>
-        <p>UdyamPulse converts consented AA/GST/UPI/EPFO-style signals into a health card, eligible credit line, reason codes, audit trail, and borrower improvement plan without pretending the public demo has private IDBI feeds.</p>
+      <div class="sidebar-block">
+        <div>
+          <p class="label">Active file</p>
+          <select id="msme" class="case-select" aria-label="Select borrower file"></select>
+        </div>
+        <div id="caseList" class="case-list" aria-label="Borrower files"></div>
       </div>
-      <aside class="readiness" aria-live="polite">
-        <div class="status-row">
-          <span class="label">Service</span>
-          <strong><span id="apiDot" class="dot" aria-hidden="true"></span><span id="apiStatus">Checking</span></strong>
-        </div>
-        <div class="status-row">
-          <span class="label">Model mode</span>
-          <strong id="modelStatus">Linear scorecard</strong>
-        </div>
-        <div class="status-row">
-          <span class="label">Data mode</span>
-          <strong>Public synthetic cohort</strong>
-        </div>
-        <div class="status-row">
-          <span class="label">Sandbox contracts</span>
-          <strong>Stage 2 ready</strong>
-        </div>
-      </aside>
-    </section>
 
-    <section id="impactGrid" class="impact-grid" aria-label="Portfolio impact"></section>
+      <div class="sidebar-block mobile-only">
+        <p class="label">Review mode</p>
+        <div class="tabs" aria-hidden="true">
+          <span class="tab-button">Decision</span>
+          <span class="tab-button">Evidence</span>
+        </div>
+      </div>
 
-    <main class="workspace">
-      <aside class="surface borrower-panel">
-        <div class="panel-head">
-          <p class="kicker">Case queue</p>
-          <h2>Borrower files</h2>
-        </div>
-        <div class="panel-body">
-          <label class="label" for="msme">Active file</label>
-          <select id="msme" class="case-select"></select>
-          <div id="caseList" class="case-list"></div>
-        </div>
-      </aside>
+      <div class="sidebar-footer">
+        <a class="subtle-link" href="https://github.com/bansalbhunesh/id">Repository <span>Open</span></a>
+        <a class="subtle-link" href="/docs">OpenAPI <span>View</span></a>
+        <a class="subtle-link" href="/submission/proof">Proof API <span>Live</span></a>
+      </div>
+    </aside>
 
-      <section class="stage" aria-live="polite">
-        <div id="spotlight" class="spotlight">
-          <div class="skeleton">Loading decision cockpit...</div>
+    <main class="main">
+      <header class="topbar">
+        <div class="command" role="status">
+          <span class="label">Command desk</span>
+          <strong id="commandLabel">Loading credit dossier</strong>
+          <span class="muted">Static cockpit, live FastAPI evidence.</span>
         </div>
-        <section class="tab-shell">
-          <div id="tabs" class="tabs" role="tablist" aria-label="Credit review views">
-            <button class="tab-button" type="button" role="tab" data-tab="decision" aria-selected="true">Decision</button>
-            <button class="tab-button" type="button" role="tab" data-tab="evidence" aria-selected="false">Evidence</button>
-            <button class="tab-button" type="button" role="tab" data-tab="governance" aria-selected="false">Governance</button>
-            <button class="tab-button" type="button" role="tab" data-tab="proof" aria-selected="false">Proof</button>
-            <button class="tab-button" type="button" role="tab" data-tab="sources" aria-selected="false">Sources</button>
+        <div class="top-meta">
+          <span id="apiStatus" class="status-pill warn"><span id="apiDot" class="dot" aria-hidden="true"></span>Checking API</span>
+          <span id="modelStatus" class="status-pill">Linear scorecard</span>
+          <span class="status-pill">Public synthetic cohort</span>
+        </div>
+      </header>
+
+      <div class="content">
+        <section class="dossier" aria-live="polite">
+          <div id="caseSummary" class="case-summary">
+            <div class="skeleton">Loading borrower dossier...</div>
+          </div>
+          <aside id="decisionStamp" class="decision-stamp" aria-label="Decision summary">
+            <div class="skeleton">Loading governance status...</div>
+          </aside>
+        </section>
+
+        <section id="portfolioMetrics" class="metrics-grid" aria-label="Portfolio impact"></section>
+
+        <section class="review-board">
+          <div class="review-head">
+            <div>
+              <p class="eyebrow">Underwriter packet</p>
+              <h3>Evidence, controls, and submission proof</h3>
+            </div>
+            <div id="tabs" class="tabs" role="tablist" aria-label="Credit review views">
+              <button class="tab-button" type="button" role="tab" data-tab="decision" aria-selected="true">Decision</button>
+              <button class="tab-button" type="button" role="tab" data-tab="evidence" aria-selected="false">Evidence</button>
+              <button class="tab-button" type="button" role="tab" data-tab="governance" aria-selected="false">Governance</button>
+              <button class="tab-button" type="button" role="tab" data-tab="proof" aria-selected="false">Proof</button>
+              <button class="tab-button" type="button" role="tab" data-tab="sources" aria-selected="false">Sources</button>
+            </div>
           </div>
           <div id="tabContent" class="tab-panel" role="tabpanel">
-            <div class="skeleton">Loading review evidence...</div>
+            <div class="skeleton">Preparing review packet...</div>
           </div>
         </section>
-      </section>
-
-      <aside class="rail" aria-label="Live control summary">
-        <section class="rail-section">
-          <div class="panel-head">
-            <p class="kicker">Control summary</p>
-            <h3>Ready for judge review</h3>
-          </div>
-          <div id="controlRail" class="rail-body"></div>
-        </section>
-        <section class="rail-section">
-          <div class="panel-head">
-            <p class="kicker">Source map</p>
-            <h3>Signal coverage</h3>
-          </div>
-          <div id="sourceRail" class="rail-body"></div>
-        </section>
-      </aside>
+      </div>
     </main>
   </div>
 
@@ -1057,14 +899,14 @@
       apiDot: document.getElementById("apiDot"),
       apiStatus: document.getElementById("apiStatus"),
       modelStatus: document.getElementById("modelStatus"),
-      impactGrid: document.getElementById("impactGrid"),
+      commandLabel: document.getElementById("commandLabel"),
       msme: document.getElementById("msme"),
       caseList: document.getElementById("caseList"),
-      spotlight: document.getElementById("spotlight"),
+      caseSummary: document.getElementById("caseSummary"),
+      decisionStamp: document.getElementById("decisionStamp"),
+      portfolioMetrics: document.getElementById("portfolioMetrics"),
       tabs: document.getElementById("tabs"),
       tabContent: document.getElementById("tabContent"),
-      controlRail: document.getElementById("controlRail"),
-      sourceRail: document.getElementById("sourceRail"),
     };
 
     const currency = new Intl.NumberFormat("en-IN", {
@@ -1083,13 +925,25 @@
     }
 
     function formatCurrency(value) {
-      return currency.format(value || 0);
+      return currency.format(Number(value || 0));
     }
 
     function titleize(value) {
-      return String(value)
+      return String(value ?? "-")
         .replace(/_/g, " ")
         .replace(/\b\w/g, (char) => char.toUpperCase());
+    }
+
+    function toneFor(value) {
+      const text = String(value || "").toLowerCase();
+      if (/(pass|live|connected|present|approved|ok|ready|low|stable)/.test(text)) return "good";
+      if (/(reject|missing|fail|offline|bad|high|decline)/.test(text)) return "danger";
+      if (/(watch|review|prototype|synthetic|thin|sample|monitor|stage|post)/.test(text)) return "warn";
+      return "";
+    }
+
+    function badge(label, tone) {
+      return `<span class="badge ${esc(tone || toneFor(label))}">${esc(label)}</span>`;
     }
 
     async function api(path) {
@@ -1098,49 +952,44 @@
       return response.json();
     }
 
-    function badgeTone(value) {
-      const text = String(value || "").toLowerCase();
-      if (/(pass|live|connected|present|approved|ok|ready|low)/.test(text)) return "good";
-      if (/(reject|missing|fail|offline|bad|high)/.test(text)) return "danger";
-      if (/(watch|review|prototype|synthetic|thin|sample|monitor|stage)/.test(text)) return "warn";
-      return "";
-    }
-
-    function badge(label, tone) {
-      return `<span class="badge ${esc(tone || badgeTone(label))}">${esc(label)}</span>`;
-    }
-
     function setApiStatus(ok, label) {
       els.apiDot.className = `dot ${ok ? "ok" : "bad"}`;
-      els.apiStatus.textContent = label;
+      els.apiStatus.className = `status-pill ${ok ? "good" : "danger"}`;
+      els.apiStatus.innerHTML = `<span id="apiDot" class="dot ${ok ? "ok" : "bad"}" aria-hidden="true"></span>${esc(label)}`;
+      els.apiDot = document.getElementById("apiDot");
     }
 
     function setModelStatus() {
       const runtime = state.model || state.governance?.model?.runtime || {};
-      const provider = runtime.active_provider || state.governance?.model?.runtime?.active_provider || "linear";
+      const provider = runtime.active_provider || "linear";
       els.modelStatus.textContent = `${provider} / sandbox-ready`;
     }
 
-    function renderImpact() {
+    function rows(items) {
+      return `<div class="ledger">${items.map(([label, value]) => `
+        <div class="ledger-row"><span>${esc(label)}</span><strong>${esc(value)}</strong></div>
+      `).join("")}</div>`;
+    }
+
+    function renderPortfolioMetrics() {
       const summary = state.portfolio?.summary;
       if (!summary) {
-        els.impactGrid.innerHTML = "";
+        els.portfolioMetrics.innerHTML = `<div class="skeleton">Portfolio metrics unavailable.</div>`;
         return;
       }
       const pilot = state.portfolio?.pilot_metrics;
       const items = [
-        ["NTC rescues", summary.ntc_rescued, "thin-file firms approved with alternate data"],
+        ["NTC rescues", summary.ntc_rescues, "thin-file files approved with alternate data"],
         ["Credit unlocked", formatCurrency(summary.credit_unlocked), "new viable limit from rejected cases"],
         ["Approval lift", pilot ? `+${pilot.ntc_ntb_approval_lift_pct}%` : `+${summary.alternate_data_approvals - summary.traditional_approvals}`, "against bureau-only baseline"],
-        ["Time saved", pilot ? `${pilot.decision_time_reduction_pct}%` : `${summary.decision_time_minutes} min`, `from ${summary.manual_baseline_days} day manual baseline`],
+        ["Decision time", pilot ? `${pilot.decision_time_reduction_pct}% saved` : `${summary.decision_time_minutes} min`, `from ${summary.manual_baseline_days} day manual baseline`],
       ];
-
-      els.impactGrid.innerHTML = items.map(([label, value, detail]) => `
-        <article class="metric">
-          <p class="label">${esc(label)}</p>
+      els.portfolioMetrics.innerHTML = items.map(([label, value, detail]) => `
+        <div class="metric">
+          <span class="label">${esc(label)}</span>
           <strong>${esc(value)}</strong>
           <span>${esc(detail)}</span>
-        </article>
+        </div>
       `).join("");
     }
 
@@ -1154,120 +1003,109 @@
       els.caseList.innerHTML = cases.map((item) => `
         <button class="case-button" type="button" data-case="${esc(item.id)}" aria-pressed="${item.id === state.activeId}">
           <strong>${esc(item.name)}</strong>
-          <span>${esc(item.sector)} &middot; ${esc(item.district)}</span>
-          <span>Grade ${esc(item.grade)} &middot; ${formatCurrency(item.eligible_limit)}</span>
+          <span>${esc(item.sector)} - ${esc(item.district)}</span>
+          <span>${esc(item.grade)} grade - ${formatCurrency(item.eligible_limit)}</span>
         </button>
-      `).join("") || `<div class="empty-state">No borrower files loaded.</div>`;
+      `).join("");
     }
 
-    function barClass(value) {
-      if (value <= 8) return "risk";
-      if (value <= 13) return "watch";
-      return "";
-    }
-
-    function reasonMark(text) {
-      return String(text).startsWith("Watch") || String(text).startsWith("-") ? "!" : "+";
-    }
-
-    function renderSpotlight(score) {
+    function renderCaseSummary(score) {
       if (!score) {
-        els.spotlight.innerHTML = `<div class="skeleton">No score packet selected.</div>`;
+        els.caseSummary.innerHTML = `<div class="skeleton">Select a borrower file.</div>`;
         return;
       }
-
-      const profile = score.profile;
-      const gaugeAngle = Math.max(0, Math.min(100, score.score)) * 3.6;
+      const profile = score.profile || {};
+      const ntcLabel = profile.has_bureau_history ? "Bureau history present" : "New-to-Credit / New-to-Bank";
       const tradClass = score.traditional.decision === "Approved" ? "approved" : "rejected";
       const altClass = score.alternate_data_decision === "Approved" ? "approved" : "rejected";
-      const ntcLabel = profile.has_bureau_history ? "Bureau history" : "New-to-Credit/New-to-Bank";
 
-      els.spotlight.innerHTML = `
-        <div class="spotlight-hero">
-          <div>
-            <p class="kicker">Active decision pack</p>
-            <h2>${esc(score.name)}</h2>
-            <p>${esc(ntcLabel)} file reviewed through consented alternate-data signals and policy guardrails.</p>
-            <div class="badge-line">
-              ${badge(profile.sector)}
-              ${badge(profile.district)}
-              ${badge(`${profile.vintage_months} months vintage`)}
-              ${badge(ntcLabel, profile.has_bureau_history ? "" : "warn")}
-              ${badge(score.risk_band)}
-            </div>
-          </div>
-          <div class="score-ring" style="--score-angle: ${gaugeAngle}deg;" role="img" aria-label="Score ${esc(score.score)} out of 100, grade ${esc(score.grade)}">
-            <div>
-              <strong>${esc(score.grade)}</strong>
-              <span>${esc(score.score)}/100</span>
-            </div>
+      els.commandLabel.textContent = score.name;
+      els.caseSummary.innerHTML = `
+        <div class="case-heading">
+          <p class="eyebrow">Active decision dossier</p>
+          <h2>${esc(score.name)}</h2>
+          <p>${esc(ntcLabel)} MSME reviewed through consented AA/GST/UPI/EPFO-style signals, explainability, policy controls, and audit evidence.</p>
+          <div class="meta-row">
+            ${badge(profile.sector || "Sector")}
+            ${badge(profile.district || "District")}
+            ${badge(`${profile.vintage_months || 0} months vintage`)}
+            ${badge(ntcLabel, "warn")}
+            ${badge(score.risk_band)}
           </div>
         </div>
-        <div class="verdict-strip" aria-label="Traditional versus alternate data verdict">
+        <div class="verdict-grid">
           <section class="verdict ${tradClass}">
-            <p class="label">Traditional bureau-only</p>
-            <span class="decision-word">${esc(score.traditional.decision)}</span>
+            <span class="label">Traditional bureau-only</span>
+            <span class="word">${esc(score.traditional.decision)}</span>
             <p class="muted">${esc(score.traditional.reason)}</p>
           </section>
           <section class="verdict ${altClass}">
-            <p class="label">UdyamPulse alternate data</p>
-            <span class="decision-word">${esc(score.alternate_data_decision)}</span>
+            <span class="label">UdyamPulse alternate data</span>
+            <span class="word">${esc(score.alternate_data_decision)}</span>
             <p class="amount">${formatCurrency(score.eligible_limit)} eligible limit</p>
-            <p class="muted">Explained, audited, and routed through policy controls.</p>
+            <p class="muted">Explained, governed, and routed for underwriter review.</p>
           </section>
         </div>
       `;
     }
 
+    function renderDecisionStamp(score) {
+      const governance = state.governance;
+      const validation = state.validation?.metrics;
+      if (!score) {
+        els.decisionStamp.innerHTML = `<div class="skeleton">Decision summary unavailable.</div>`;
+        return;
+      }
+      els.decisionStamp.innerHTML = `
+        <div class="score-block">
+          <div>
+            <p class="eyebrow">Health grade</p>
+            <div class="grade">${esc(score.grade)}</div>
+          </div>
+          <div class="score">${esc(score.score)}/100<br>${badge(score.risk_band)}</div>
+        </div>
+        ${rows([
+          ["Audit events", governance?.audit?.events_recorded ?? "-"],
+          ["Active model", governance?.model?.runtime?.active_provider || state.model?.active_provider || "linear"],
+          ["Proof API", state.submissionProof?.status ? "Live" : "Pending"],
+          ["OOT AUC", validation?.auc ?? "-"],
+          ["Data mode", "Synthetic demo"],
+        ])}
+      `;
+    }
+
     function renderPillars(score) {
-      return Object.entries(score.pillars).map(([key, value]) => `
-        <div class="pillar">
-          <div class="pillar-head">
-            <strong>${esc(titleize(key))}</strong>
-            <strong>${esc(value)}/20</strong>
-          </div>
-          <div class="bar-track" role="progressbar" aria-label="${esc(titleize(key))} ${esc(value)} out of 20" aria-valuemin="0" aria-valuemax="20" aria-valuenow="${esc(value)}">
-            <div class="bar-fill ${barClass(value)}" style="--value: ${esc(value)};"></div>
-          </div>
+      return Object.entries(score.pillars || {}).map(([key, value]) => `
+        <div class="pillar-row">
+          <div class="pillar-head"><span>${titleize(key)}</span><strong>${esc(value)}/20</strong></div>
+          <div class="bar" aria-hidden="true"><span style="--value: ${Math.max(0, Math.min(100, Number(value) * 5))}%;"></span></div>
         </div>
       `).join("");
     }
 
-    function renderReasons(reasons) {
-      return (reasons || []).map((reason) => `
-        <div class="reason-item">
-          <span class="reason-mark ${reasonMark(reason) === "!" ? "warn" : ""}">${esc(reasonMark(reason))}</span>
-          <span>${esc(reason)}</span>
-        </div>
-      `).join("") || `<div class="empty-state">No exception reason was generated for this file.</div>`;
+    function renderReasons(reasons = []) {
+      return reasons.map((reason) => `
+        <div class="reason-item"><strong>${esc(reason)}</strong></div>
+      `).join("") || `<div class="empty-state">No reason codes available.</div>`;
     }
 
-    function renderStack(items, emptyLabel) {
-      return (items || []).map((item) => `
+    function renderStack(items = [], emptyLabel = "No rows available.") {
+      return items.map((item) => `
         <div class="stack-item">
-          ${badge(item.status || item.decision || "Review")}
-          <strong>${esc(item.control || item.stage || item.source || item.title || "Review item")}</strong>
-          <span class="muted">${esc(item.detail || item.evidence || item.signal || "")}</span>
+          ${badge(item.status || item.decision || item.method || "Review")}
+          <strong>${esc(item.control || item.stage || item.source || item.layer || item.step || item.title || "Review item")}</strong>
+          <span class="muted">${esc(item.detail || item.evidence || item.signal || item.proves || item.expected || item.implemented || "")}</span>
         </div>
-      `).join("") || `<div class="empty-state">${esc(emptyLabel || "No rows available.")}</div>`;
-    }
-
-    function renderMiniRows(rows) {
-      return rows.map(([label, value]) => `
-        <div class="data-row">
-          <span>${esc(label)}</span>
-          <strong>${esc(value)}</strong>
-        </div>
-      `).join("");
+      `).join("") || `<div class="empty-state">${esc(emptyLabel)}</div>`;
     }
 
     function renderFairnessRows(rows = []) {
       return rows.map((row) => `
-        <div class="data-row">
-          <span>${esc(row.group)} <span class="muted">(${esc(row.count)})</span></span>
+        <div class="ledger-row">
+          <span>${esc(row.group)} (${esc(row.count)})</span>
           <strong>${esc(row.alternate_approval_rate)}%</strong>
         </div>
-      `).join("") || `<div class="data-row"><span class="muted">No rows yet</span><strong>-</strong></div>`;
+      `).join("") || `<div class="ledger-row"><span>No rows</span><strong>-</strong></div>`;
     }
 
     function renderDecisionTab(score) {
@@ -1275,25 +1113,24 @@
       const improvementText = improvement
         ? `${improvement.action} Potential grade: ${improvement.potential_grade}; limit uplift: ${formatCurrency(improvement.limit_increase)}.`
         : "Maintain GST filing continuity, low bounce rate, and broad digital counterparties to preserve the current fast-track grade.";
-
       return `
         <div class="grid-2">
-          <section class="card">
-            <h3>Five-pillar health card</h3>
+          <section class="panel">
+            <h3>Five-pillar health ledger</h3>
             <div class="row-list">${renderPillars(score)}</div>
           </section>
-          <section class="card">
-            <h3>Plain-language reason codes</h3>
+          <section class="panel">
+            <h3>Reason codes</h3>
             <div class="row-list">${renderReasons(score.reasons)}</div>
           </section>
         </div>
-        <div class="grid-2" style="margin-top: 12px;">
+        <div class="memo-grid">
           <section class="memo">
-            <p class="label">Underwriter memo</p>
+            <span class="label">Underwriter memo</span>
             <p>${esc(score.memo)}</p>
           </section>
           <section class="memo">
-            <p class="label">Borrower improvement plan</p>
+            <span class="label">Borrower improvement plan</span>
             <p>${esc(improvementText)}</p>
           </section>
         </div>
@@ -1303,17 +1140,17 @@
     function renderEvidenceTab(score) {
       return `
         <div class="grid-2">
-          <section class="card">
-            <h3>Risk model attribution</h3>
-            <p class="muted">Baseline ${esc(score.ml.baseline_score)} with exact linear Shapley contributions in the public model.</p>
-            <div class="row-list" style="margin-top: 12px;">${renderReasons(score.ml.top_reasons)}</div>
+          <section class="panel">
+            <h3>Model attribution</h3>
+            <p class="muted">Baseline ${esc(score.ml?.baseline_score)} with exact linear Shapley-equivalent contributions in the public model.</p>
+            <div class="row-list">${renderReasons(score.ml?.top_reasons || [])}</div>
           </section>
-          <section class="card">
+          <section class="panel">
             <h3>Decision path</h3>
             <div class="stack-list">${renderStack(score.decision_path, "No decision path rows available.")}</div>
           </section>
         </div>
-        <section class="card" style="margin-top: 12px;">
+        <section class="panel" style="margin-top: 16px;">
           <h3>Policy guardrails</h3>
           <div class="grid-2">${renderStack(score.policy_guardrails, "No guardrail rows available.")}</div>
         </section>
@@ -1327,55 +1164,144 @@
       const pilot = governance?.pilot_metrics || state.portfolio?.pilot_metrics;
       const fairness = governance?.fairness || {};
       const runtime = governance?.model?.runtime || {};
-
       if (!governance) return `<div class="empty-state">Governance data is not loaded yet.</div>`;
 
-      const validationRows = validation ? renderMiniRows([
-        ["OOT AUC", validation.auc],
-        ["Gini", validation.gini],
-        ["KS", validation.ks],
-        ["PSI drift", validation.psi],
-        ["Reason stability", validation.reason_code_stability],
-      ]) : `<div class="data-row"><span class="muted">No validation report</span><strong>-</strong></div>`;
-
-      const pilotRows = pilot ? renderMiniRows([
-        ["NTC/NTB lift", `+${pilot.ntc_ntb_approval_lift_pct}%`],
-        ["Decision-time reduction", `${pilot.decision_time_reduction_pct}%`],
-        ["Approved sectors", pilot.portfolio_diversification.approved_sector_count],
-        ["Approved districts", pilot.portfolio_diversification.approved_district_count],
-      ]) : `<div class="data-row"><span class="muted">No pilot KPI rows</span><strong>-</strong></div>`;
-
       return `
-        <div class="grid-2">
-          <section class="table-card">
+        <div class="grid-3">
+          <section class="panel">
             <h3>Model and audit</h3>
-            ${renderMiniRows([
+            ${rows([
               ["Audit events", governance.audit.events_recorded],
               ["Model version", governance.model.version],
               ["Active model", runtime.active_provider || "linear"],
             ])}
           </section>
-          <section class="table-card">
+          <section class="panel">
             <h3>OOT validation</h3>
-            ${validationRows}
-            ${warnings.length ? `<p class="muted" style="margin-top: 12px;">${esc(warnings[0])}</p>` : ""}
+            ${validation ? rows([
+              ["AUC", validation.auc],
+              ["Gini", validation.gini],
+              ["KS", validation.ks],
+              ["PSI drift", validation.psi],
+              ["Reason stability", validation.reason_code_stability],
+            ]) : `<div class="empty-state">No validation report.</div>`}
+            ${warnings.length ? `<p class="muted">${esc(warnings[0])}</p>` : ""}
           </section>
-          <section class="table-card">
+          <section class="panel">
             <h3>Pilot KPIs</h3>
-            ${pilotRows}
+            ${pilot ? rows([
+              ["NTC/NTB lift", `+${pilot.ntc_ntb_approval_lift_pct}%`],
+              ["Decision time", `${pilot.decision_time_reduction_pct}% saved`],
+              ["Approved sectors", pilot.portfolio_diversification.approved_sector_count],
+              ["Approved districts", pilot.portfolio_diversification.approved_district_count],
+            ]) : `<div class="empty-state">No pilot KPI rows.</div>`}
           </section>
         </div>
-        <section class="card" style="margin-top: 12px;">
-          <h3>Live model-risk controls</h3>
+        <section class="panel" style="margin-top: 16px;">
+          <h3>Live controls</h3>
           <div class="grid-2">${renderStack(governance.controls, "No control rows available.")}</div>
         </section>
-        <section class="card" style="margin-top: 12px;">
+        <section class="panel" style="margin-top: 16px;">
           <h3>Fairness gap checks</h3>
           <p class="muted">${esc(fairness.note || "Public cohort check only; production pilot requires outcome-linked monitoring.")}</p>
-          <div class="grid-3" style="margin-top: 12px;">
-            <div class="table-card"><h3>Bureau history</h3>${renderFairnessRows(fairness.by_bureau_history)}</div>
-            <div class="table-card"><h3>Sector</h3>${renderFairnessRows(fairness.by_sector)}</div>
-            <div class="table-card"><h3>Geography</h3>${renderFairnessRows(fairness.by_geography)}</div>
+          <div class="grid-3">
+            <div class="panel"><h4>Bureau history</h4><div class="ledger">${renderFairnessRows(fairness.by_bureau_history)}</div></div>
+            <div class="panel"><h4>Sector</h4><div class="ledger">${renderFairnessRows(fairness.by_sector)}</div></div>
+            <div class="panel"><h4>Geography</h4><div class="ledger">${renderFairnessRows(fairness.by_geography)}</div></div>
+          </div>
+        </section>
+      `;
+    }
+
+    function renderProofTab() {
+      const proof = state.submissionProof;
+      if (!proof) return `<div class="empty-state">Submission proof is not loaded yet.</div>`;
+      const hero = proof.hero_reversal || {};
+      const truth = proof.truth_boundary || {};
+      const rubric = proof.rubric_scorecard || [];
+      const gaps = proof.competitor_gap_map || [];
+      const runbook = proof.judge_runbook || [];
+      const capabilities = proof.backend_capabilities || [];
+      const apis = proof.api_catalog || [];
+      const evidenceChips = (items = []) => items.map((item) => `<code>${esc(item)}</code>`).join(" ");
+
+      return `
+        <div class="grid-3">
+          <section class="panel">
+            <h3>Judge proof</h3>
+            ${rows([
+              ["Proof API", "Live"],
+              ["Hero case", hero.case || "-"],
+              ["Traditional", hero.traditional_decision || "-"],
+              ["UdyamPulse", hero.alternate_data_decision || "-"],
+              ["Grade", `${hero.grade || "-"} / ${hero.score ?? "-"} score`],
+            ])}
+          </section>
+          <section class="panel">
+            <h3>Truth boundary</h3>
+            ${rows([
+              ["Public data", truth.public_data ? "Synthetic demo cohort" : "-"],
+              ["Private IDBI data", truth.private_idbi_data === "not_claimed" ? "Not claimed" : titleize(truth.private_idbi_data)],
+              ["Sandbox access", truth.sandbox_access ? "Post-shortlisting" : "-"],
+              ["Production model", truth.production_model ? "Optional Stage 2 GBM/SHAP" : "-"],
+            ])}
+          </section>
+          <section class="panel">
+            <h3>Proof inventory</h3>
+            ${rows([
+              ["Rubric criteria", rubric.length],
+              ["Competitor gaps", gaps.length],
+              ["Runbook steps", runbook.length],
+              ["Proof APIs", apis.length],
+              ["Capability layers", capabilities.length],
+            ])}
+          </section>
+        </div>
+        <section class="panel" style="margin-top: 16px;">
+          <h3>Rubric scorecard</h3>
+          <div class="grid-2">
+            ${rubric.map((item) => `
+              <div class="stack-item">
+                ${badge(item.criterion || "Rubric", "good")}
+                <strong>${esc(item.proof)}</strong>
+                <span class="muted">${evidenceChips(item.evidence)}</span>
+              </div>
+            `).join("")}
+          </div>
+        </section>
+        <div class="grid-2" style="margin-top: 16px;">
+          <section class="panel">
+            <h3>Competitor gap map</h3>
+            <div class="stack-list">${gaps.map((item) => `
+              <div class="stack-item">
+                ${badge(item.proof || "Proof", "warn")}
+                <strong>${esc(item.common_pattern)}</strong>
+                <span class="muted">${esc(item.udyampulse_advantage)}</span>
+              </div>
+            `).join("")}</div>
+          </section>
+          <section class="panel">
+            <h3>Judge runbook</h3>
+            <div class="stack-list">${runbook.map((item) => `
+              <div class="stack-item">
+                ${badge(item.endpoint || "Endpoint", "good")}
+                <strong>${esc(item.step)}</strong>
+                <span class="muted">${esc(item.expected)}</span>
+              </div>
+            `).join("")}</div>
+          </section>
+        </div>
+        <section class="panel" style="margin-top: 16px;">
+          <h3>Backend capability and API catalog</h3>
+          <div class="grid-2">
+            <div class="stack-list">${renderStack(capabilities, "No capability rows.")}</div>
+            <div class="stack-list">${apis.map((item) => `
+              <div class="stack-item">
+                ${badge(`${item.method} ${item.path}`)}
+                <strong>${esc(item.layer)}</strong>
+                <span class="muted">${esc(item.proves)}</span>
+              </div>
+            `).join("")}</div>
           </div>
         </section>
       `;
@@ -1384,11 +1310,11 @@
     function renderSourcesTab(score) {
       return `
         <div class="grid-2">
-          <section class="card">
+          <section class="panel">
             <h3>Data source map</h3>
             <div class="stack-list">${renderStack(score.data_sources, "No source rows available.")}</div>
           </section>
-          <section class="card">
+          <section class="panel">
             <h3>Sandbox readiness</h3>
             <div class="stack-list">
               <div class="stack-item">
@@ -1412,126 +1338,12 @@
       `;
     }
 
-    function renderProofTab() {
-      const proof = state.submissionProof;
-      if (!proof) {
-        return `<div class="empty-state">Submission proof is not loaded yet.</div>`;
-      }
-
-      const hero = proof.hero_reversal || {};
-      const truth = proof.truth_boundary || {};
-      const rubric = proof.rubric_scorecard || [];
-      const gaps = proof.competitor_gap_map || [];
-      const apis = proof.api_catalog || [];
-      const capabilities = proof.backend_capabilities || [];
-      const runbook = proof.judge_runbook || [];
-      const renderEvidenceChips = (items = []) => items.map((item) => `<code>${esc(item)}</code>`).join(" ");
-
-      return `
-        <div class="grid-2">
-          <section class="table-card">
-            <h3>Judge proof</h3>
-            ${renderMiniRows([
-              ["Proof API", "Live"],
-              ["Traditional verdict", hero.traditional_decision || "-"],
-              ["UdyamPulse verdict", hero.alternate_data_decision || "-"],
-              ["Grade", `${hero.grade || "-"} / ${hero.score ?? "-"} score`],
-              ["Eligible limit", formatCurrency(hero.eligible_limit)],
-            ])}
-          </section>
-          <section class="table-card">
-            <h3>Truth boundary</h3>
-            ${renderMiniRows([
-              ["Public data", truth.public_data ? "Synthetic demo cohort" : "-"],
-              ["Private IDBI data", truth.private_idbi_data === "not_claimed" ? "Not claimed" : titleize(truth.private_idbi_data || "-")],
-              ["Sandbox access", truth.sandbox_access ? "Post-shortlisting contract" : "-"],
-              ["Production model", truth.production_model ? "Optional Stage 2 GBM/SHAP" : "-"],
-            ])}
-          </section>
-          <section class="table-card">
-            <h3>Implemented backend</h3>
-            ${renderMiniRows([
-              ["Capability layers", capabilities.length],
-              ["Proof APIs", apis.length],
-              ["Runbook steps", runbook.length],
-              ["Rubric criteria", rubric.length],
-              ["Competitor gaps", gaps.length],
-            ])}
-          </section>
-        </div>
-
-        <section class="card" style="margin-top: 12px;">
-          <h3>Rubric scorecard</h3>
-          <div class="grid-2">
-            ${rubric.map((item) => `
-              <div class="stack-item">
-                ${badge(item.criterion || "Rubric", "good")}
-                <strong>${esc(item.proof)}</strong>
-                <span class="muted">${renderEvidenceChips(item.evidence)}</span>
-              </div>
-            `).join("") || `<div class="empty-state">No rubric rows available.</div>`}
-          </div>
-        </section>
-
-        <section class="card" style="margin-top: 12px;">
-          <h3>Competitor gap map</h3>
-          <div class="grid-2">
-            ${gaps.map((item) => `
-              <div class="stack-item">
-                ${badge(item.proof || "Proof", "warn")}
-                <strong>${esc(item.common_pattern)}</strong>
-                <span class="muted">${esc(item.udyampulse_advantage)}</span>
-              </div>
-            `).join("") || `<div class="empty-state">No competitor gap rows available.</div>`}
-          </div>
-        </section>
-
-        <section class="card" style="margin-top: 12px;">
-          <h3>Judge verification runbook</h3>
-          <div class="grid-2">
-            ${runbook.map((item) => `
-              <div class="stack-item">
-                ${badge(item.endpoint || "Endpoint", "good")}
-                <strong>${esc(item.step)}</strong>
-                <span class="muted">${esc(item.expected)}</span>
-              </div>
-            `).join("") || `<div class="empty-state">No runbook rows available.</div>`}
-          </div>
-        </section>
-
-        <section class="card" style="margin-top: 12px;">
-          <h3>Backend capability and API proof</h3>
-          <div class="grid-2">
-            <div class="stack-list">
-              ${capabilities.map((item) => `
-                <div class="stack-item">
-                  ${badge(item.layer || "Capability")}
-                  <strong>${esc((item.modules || []).join(" + "))}</strong>
-                  <span class="muted">${esc(item.implemented)}</span>
-                </div>
-              `).join("") || `<div class="empty-state">No capability rows available.</div>`}
-            </div>
-            <div class="stack-list">
-              ${apis.map((item) => `
-                <div class="stack-item">
-                  ${badge(`${item.method} ${item.path}`)}
-                  <strong>${esc(item.layer)}</strong>
-                  <span class="muted">${esc(item.proves)}</span>
-                </div>
-              `).join("") || `<div class="empty-state">No API catalog rows available.</div>`}
-            </div>
-          </div>
-        </section>
-      `;
-    }
-
     function renderTabContent() {
       const score = state.activeScore;
       if (!score) {
-        els.tabContent.innerHTML = `<div class="skeleton">Select a borrower file to render the review pack.</div>`;
+        els.tabContent.innerHTML = `<div class="skeleton">Select a borrower file to render the review packet.</div>`;
         return;
       }
-
       const views = {
         decision: () => renderDecisionTab(score),
         evidence: () => renderEvidenceTab(score),
@@ -1539,7 +1351,6 @@
         proof: () => renderProofTab(),
         sources: () => renderSourcesTab(score),
       };
-
       els.tabContent.innerHTML = views[state.activeTab]?.() || views.decision();
     }
 
@@ -1551,31 +1362,6 @@
       renderTabContent();
     }
 
-    function renderRail(score) {
-      const governance = state.governance;
-      const validation = state.validation?.metrics;
-      const controls = governance?.controls || [];
-      const controlRows = [
-        ["Audit events", governance?.audit?.events_recorded ?? "-"],
-        ["Active model", governance?.model?.runtime?.active_provider || state.model?.active_provider || "linear"],
-        ["Proof API", state.submissionProof?.status ? "Live" : "Pending"],
-        ["OOT AUC", validation?.auc ?? "-"],
-      ];
-
-      els.controlRail.innerHTML = `
-        ${renderMiniRows(controlRows)}
-        <div class="stack-list" style="margin-top: 8px;">
-          ${renderStack(controls.slice(0, 3), "No control rows yet.")}
-        </div>
-      `;
-
-      els.sourceRail.innerHTML = score ? `
-        <div class="stack-list">
-          ${renderStack(score.data_sources.slice(0, 5), "No source rows yet.")}
-        </div>
-      ` : `<div class="empty-state">Source map appears after scoring.</div>`;
-    }
-
     async function refreshGovernance() {
       state.governance = await api("/governance");
       setModelStatus();
@@ -1585,20 +1371,21 @@
       state.activeId = id;
       els.msme.value = id;
       renderCases();
-      els.spotlight.innerHTML = `<div class="skeleton">Scoring selected MSME...</div>`;
-      els.tabContent.innerHTML = `<div class="skeleton">Preparing review evidence...</div>`;
-
+      els.caseSummary.innerHTML = `<div class="skeleton">Scoring selected MSME...</div>`;
+      els.decisionStamp.innerHTML = `<div class="skeleton">Refreshing decision summary...</div>`;
+      els.tabContent.innerHTML = `<div class="skeleton">Preparing review packet...</div>`;
       try {
         const score = await api(`/msmes/${encodeURIComponent(id)}/score`);
         state.activeScore = score;
         await refreshGovernance();
-        renderSpotlight(score);
-        renderRail(score);
+        renderCaseSummary(score);
+        renderDecisionStamp(score);
         renderTabContent();
-        setApiStatus(true, "Live");
+        setApiStatus(true, "Live API");
       } catch (error) {
         setApiStatus(false, "Offline");
-        els.spotlight.innerHTML = `<div class="error">Could not reach the UdyamPulse API. ${esc(error.message)}</div>`;
+        els.caseSummary.innerHTML = `<div class="error-state">Could not reach the UdyamPulse API. ${esc(error.message)}</div>`;
+        els.decisionStamp.innerHTML = `<div class="empty-state">Decision summary unavailable while the API is offline.</div>`;
         els.tabContent.innerHTML = `<div class="empty-state">Review evidence is unavailable while the API is offline.</div>`;
       }
     }
@@ -1623,11 +1410,10 @@
         state.model = model;
         state.submissionProof = submissionProof;
 
-        setApiStatus(health.status === "ok", health.status === "ok" ? "Live" : "Check");
+        setApiStatus(health.status === "ok", health.status === "ok" ? "Live API" : "Check API");
         setModelStatus();
-        renderImpact();
+        renderPortfolioMetrics();
         renderCases();
-        renderRail(null);
 
         els.msme.addEventListener("change", (event) => loadCase(event.target.value));
         els.caseList.addEventListener("click", (event) => {
@@ -1642,7 +1428,8 @@
         await loadCase(state.activeId);
       } catch (error) {
         setApiStatus(false, "Offline");
-        els.spotlight.innerHTML = `<div class="error">Startup check failed. ${esc(error.message)}</div>`;
+        els.caseSummary.innerHTML = `<div class="error-state">Startup check failed. ${esc(error.message)}</div>`;
+        els.decisionStamp.innerHTML = `<div class="empty-state">Model and audit status could not be fetched.</div>`;
         els.tabContent.innerHTML = `<div class="empty-state">The cockpit loaded, but API evidence could not be fetched.</div>`;
       }
     }

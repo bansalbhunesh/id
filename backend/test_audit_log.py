@@ -7,6 +7,7 @@ def test_scoring_appends_to_audit_log(tmp_path, monkeypatch):
     monkeypatch.setattr(audit_log, "LOG_PATH", tmp_path / "audit_log.jsonl")
     monkeypatch.setattr(audit_log, "_memory_log", [])
     monkeypatch.setattr(audit_log, "_last_hash", audit_log.GENESIS_HASH)
+    monkeypatch.setattr(audit_log, "_loaded_path", None)
 
     score_profile(SAMPLE_PROFILES["ntc_hero"])
     after = audit_log.read_recent()
@@ -16,12 +17,15 @@ def test_scoring_appends_to_audit_log(tmp_path, monkeypatch):
     assert "timestamp" in after[-1]
     assert after[-1]["prev_hash"] == audit_log.GENESIS_HASH
     assert after[-1]["entry_hash"]
+    assert "name" not in after[-1]
+    assert after[-1]["subject_ref"].startswith("subject_")
 
 
 def test_hash_chain_links_consecutive_entries(tmp_path, monkeypatch):
     monkeypatch.setattr(audit_log, "LOG_PATH", tmp_path / "audit_log.jsonl")
     monkeypatch.setattr(audit_log, "_memory_log", [])
     monkeypatch.setattr(audit_log, "_last_hash", audit_log.GENESIS_HASH)
+    monkeypatch.setattr(audit_log, "_loaded_path", None)
 
     score_profile(SAMPLE_PROFILES["ntc_hero"])
     score_profile(SAMPLE_PROFILES["stressed_retailer"])
@@ -37,6 +41,7 @@ def test_verify_chain_detects_tampering(tmp_path, monkeypatch):
     monkeypatch.setattr(audit_log, "LOG_PATH", tmp_path / "audit_log.jsonl")
     monkeypatch.setattr(audit_log, "_memory_log", [])
     monkeypatch.setattr(audit_log, "_last_hash", audit_log.GENESIS_HASH)
+    monkeypatch.setattr(audit_log, "_loaded_path", None)
 
     score_profile(SAMPLE_PROFILES["ntc_hero"])
     score_profile(SAMPLE_PROFILES["stressed_retailer"])
@@ -48,3 +53,22 @@ def test_verify_chain_detects_tampering(tmp_path, monkeypatch):
     result = audit_log.verify_chain(tampered)
     assert result["valid"] is False
     assert result["break_index"] == 0
+
+
+def test_restart_reloads_last_hash_and_continues_chain(tmp_path, monkeypatch):
+    monkeypatch.setattr(audit_log, "LOG_PATH", tmp_path / "audit_log.jsonl")
+    monkeypatch.setattr(audit_log, "_memory_log", [])
+    monkeypatch.setattr(audit_log, "_last_hash", audit_log.GENESIS_HASH)
+    monkeypatch.setattr(audit_log, "_loaded_path", None)
+
+    score_profile(SAMPLE_PROFILES["ntc_hero"])
+    first_hash = audit_log.read_recent()[-1]["entry_hash"]
+
+    monkeypatch.setattr(audit_log, "_memory_log", [])
+    monkeypatch.setattr(audit_log, "_last_hash", audit_log.GENESIS_HASH)
+    monkeypatch.setattr(audit_log, "_loaded_path", None)
+    score_profile(SAMPLE_PROFILES["stressed_retailer"])
+    entries = audit_log.read_recent()
+
+    assert entries[-1]["prev_hash"] == first_hash
+    assert audit_log.verify_chain(entries)["valid"] is True

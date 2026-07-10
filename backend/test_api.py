@@ -96,5 +96,5 @@ def test_submission_proof_maps_judging_rubric_to_verifiable_routes():
         "public_data": "synthetic_demo_cohort",
         "private_idbi_data": "not_claimed",
         "sandbox_access": "designed_for_post_shortlisting_api_access",
-        "production_model": "optional_stage2_gbm_shap_requires_labelled_outcomes",
+        "production_model": "public_proxy_xgboost_not_bank_calibrated; retraining_on_idbi_outcomes_required",
     }

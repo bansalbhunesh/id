@@ -7,10 +7,10 @@ underwriting features into `MSMEProfile`.
 """
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from math import sqrt
 from statistics import mean
-from typing import Annotated
+from typing import Annotated, Literal
 
 from pydantic import BaseModel, Field, model_validator
 
@@ -67,15 +67,31 @@ class ConsentRecord(BaseModel):
     optional ID that's reported as present/absent and never checked."""
 
     consent_id: str = Field(min_length=1)
-    purpose: str = Field(min_length=1)
+    purpose: Literal["msme_underwriting"]
     scope: list[str] = Field(min_length=1)
     granted_at: datetime
     expires_at: datetime
+    status: Literal["active", "revoked"] = "active"
 
     @model_validator(mode="after")
     def expiry_after_grant(self):
-        if self.expires_at <= self.granted_at:
+        granted = self.granted_at if self.granted_at.tzinfo else self.granted_at.replace(tzinfo=timezone.utc)
+        expires = self.expires_at if self.expires_at.tzinfo else self.expires_at.replace(tzinfo=timezone.utc)
+        now = datetime.now(timezone.utc)
+        if expires <= granted:
             raise ValueError("consent.expires_at must be after consent.granted_at")
+        if granted > now + timedelta(minutes=5):
+            raise ValueError("consent.granted_at cannot be in the future")
+        if expires - granted > timedelta(days=365):
+            raise ValueError("consent validity cannot exceed 365 days")
+        allowed = {"account_aggregator", "gst", "upi", "epfo", "bureau"}
+        unknown = sorted(set(self.scope) - allowed)
+        if unknown:
+            raise ValueError(f"consent.scope contains unsupported sources: {unknown}")
+        if len(self.scope) != len(set(self.scope)):
+            raise ValueError("consent.scope cannot contain duplicates")
+        if self.status != "active":
+            raise ValueError("consent is revoked")
         return self
 
     def is_expired(self, *, now: datetime | None = None) -> bool:
@@ -92,6 +108,26 @@ class IDBISandboxPayload(BaseModel):
     epfo: EPFOFeed
     bureau: BureauFeed = Field(default_factory=BureauFeed)
     consent: ConsentRecord
+
+    @model_validator(mode="after")
+    def consent_scope_covers_supplied_feeds(self):
+        required = {"bureau"}
+        if (
+            self.account_aggregator.monthly_inflows
+            or self.account_aggregator.cheque_presentations
+            or self.account_aggregator.outstanding_debt
+        ):
+            required.add("account_aggregator")
+        if self.gst.filing_streak_months or self.gst.trailing_6m_turnover:
+            required.add("gst")
+        if self.upi.monthly_transaction_count or self.upi.unique_counterparties:
+            required.add("upi")
+        if self.epfo.employees:
+            required.add("epfo")
+        missing = sorted(required - set(self.consent.scope))
+        if missing:
+            raise ValueError(f"consent.scope does not cover supplied feeds: {missing}")
+        return self
 
 
 def _coefficient_of_variation(values: list[float]) -> float:

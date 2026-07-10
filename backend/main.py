@@ -41,6 +41,17 @@ app.add_middleware(
 )
 
 
+@app.middleware("http")
+async def security_headers(request, call_next):
+    response = await call_next(request)
+    response.headers["X-Content-Type-Options"] = "nosniff"
+    response.headers["X-Frame-Options"] = "DENY"
+    response.headers["Referrer-Policy"] = "no-referrer"
+    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
+    response.headers["Cache-Control"] = "no-store" if request.url.path.startswith("/audit") else "no-cache"
+    return response
+
+
 @app.get("/health")
 def health():
     return {"status": "ok"}
@@ -70,12 +81,18 @@ def get_score(msme_id: str):
 
 
 @app.post("/score", dependencies=[Depends(rate_limit(max_requests=60))])
-def score_custom(profile: MSMEProfile):
+def score_custom(
+    profile: MSMEProfile,
+    role: str = Depends(require_role("underwriter")),
+):
     return score_profile(profile)
 
 
 @app.post("/sandbox/score", dependencies=[Depends(rate_limit(max_requests=60))])
-def score_sandbox_payload(payload: IDBISandboxPayload):
+def score_sandbox_payload(
+    payload: IDBISandboxPayload,
+    role: str = Depends(require_role("underwriter")),
+):
     if payload.consent.is_expired():
         raise HTTPException(
             status_code=403,
@@ -97,8 +114,14 @@ def score_sandbox_payload(payload: IDBISandboxPayload):
     return result
 
 
-@app.post("/sandbox/recalibration/report")
-def sandbox_recalibration_report(request: SandboxRecalibrationRequest):
+@app.post(
+    "/sandbox/recalibration/report",
+    dependencies=[Depends(rate_limit(max_requests=20))],
+)
+def sandbox_recalibration_report(
+    request: SandboxRecalibrationRequest,
+    role: str = Depends(require_role("underwriter")),
+):
     return build_recalibration_report(request)
 
 
@@ -145,8 +168,11 @@ def get_submission_proof():
     return build_submission_proof(audit_log.read_recent())
 
 
-@app.post("/validation/report")
-def validation_report(request: ValidationRequest):
+@app.post("/validation/report", dependencies=[Depends(rate_limit(max_requests=20))])
+def validation_report(
+    request: ValidationRequest,
+    role: str = Depends(require_role("underwriter")),
+):
     report = build_validation_report(request.development, request.out_of_time)
     report["evidence_type"] = "submitted_batch_validation"
     return report

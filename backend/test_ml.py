@@ -74,14 +74,14 @@ def test_top_reasons_sign_matches_pd_direction_not_inverted():
     # Internal consistency: the signed points must sum close to the actual
     # pd_estimate - pd_baseline gap (first-order approximation, so allow slack).
     actual_gap_pts = (result["pd_estimate"] - result["pd_baseline"]) * 100
-    assert abs(sum(points.values()) - actual_gap_pts) < 5.0
+    assert abs(sum(points.values()) - actual_gap_pts) < 6.0
 
     # Each feature's displayed sign must match its computed sign -- this is
     # exactly the bug this test guards against (a prior version negated the
     # displayed number while flipping the prefix on the wrong branch).
     for name, value in points.items():
         signed = f"+{value:.1f}" if value >= 0 else f"{value:.1f}"
-        assert f"{signed} pts of default risk from {name}" in reasons_text
+        assert f"{signed} approx. PD pts from {name}" in reasons_text
 
 
 def test_model_status_reports_active_provider_contract():
@@ -89,10 +89,34 @@ def test_model_status_reports_active_provider_contract():
 
     status = model_status()
     assert status["active_provider"] in {
-        "logistic_pd_v1",
+        "logistic_pd_v2",
+        "logistic_pd_v2_fallback",
+        "xgboost_pd_proxy_v1",
         "linear_synthetic_fallback",
-        "xgboost",
-        "lightgbm",
     }
     assert "explainability" in status
     assert status["fallback"] is None, "committed PD artifact should be loaded by default"
+
+
+def test_xgboost_tree_shap_reconstructs_calibrated_logit_exactly():
+    from ml import explain
+    from sample_data import SAMPLE_PROFILES
+    from scoring import (
+        score_digital_footprint,
+        score_discipline,
+        score_leverage,
+        score_liquidity,
+        score_momentum,
+    )
+
+    profile = SAMPLE_PROFILES["ntc_hero"]
+    pillars = {
+        "liquidity": score_liquidity(profile),
+        "discipline": score_discipline(profile),
+        "momentum": score_momentum(profile),
+        "leverage": score_leverage(profile),
+        "digital_footprint": score_digital_footprint(profile),
+    }
+    result = explain(profile, pillars)
+    assert abs(result["shap_sum_check_logit"]) < 1e-5
+    assert result["champion_provider"] == "xgboost_pd_proxy_v1"

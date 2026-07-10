@@ -10,31 +10,46 @@ import math
 
 
 def roc_auc(y_true: list[int], y_score: list[float]) -> float:
-    positives = [s for s, y in zip(y_score, y_true) if y == 1]
-    negatives = [s for s, y in zip(y_score, y_true) if y == 0]
+    positives = sum(y_true)
+    negatives = len(y_true) - positives
     if not positives or not negatives:
         return 0.0
-    wins = 0.0
-    for pos in positives:
-        for neg in negatives:
-            if pos > neg:
-                wins += 1
-            elif pos == neg:
-                wins += 0.5
-    return wins / (len(positives) * len(negatives))
+    ranked = sorted(zip(y_score, y_true), key=lambda item: item[0])
+    positive_rank_sum = 0.0
+    position = 1
+    index = 0
+    while index < len(ranked):
+        end = index + 1
+        while end < len(ranked) and ranked[end][0] == ranked[index][0]:
+            end += 1
+        average_rank = (position + (position + end - index - 1)) / 2
+        positive_rank_sum += average_rank * sum(y for _, y in ranked[index:end])
+        position += end - index
+        index = end
+    return (positive_rank_sum - positives * (positives + 1) / 2) / (positives * negatives)
 
 
 def ks_statistic(y_true: list[int], y_score: list[float]) -> float:
-    goods = sorted(s for s, y in zip(y_score, y_true) if y == 0)
-    bads = sorted(s for s, y in zip(y_score, y_true) if y == 1)
-    if not goods or not bads:
+    total_goods = len(y_true) - sum(y_true)
+    total_bads = sum(y_true)
+    if not total_goods or not total_bads:
         return 0.0
-    thresholds = sorted(set(goods + bads))
+    rows = sorted(zip(y_score, y_true), key=lambda item: item[0])
+    goods_seen = 0
+    bads_seen = 0
     max_gap = 0.0
-    for t in thresholds:
-        good_cdf = sum(s <= t for s in goods) / len(goods)
-        bad_cdf = sum(s <= t for s in bads) / len(bads)
-        max_gap = max(max_gap, abs(bad_cdf - good_cdf))
+    index = 0
+    while index < len(rows):
+        end = index + 1
+        while end < len(rows) and rows[end][0] == rows[index][0]:
+            end += 1
+        bads_seen += sum(y for _, y in rows[index:end])
+        goods_seen += (end - index) - sum(y for _, y in rows[index:end])
+        max_gap = max(
+            max_gap,
+            abs(bads_seen / total_bads - goods_seen / total_goods),
+        )
+        index = end
     return max_gap
 
 
@@ -66,6 +81,29 @@ def brier_score(y_true: list[int], y_prob: list[float]) -> float:
     return sum((p - y) ** 2 for p, y in zip(y_prob, y_true)) / n
 
 
+def log_loss(y_true: list[int], y_prob: list[float]) -> float:
+    if not y_true:
+        return 0.0
+    epsilon = 1e-12
+    total = 0.0
+    for target, probability in zip(y_true, y_prob):
+        probability = min(max(probability, epsilon), 1 - epsilon)
+        total -= target * math.log(probability) + (1 - target) * math.log(1 - probability)
+    return total / len(y_true)
+
+
+def expected_calibration_error(
+    y_true: list[int], y_prob: list[float], buckets: int = 10
+) -> float:
+    bins = calibration_bins(y_true, y_prob, buckets)
+    total = sum(item["n"] for item in bins) or 1
+    return sum(
+        item["n"] / total
+        * abs(item["avg_predicted_pd"] - item["actual_default_rate"])
+        for item in bins
+    )
+
+
 def confusion_at_threshold(y_true: list[int], y_prob: list[float], threshold: float) -> dict:
     tp = fp = tn = fn = 0
     for y, p in zip(y_true, y_prob):
@@ -80,6 +118,8 @@ def confusion_at_threshold(y_true: list[int], y_prob: list[float], threshold: fl
             fn += 1
     precision = tp / (tp + fp) if (tp + fp) else 0.0
     recall = tp / (tp + fn) if (tp + fn) else 0.0
+    false_positive_rate = fp / (fp + tn) if (fp + tn) else 0.0
+    specificity = tn / (tn + fp) if (tn + fp) else 0.0
     return {
         "threshold": threshold,
         "true_positive": tp,
@@ -88,6 +128,8 @@ def confusion_at_threshold(y_true: list[int], y_prob: list[float], threshold: fl
         "false_negative": fn,
         "precision": round(precision, 4),
         "recall_capture_rate": round(recall, 4),
+        "false_positive_rate": round(false_positive_rate, 4),
+        "specificity": round(specificity, 4),
     }
 
 

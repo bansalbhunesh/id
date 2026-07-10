@@ -28,7 +28,10 @@ import os
 
 from fastapi import Header, HTTPException
 
-_DEMO_KEYS = {"udyampulse-demo-auditor-key": "auditor"}
+_DEMO_KEYS = {
+    "udyampulse-demo-underwriter-key": "underwriter",
+    "udyampulse-demo-auditor-key": "auditor",
+}
 
 
 def _load_keys() -> dict[str, str]:

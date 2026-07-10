@@ -183,7 +183,8 @@ def _redact_latest_decision(entry: dict | None) -> dict | None:
     if entry is None:
         return None
     redacted = dict(entry)
-    redacted["name"] = "[redacted -- see authenticated /audit-log for full record]"
+    redacted.pop("subject_ref", None)
+    redacted["subject"] = "[pseudonym removed from public governance response]"
     return redacted
 
 
@@ -197,10 +198,10 @@ def build_governance_summary(audit_events: list[dict]) -> dict:
 
     return {
         "model": {
-            "name": "UdyamPulse alternate-data MSME scorecard",
-            "version": "0.3.0-stage2-ready",
-            "training_data": "Public cohort remains synthetic; /sandbox/score accepts consented AA/GST/UPI/EPFO/Bureau payloads for IDBI sandbox recalibration.",
-            "explainability": "Current model returns exact linear Shapley attribution plus reason codes; XGBoost/LightGBM SHAP is the production-scale upgrade path.",
+            "name": "UdyamPulse scorecard + calibrated PD champion/challenger",
+            "version": "0.5.0-public-proxy",
+            "training_data": "Public borrower cohort is synthetic. The PD benchmark is trained on a 30,000-row public consumer-credit proxy; neither is IDBI/MSME outcome data.",
+            "explainability": "Calibrated XGBoost uses native exact TreeSHAP in logit space; calibrated logistic remains the deterministic fallback.",
             "runtime": model_status(),
         },
         "controls": [
@@ -211,7 +212,7 @@ def build_governance_summary(audit_events: list[dict]) -> dict:
             },
             {
                 "control": "Audit reconstruction",
-                "evidence": "Every scoring call appends borrower, score, grade, verdict, and reasons to /audit-log, "
+                "evidence": "Every scoring call appends a pseudonymous subject reference, score, grade, verdict, and reasons to /audit-log, "
                 f"hash-chained entry to entry (chain_valid={chain['valid']}, entries_checked={len(audit_events)}). "
                 "Full records require the auditor role; this evidence is redaction-safe.",
                 "status": "Live" if chain["valid"] else "Broken",
@@ -227,9 +228,9 @@ def build_governance_summary(audit_events: list[dict]) -> dict:
                 "status": "Monitor",
             },
             {
-                "control": "Out-of-time validation",
-                "evidence": "Validation API reports AUC, Gini, KS, PSI drift, and reason-code stability before pilot rollout.",
-                "status": "Stage 2 ready",
+                "control": "Holdout and future OOT validation",
+                "evidence": "Public evidence reports untouched holdout AUC/Gini/KS/PR-AUC/Brier/ECE, bootstrap intervals and PSI. True dated OOT remains blocked on IDBI sandbox outcomes and is not faked.",
+                "status": "Holdout live / OOT pending sandbox",
             },
         ],
         "audit": {

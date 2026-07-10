@@ -24,7 +24,7 @@ API_CATALOG = [
         "method": "POST",
         "path": "/score",
         "layer": "Custom scoring",
-        "proves": "The scorecard is not hard-coded to the public cohort; validators reject impossible underwriting values.",
+        "proves": "Underwriter-authenticated custom scoring proves the scorecard is not hard-coded to the public cohort.",
     },
     {
         "method": "POST",
@@ -67,8 +67,8 @@ BACKEND_CAPABILITIES = [
     },
     {
         "layer": "Explainability",
-        "modules": ["linear_model.py", "ml.py"],
-        "implemented": "Dependency-free linear PD-proxy with exact Shapley-equivalent feature contributions and optional GBM runtime gate.",
+        "modules": ["ml.py", "pd_model.py", "xgb_pd_model.py"],
+        "implemented": "Calibrated XGBoost champion with native exact TreeSHAP, calibrated logistic fallback, and score/PD/policy separation.",
     },
     {
         "layer": "Sandbox ingestion",
@@ -78,12 +78,12 @@ BACKEND_CAPABILITIES = [
     {
         "layer": "Model governance",
         "modules": ["portfolio.py", "pilot_metrics.py", "validation.py"],
-        "implemented": "Fairness slices, pilot KPIs, out-of-time validation, PSI drift, reason-code stability, governance summary.",
+        "implemented": "Proxy holdout fairness slices, pilot-target labelling, bootstrap intervals, PSI stability, reason-code controls, governance summary.",
     },
     {
         "layer": "Audit and memo",
         "modules": ["audit_log.py", "agent_memo.py"],
-        "implemented": "Reconstructable score events and deterministic underwriter memo with optional Bedrock provider fallback.",
+        "implemented": "Pseudonymised restart-safe hash-chain events and deterministic underwriter memo with optional Bedrock provider fallback.",
     },
 ]
 
@@ -111,12 +111,12 @@ RUBRIC_SCORECARD = [
     },
     {
         "criterion": "Technical implementation",
-        "proof": "Implements Pydantic validation, score contracts, exact linear Shapley attribution, validation metrics, fairness slices, and API-level proof instead of static UI claims.",
+        "proof": "Implements Pydantic validation, score/PD/policy contracts, calibrated XGBoost TreeSHAP, holdout metrics, fairness slices, scoped auth, and API-level proof.",
         "evidence": ["/score", "/validation/report", "/governance"],
     },
     {
         "criterion": "Governance readiness",
-        "proof": "Surfaces model limitations, human review lane, audit reconstruction, fairness monitoring, PSI drift, reason-code stability, and deterministic memo fallback.",
+        "proof": "Surfaces domain-transfer limits, model-disagreement review, pseudonymised audit reconstruction, fairness monitoring, PSI, confidence intervals, and deterministic memo fallback.",
         "evidence": ["MODEL_CARD.md", "/audit-log", "/governance"],
     },
 ]
@@ -140,7 +140,7 @@ COMPETITOR_GAP_MAP = [
     },
     {
         "common_pattern": "Explainability as a slide",
-        "udyampulse_advantage": "Every score packet returns exact linear Shapley-equivalent contributions plus human-readable reason codes.",
+        "udyampulse_advantage": "Every score packet returns exact calibrated TreeSHAP/logistic contributions plus human-readable reason codes.",
         "proof": "/msmes/{id}/score",
     },
     {
@@ -192,7 +192,7 @@ def build_submission_proof(audit_events: list[dict]) -> dict[str, Any]:
             "public_data": "synthetic_demo_cohort",
             "private_idbi_data": "not_claimed",
             "sandbox_access": "designed_for_post_shortlisting_api_access",
-            "production_model": "optional_stage2_gbm_shap_requires_labelled_outcomes",
+            "production_model": "public_proxy_xgboost_not_bank_calibrated; retraining_on_idbi_outcomes_required",
         },
         "hero_reversal": {
             "case": hero["name"],
@@ -216,7 +216,8 @@ def build_submission_proof(audit_events: list[dict]) -> dict[str, Any]:
                 "Borrower or sandbox payload enters FastAPI",
                 "Pydantic validates profile/feed constraints",
                 "Scoring engine emits health card, verdict, limit, guardrails",
-                "ML layer adds exact Shapley attribution",
+                "Calibrated PD champion adds exact logit-space TreeSHAP attribution",
+                "Versioned policy separates score, PD estimate, and review route",
                 "Memo layer creates deterministic underwriter memo",
                 "Audit log records reconstructable decision event",
                 "Governance APIs expose validation, drift, fairness, and pilot KPIs",
@@ -224,7 +225,7 @@ def build_submission_proof(audit_events: list[dict]) -> dict[str, Any]:
             "stage2_swap_points": [
                 "Replace public synthetic cohort with consented IDBI sandbox feeds",
                 "Run /sandbox/recalibration/report on real feature distributions and repayment labels",
-                "Enable XGBoost/LightGBM + SHAP only after approved labelled volume exists",
+                "Retrain the existing champion/challenger pipeline on approved labelled sandbox outcomes",
                 "Enable AWS Bedrock memo provider with deterministic fallback still active",
                 "Swap in persistent audit storage for pilot operations",
             ],
@@ -233,14 +234,15 @@ def build_submission_proof(audit_events: list[dict]) -> dict[str, Any]:
         "validation_metrics": (
             {
                 "evidence_type": "held_out_model_evaluation",
-                "auc": evaluation["splits"]["out_of_time"]["auc"],
-                "gini": evaluation["splits"]["out_of_time"]["gini"],
-                "ks": evaluation["splits"]["out_of_time"]["ks"],
-                "pr_auc": evaluation["splits"]["out_of_time"]["pr_auc"],
-                "brier_score": evaluation["splits"]["out_of_time"]["brier_score"],
-                "n": evaluation["splits"]["out_of_time"]["n"],
+                "auc": evaluation["splits"]["holdout"]["auc"],
+                "gini": evaluation["splits"]["holdout"]["gini"],
+                "ks": evaluation["splits"]["holdout"]["ks"],
+                "pr_auc": evaluation["splits"]["holdout"]["pr_auc"],
+                "brier_score": evaluation["splits"]["holdout"]["brier_score"],
+                "expected_calibration_error": evaluation["splits"]["holdout"]["expected_calibration_error"],
+                "n": evaluation["splits"]["holdout"]["n"],
                 "dataset": evaluation["dataset"]["name"],
-                "note": "Real held-out metrics from the trained PD model (GET /model/evaluation), not an illustrative fixture.",
+                "note": "Untouched random holdout metrics from a public proxy dataset, not OOT and not IDBI/MSME performance.",
             }
             if evaluation is not None
             else {

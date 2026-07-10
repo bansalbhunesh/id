@@ -1,9 +1,8 @@
 """Rule-based MSME financial health scoring engine.
 
 Five pillars, each 0-20, summed to a 0-100 score with an A-E grade.
-Deliberately simple and dependency-free for the public build; the ML
-attribution layer can switch to optional XGBoost/LightGBM + SHAP without
-changing this module's public interface.
+The descriptive score stays separate from the calibrated XGBoost PD model
+and the versioned lending policy so each layer can be audited independently.
 """
 from pydantic import BaseModel, Field
 
@@ -136,7 +135,12 @@ def data_source_signals(p: MSMEProfile) -> list[dict]:
     ]
 
 
-def policy_guardrails(p: MSMEProfile, pillars: dict[str, int], total: int) -> list[dict]:
+def policy_guardrails(
+    p: MSMEProfile,
+    pillars: dict[str, int],
+    total: int,
+    policy: dict,
+) -> list[dict]:
     return [
         {
             "control": "Consent data boundary",
@@ -160,14 +164,27 @@ def policy_guardrails(p: MSMEProfile, pillars: dict[str, int], total: int) -> li
         },
         {
             "control": "Human review lane",
-            "status": "Review" if 50 <= total < 65 else "Pass",
-            "detail": "Grade C files are bankable with conditions; grade A/B can move to fast-track approval.",
+            "status": "Review" if policy["decision"] == "Review" else "Pass",
+            "detail": policy["reason"],
+        },
+        {
+            "control": "PD guardrail",
+            "status": "Review" if policy["pd_guardrail_triggered"] else "Pass",
+            "detail": (
+                f"Proxy PD {policy['pd_estimate']:.1%}; human-review threshold "
+                f"{policy['pd_review_threshold']:.1%}. The proxy can route to review but never auto-declines."
+            ),
         },
     ]
 
 
-def decision_path(p: MSMEProfile, total: int, grade: str, traditional: dict) -> list[dict]:
-    alternate = "Approved" if grade in ("A", "B", "C") else "Rejected"
+def decision_path(
+    p: MSMEProfile,
+    total: int,
+    grade: str,
+    traditional: dict,
+    policy: dict,
+) -> list[dict]:
     return [
         {
             "stage": "Traditional bureau screen",
@@ -176,8 +193,11 @@ def decision_path(p: MSMEProfile, total: int, grade: str, traditional: dict) -> 
         },
         {
             "stage": "Alternate-data health card",
-            "decision": alternate,
-            "evidence": f"Composite score {total}/100, grade {grade}, {risk_band_for(grade).lower()}.",
+            "decision": policy["decision"],
+            "evidence": (
+                f"Composite score {total}/100, grade {grade}, {risk_band_for(grade).lower()}; "
+                f"proxy PD {policy['pd_estimate']:.1%}."
+            ),
         },
         {
             "stage": "Credit-line recommendation",
@@ -185,6 +205,47 @@ def decision_path(p: MSMEProfile, total: int, grade: str, traditional: dict) -> 
             "evidence": f"Eligible working-capital limit Rs {eligible_limit(total, p):,.0f}.",
         },
     ]
+
+
+def apply_decision_policy(grade: str, pd_estimate: float | None, pd_threshold: float | None) -> dict:
+    """Separate descriptive score, risk estimate and lending policy.
+
+    The public proxy PD may route a nominally bankable file to human review,
+    but it is never allowed to auto-decline an MSME across domains. Grades D/E
+    remain rule-policy declines; grade C is always reviewed.
+    """
+    estimate = float(pd_estimate) if pd_estimate is not None else 0.0
+    threshold = float(pd_threshold) if pd_threshold is not None else 1.0
+    pd_triggered = pd_estimate is not None and estimate >= threshold
+    if grade in ("D", "E"):
+        decision = "Rejected"
+        route = "policy_decline"
+        reason = f"Grade {grade} is outside the bankable scorecard range."
+    elif grade == "C":
+        decision = "Review"
+        route = "mandatory_human_review"
+        reason = "Grade C is bankable only with conditions and mandatory underwriter review."
+    elif pd_triggered:
+        decision = "Review"
+        route = "model_disagreement_review"
+        reason = (
+            "The scorecard is bankable but the cross-domain proxy PD crossed its calibrated "
+            "review threshold; an underwriter must resolve the disagreement."
+        )
+    else:
+        decision = "Approved"
+        route = "fast_track_eligible"
+        reason = "Grade A/B and proxy PD below the review threshold; eligible for fast-track approval."
+    return {
+        "version": "policy-v2-score-pd-separation",
+        "decision": decision,
+        "route": route,
+        "reason": reason,
+        "pd_estimate": estimate,
+        "pd_review_threshold": threshold,
+        "pd_guardrail_triggered": pd_triggered,
+        "auto_decline_from_proxy_model": False,
+    }
 
 
 IMPROVEMENT_ACTIONS = {
@@ -243,12 +304,16 @@ def score_profile(p: MSMEProfile, record_audit: bool = True) -> dict:
     total = sum(pillars.values())
     grade = grade_for(total)
     traditional = traditional_verdict(p)
-    alternate_data_decision = "Approved" if grade in ("A", "B", "C") else "Rejected"
-    policy = {
-        "version": "policy-v1",
-        "rule": "Approve grades A-C (composite score >= 50); grade C routed to human review lane.",
-        "decision": alternate_data_decision,
-    }
+
+    from ml import explain, pd_policy_threshold  # local import avoids circular import at module load
+
+    model_explanation = explain(p, pillars)
+    policy = apply_decision_policy(
+        grade,
+        model_explanation.get("pd_estimate"),
+        pd_policy_threshold(),
+    )
+    alternate_data_decision = policy["decision"]
     result = {
         "name": p.name,
         "profile": {
@@ -270,15 +335,14 @@ def score_profile(p: MSMEProfile, record_audit: bool = True) -> dict:
         "policy": policy,
         "improvement_plan": improvement_plan(pillars, p),
         "data_sources": data_source_signals(p),
-        "policy_guardrails": policy_guardrails(p, pillars, total),
-        "decision_path": decision_path(p, total, grade, traditional),
+        "policy_guardrails": policy_guardrails(p, pillars, total, policy),
+        "decision_path": decision_path(p, total, grade, traditional, policy),
     }
 
-    from ml import explain  # local imports: avoid circular imports at module load
     from agent_memo import generate_memo
     import audit_log
 
-    result["ml"] = explain(p, pillars)
+    result["ml"] = model_explanation
     result["pd_estimate"] = result["ml"].get("pd_estimate")
     result["memo"] = generate_memo(result)
     if record_audit:

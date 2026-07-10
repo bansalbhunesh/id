@@ -13,8 +13,13 @@ UNIVERSAL_FEATURES = ["discipline", "leverage", "liquidity"]
 
 
 def msme_pillars_to_universal(pillars_0_20: dict[str, float]) -> dict[str, float]:
+    # UCI discipline=1 means no observed repayment delinquency. The MSME
+    # pillar blends cheque conduct with GST continuity, so a strong score
+    # (17+/20) is the economically equivalent no-adverse-conduct state;
+    # dividing by 20 would incorrectly treat a clean 17 as delinquent.
+    discipline = (pillars_0_20["discipline"] - 8.0) / 9.0
     return {
-        "discipline": pillars_0_20["discipline"] / 20.0,
+        "discipline": max(0.0, min(1.0, discipline)),
         "leverage": pillars_0_20["leverage"] / 20.0,
         "liquidity": pillars_0_20["liquidity"] / 20.0,
     }

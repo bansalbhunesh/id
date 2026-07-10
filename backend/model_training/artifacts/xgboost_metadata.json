@@ -1,0 +1,19 @@
+{
+  "model_type": "xgboost_pd_proxy_v1",
+  "feature_names": [
+    "discipline",
+    "leverage",
+    "liquidity"
+  ],
+  "calibration_slope": 1.012075610097067,
+  "calibration_intercept": -0.010733757225246388,
+  "tree_count": 220,
+  "monotone_constraints": {
+    "discipline": -1,
+    "leverage": -1,
+    "liquidity": -1
+  },
+  "tree_shap": "native pred_contribs, exact in calibrated logit space",
+  "trained_at_utc": "2026-07-10T21:27:51.145041+00:00",
+  "dataset_sha256": "30c6be3abd8dcfd3e6096c828bad8c2f011238620f5369220bd60cfc82700933"
+}

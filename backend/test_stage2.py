@@ -11,6 +11,7 @@ from scoring import score_profile
 
 
 client = TestClient(app)
+UNDERWRITER_HEADERS = {"Authorization": "Bearer udyampulse-demo-underwriter-key"}
 
 
 def _consent(*, expired: bool = False) -> dict:
@@ -71,7 +72,7 @@ def test_sandbox_feed_maps_to_scoreable_profile():
 
 
 def test_sandbox_score_endpoint_marks_connected_real_feeds():
-    response = client.post("/sandbox/score", json=sandbox_payload())
+    response = client.post("/sandbox/score", json=sandbox_payload(), headers=UNDERWRITER_HEADERS)
 
     assert response.status_code == 200
     body = response.json()
@@ -86,7 +87,7 @@ def test_sandbox_score_rejects_impossible_feed_values():
     payload["account_aggregator"]["cheque_bounces"] = 4
     payload["account_aggregator"]["cheque_presentations"] = 2
 
-    response = client.post("/sandbox/score", json=payload)
+    response = client.post("/sandbox/score", json=payload, headers=UNDERWRITER_HEADERS)
 
     assert response.status_code == 422
 
@@ -95,20 +96,24 @@ def test_sandbox_score_rejects_missing_consent():
     payload = sandbox_payload()
     del payload["consent"]
 
-    response = client.post("/sandbox/score", json=payload)
+    response = client.post("/sandbox/score", json=payload, headers=UNDERWRITER_HEADERS)
 
     assert response.status_code == 422
 
 
 def test_sandbox_score_rejects_expired_consent():
-    response = client.post("/sandbox/score", json=sandbox_payload(expired_consent=True))
+    response = client.post(
+        "/sandbox/score",
+        json=sandbox_payload(expired_consent=True),
+        headers=UNDERWRITER_HEADERS,
+    )
 
     assert response.status_code == 403
     assert "expired" in response.json()["detail"].lower()
 
 
 def test_sandbox_score_guardrail_reflects_verified_consent():
-    response = client.post("/sandbox/score", json=sandbox_payload())
+    response = client.post("/sandbox/score", json=sandbox_payload(), headers=UNDERWRITER_HEADERS)
 
     assert response.status_code == 200
     guardrails = {g["control"]: g for g in response.json()["policy_guardrails"]}
@@ -130,6 +135,7 @@ def test_sandbox_recalibration_report_profiles_real_feed_distributions():
     response = client.post(
         "/sandbox/recalibration/report",
         json={"development": development, "out_of_time": out_of_time},
+        headers=UNDERWRITER_HEADERS,
     )
 
     assert response.status_code == 200
@@ -157,6 +163,7 @@ def test_custom_score_rejects_negative_underwriting_features():
             "unique_counterparties": 5,
             "outstanding_debt_to_inflow": 0.2,
         },
+        headers=UNDERWRITER_HEADERS,
     )
 
     assert response.status_code == 422
@@ -178,7 +185,7 @@ def test_validation_report_exposes_auc_gini_ks_psi_and_reason_stability():
         ],
     }
 
-    response = client.post("/validation/report", json=payload)
+    response = client.post("/validation/report", json=payload, headers=UNDERWRITER_HEADERS)
 
     assert response.status_code == 200
     metrics = response.json()["metrics"]
@@ -201,7 +208,7 @@ def test_validation_report_flags_missing_outcome_classes():
         ],
     }
 
-    response = client.post("/validation/report", json=payload)
+    response = client.post("/validation/report", json=payload, headers=UNDERWRITER_HEADERS)
 
     assert response.status_code == 200
     assert "both defaulted and non-defaulted" in " ".join(response.json()["warnings"])
@@ -224,7 +231,7 @@ def test_governance_summary_includes_validation_and_pilot_controls():
     summary = build_governance_summary([])
     controls = {item["control"] for item in summary["controls"]}
 
-    assert "Out-of-time validation" in controls
+    assert "Holdout and future OOT validation" in controls
     assert "Fairness monitor" in controls
     assert "pilot_metrics" in summary
 
@@ -234,10 +241,10 @@ def test_model_status_endpoint_exposes_runtime_provider():
 
     assert response.status_code == 200
     assert response.json()["active_provider"] in {
-        "logistic_pd_v1",
+        "logistic_pd_v2",
+        "logistic_pd_v2_fallback",
+        "xgboost_pd_proxy_v1",
         "linear_synthetic_fallback",
-        "xgboost",
-        "lightgbm",
     }
 
 
@@ -292,7 +299,7 @@ def test_governance_redacts_latest_borrower_name():
         "upi_txn_count_monthly": 100,
         "unique_counterparties": 20,
         "outstanding_debt_to_inflow": 0.1,
-    })
+    }, headers=UNDERWRITER_HEADERS)
 
     response = client.get("/governance")
 
@@ -308,6 +315,22 @@ def test_model_evaluation_exposes_real_held_out_metrics():
     assert response.status_code == 200
     body = response.json()
     assert body["evidence_type"] == "held_out_model_evaluation"
-    oot = body["splits"]["out_of_time"]
-    assert oot["auc"] > 0.65
-    assert oot["n"] > 1000
+    holdout = body["splits"]["holdout"]
+    assert holdout["auc"] > 0.65
+    assert holdout["n"] > 1000
+    assert "not an out-of-time" in body["validation_design"]
+
+
+def test_protected_scoring_requires_underwriter_role():
+    response = client.post("/sandbox/score", json=sandbox_payload())
+    assert response.status_code == 401
+
+
+def test_sandbox_scope_must_cover_supplied_feeds():
+    payload = sandbox_payload()
+    payload["consent"]["scope"].remove("gst")
+    response = client.post(
+        "/sandbox/score", json=payload, headers=UNDERWRITER_HEADERS
+    )
+    assert response.status_code == 422
+    assert "does not cover supplied feeds" in response.text

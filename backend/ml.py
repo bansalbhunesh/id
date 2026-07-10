@@ -1,22 +1,15 @@
-"""ML explainability layer.
+"""Champion/challenger PD inference and exact model attribution.
 
-Default runtime model: a logistic-regression PD (probability of default)
-model trained on a real binary default-outcome label from a public dataset
-(backend/model_training/train_pd_model.py), loaded from the committed
-`model_training/artifacts/artifact.json`. No scikit-learn/xgboost/shap is
-required to serve -- `pd_model.LogisticModel` is dependency-free stdlib
-Python, exactly like the linear model it replaces as the default provider.
-
-Every score also gets an optional GBM upgrade path: when IDBI sandbox labels
-and optional production ML packages are available,
-`UDYAMPULSE_MODEL_PROVIDER=xgboost|lightgbm` plus
-`UDYAMPULSE_TRAINING_DATA=/path/to/labelled.jsonl` switches the same public
-`explain` contract to a gradient-boosted model with SHAP.
+The committed champion manifest is produced by
+``model_training/train_pd_model.py``. The preferred provider is calibrated
+XGBoost with native TreeSHAP in logit space. A calibrated dependency-free
+logistic artifact remains the deterministic fallback if XGBoost cannot load;
+the old synthetic score regression is only a last-resort missing-artifact
+fallback and is never presented as default-risk evidence.
 """
 from __future__ import annotations
 
 import json
-import os
 from pathlib import Path
 
 from feature_bridge import UNIVERSAL_FEATURES, msme_pillars_to_universal
@@ -25,128 +18,100 @@ from pd_model import LogisticModel
 from scoring import MSMEProfile
 from synthetic_training import generate_training_set
 
-MIN_PRODUCTION_ROWS = 1000
-ARTIFACT_PATH = Path(__file__).parent / "model_training" / "artifacts" / "artifact.json"
-EVALUATION_PATH = Path(__file__).parent / "model_training" / "artifacts" / "evaluation.json"
+ARTIFACT_DIR = Path(__file__).parent / "model_training" / "artifacts"
+LOGISTIC_PATH = ARTIFACT_DIR / "artifact.json"
+XGB_MODEL_PATH = ARTIFACT_DIR / "xgboost_model.json"
+XGB_METADATA_PATH = ARTIFACT_DIR / "xgboost_metadata.json"
+CHAMPION_PATH = ARTIFACT_DIR / "champion.json"
+EVALUATION_PATH = ARTIFACT_DIR / "evaluation.json"
 
 
-def _load_pd_model() -> tuple[LogisticModel | None, dict]:
-    if not ARTIFACT_PATH.exists():
+def _read_json(path: Path) -> dict:
+    with path.open("r", encoding="utf-8") as handle:
+        return json.load(handle)
+
+
+def _load_champion():
+    if not LOGISTIC_PATH.exists():
         return None, {
             "active_provider": "linear_synthetic_fallback",
-            "requested_provider": os.getenv("UDYAMPULSE_MODEL_PROVIDER", "linear").lower(),
-            "training_data": "public synthetic cohort (fallback: no trained PD artifact found)",
-            "explainability": "exact linear Shapley contributions on a synthetic score proxy",
-            "fallback": f"Expected artifact at {ARTIFACT_PATH}; run backend/model_training/train_pd_model.py",
+            "champion_provider": None,
+            "training_data": "public synthetic score proxy; no PD artifact found",
+            "explainability": "exact linear Shapley contributions on a synthetic score target",
+            "fallback": f"Run {Path('backend/model_training/train_pd_model.py')}",
+            "policy_review_threshold": None,
         }
-    model = LogisticModel.load(ARTIFACT_PATH)
-    with ARTIFACT_PATH.open("r", encoding="utf-8") as handle:
-        artifact_meta = json.load(handle)
+
+    champion = _read_json(CHAMPION_PATH) if CHAMPION_PATH.exists() else {
+        "provider": "logistic_pd_v2",
+        "policy_review_threshold": 0.30,
+    }
+    fallback_reason = None
+    model = None
+    active_provider = champion["provider"]
+    if champion["provider"] == "xgboost_pd_proxy_v1":
+        try:
+            from xgb_pd_model import XGBoostPDModel
+
+            model = XGBoostPDModel.load(XGB_MODEL_PATH, XGB_METADATA_PATH)
+        except (ImportError, OSError, ValueError) as exc:
+            fallback_reason = (
+                f"Champion XGBoost unavailable ({exc.__class__.__name__}); "
+                "serving calibrated logistic fallback."
+            )
+            active_provider = "logistic_pd_v2_fallback"
+
+    if model is None:
+        model = LogisticModel.load(LOGISTIC_PATH)
+        if champion["provider"] != "xgboost_pd_proxy_v1":
+            active_provider = "logistic_pd_v2"
+
+    evaluation = _read_json(EVALUATION_PATH) if EVALUATION_PATH.exists() else {}
+    dataset = evaluation.get("dataset", {})
     status = {
-        "active_provider": "logistic_pd_v1",
-        "requested_provider": os.getenv("UDYAMPULSE_MODEL_PROVIDER", "linear").lower(),
-        "training_data": f"UCI public credit-default dataset (proxy; see model_training/dataset_manifest.json), sha256={artifact_meta.get('dataset_sha256', '?')[:12]}...",
-        "trained_at_utc": artifact_meta.get("trained_at_utc"),
+        "active_provider": active_provider,
+        "champion_provider": champion.get("provider"),
+        "fallback_provider": champion.get("fallback_provider", "logistic_pd_v2"),
+        "training_data": (
+            f"{dataset.get('name', 'public credit-default proxy')} "
+            f"({dataset.get('rows', '?')} rows; not IDBI/MSME data)"
+        ),
+        "trained_at_utc": champion.get("trained_at_utc"),
         "features": UNIVERSAL_FEATURES,
-        "explainability": "exact logit-space Shapley contributions + first-order probability-scale approximation",
-        "fallback": None,
+        "policy_review_threshold": champion.get("policy_review_threshold", 0.30),
+        "validation_design": evaluation.get("validation_design"),
+        "explainability": (
+            "native exact TreeSHAP in calibrated logit space"
+            if active_provider == "xgboost_pd_proxy_v1"
+            else "exact calibrated linear Shapley contributions in logit space"
+        ),
+        "fallback": fallback_reason,
     }
     return model, status
 
 
-_pd_model, _runtime_status = _load_pd_model()
+_pd_model, _runtime_status = _load_champion()
 
-# Kept only as the deterministic score-explanation fallback if no PD artifact
-# is committed; never the default when artifact.json exists (see above).
+# Missing-artifact fallback only. It keeps the app available but is explicitly
+# labelled synthetic and is not used when the committed PD artifacts exist.
 _linear_model = LinearModel()
 _rows, _targets = generate_training_set()
 _linear_model.fit(_rows, _targets)
-
-_gbm_bundle: dict | None = None
-
-
-def _to_features(p: MSMEProfile) -> dict[str, float]:
-    return {name: getattr(p, name) for name in FEATURE_NAMES}
-
-
-def _load_labelled_rows(path: str) -> tuple[list[dict[str, float]], list[float]]:
-    rows: list[dict[str, float]] = []
-    targets: list[float] = []
-    with Path(path).open("r", encoding="utf-8") as handle:
-        for line_number, line in enumerate(handle, start=1):
-            if not line.strip():
-                continue
-            item = json.loads(line)
-            target = item.get("target_score", item.get("score"))
-            if target is None:
-                raise ValueError(f"Missing target score on line {line_number}")
-            source = item.get("features", item)
-            rows.append({name: float(source[name]) for name in FEATURE_NAMES})
-            targets.append(float(target))
-    return rows, targets
-
-
-def _try_build_gbm() -> None:
-    global _gbm_bundle, _runtime_status
-
-    provider = _runtime_status["requested_provider"]
-    if provider not in {"xgboost", "lightgbm"}:
-        return
-
-    data_path = os.getenv("UDYAMPULSE_TRAINING_DATA")
-    if not data_path:
-        _runtime_status["fallback"] = "UDYAMPULSE_TRAINING_DATA is not configured."
-        return
-
-    try:
-        rows, targets = _load_labelled_rows(data_path)
-        min_rows = int(os.getenv("UDYAMPULSE_MIN_GBM_ROWS", str(MIN_PRODUCTION_ROWS)))
-        if len(rows) < min_rows:
-            _runtime_status["fallback"] = f"Only {len(rows)} labelled rows found; {min_rows} required for GBM mode."
-            return
-
-        if provider == "xgboost":
-            from xgboost import XGBRegressor as Regressor  # type: ignore
-        else:
-            from lightgbm import LGBMRegressor as Regressor  # type: ignore
-        import shap  # type: ignore
-
-        matrix = [[row[name] for name in FEATURE_NAMES] for row in rows]
-        model = Regressor(n_estimators=300, max_depth=3, learning_rate=0.05, random_state=42)
-        model.fit(matrix, targets)
-        explainer = shap.Explainer(model, matrix[: min(500, len(matrix))])
-        baseline = float(getattr(explainer, "expected_value", sum(targets) / len(targets)))
-        if isinstance(baseline, list):
-            baseline = float(baseline[0])
-        _gbm_bundle = {
-            "model": model,
-            "explainer": explainer,
-            "baseline": baseline,
-        }
-        _runtime_status = {
-            "active_provider": provider,
-            "requested_provider": provider,
-            "training_data": str(Path(data_path)),
-            "records": len(rows),
-            "explainability": "Tree SHAP via shap package",
-            "fallback": None,
-        }
-    except Exception as exc:  # optional production dependencies must not break demo mode
-        _runtime_status["fallback"] = f"{provider} mode unavailable: {exc.__class__.__name__}"
-        _gbm_bundle = None
 
 
 def model_status() -> dict:
     return dict(_runtime_status)
 
 
+def pd_policy_threshold() -> float | None:
+    value = _runtime_status.get("policy_review_threshold")
+    return float(value) if value is not None else None
+
+
 def model_evaluation() -> dict | None:
-    """Held-out OOT evaluation metrics for the active PD artifact, or None if
-    no artifact has been trained yet. Same numbers /model/evaluation serves."""
     if not EVALUATION_PATH.exists():
         return None
-    with EVALUATION_PATH.open("r", encoding="utf-8") as handle:
-        return json.load(handle)
+    return _read_json(EVALUATION_PATH)
 
 
 def _pd_explain(pillars: dict[str, int]) -> dict:
@@ -155,88 +120,71 @@ def _pd_explain(pillars: dict[str, int]) -> dict:
     pd_probability = _pd_model.predict_proba(universal)
     logit_contributions = _pd_model.shap_contributions_logit(universal)
     baseline_probability = _pd_model.baseline_probability
+    baseline_logit = _pd_model.baseline_logit
 
-    # First-order (delta-method) linearization of the sigmoid at the baseline
-    # to express logit-space contributions in approximate probability points.
-    # Exact only at the baseline point; noted explicitly in the response.
-    slope = baseline_probability * (1 - baseline_probability)
+    # Delta-method display values aid underwriter intuition. The exact audit
+    # invariant remains the logit-space reconstruction directly below.
+    probability_slope = baseline_probability * (1 - baseline_probability)
     approx_probability_points = {
-        name: round(value * slope * 100, 2) for name, value in logit_contributions.items()
+        name: round(value * probability_slope * 100, 2)
+        for name, value in logit_contributions.items()
     }
-
-    ranked = sorted(logit_contributions.items(), key=lambda kv: abs(kv[1]), reverse=True)
+    ranked = sorted(logit_contributions.items(), key=lambda item: abs(item[1]), reverse=True)
     top_reasons = [
-        # Positive == this feature pushed the PD estimate up (more risk);
-        # negative == it pulled the estimate down (less risk). Do not flip
-        # the sign here -- approx_probability_points is already signed
-        # correctly relative to pd_probability - baseline_probability.
-        f"{'+' if approx_probability_points[name] >= 0 else ''}{approx_probability_points[name]:.1f} pts "
-        f"of default risk from {name}"
-        for name, _ in ranked
+        f"{'+' if approx_probability_points[name] >= 0 else ''}{approx_probability_points[name]:.1f} "
+        f"approx. PD pts from {name}"
+        for name, _value in ranked
     ]
 
-    predicted_score = round((1 - pd_probability) * 100, 1)
-    baseline_score = round((1 - baseline_probability) * 100, 1)
-
+    predicted_logit = _pd_model.predict_logit(universal)
     return {
-        "predicted_score": predicted_score,
-        "baseline_score": baseline_score,
+        "predicted_score": round((1 - pd_probability) * 100, 1),
+        "baseline_score": round((1 - baseline_probability) * 100, 1),
         "pd_estimate": round(pd_probability, 4),
         "pd_baseline": round(baseline_probability, 4),
-        "shap_contributions_logit": {k: round(v, 4) for k, v in logit_contributions.items()},
+        "pd_review_threshold": pd_policy_threshold(),
+        "shap_contributions_logit": {
+            name: round(value, 4) for name, value in logit_contributions.items()
+        },
         "shap_contributions_approx_probability_points": approx_probability_points,
+        "probability_points_note": (
+            "First-order display approximation at the baseline; exact additivity is in logit space."
+        ),
         "top_reasons": top_reasons,
         "provider": _runtime_status["active_provider"],
+        "champion_provider": _runtime_status.get("champion_provider"),
         "shap_sum_check_logit": round(
-            sum(logit_contributions.values()) - (_pd_model.predict_logit(universal) - _pd_model.baseline_logit), 6
+            sum(logit_contributions.values()) - (predicted_logit - baseline_logit),
+            6,
         ),
     }
 
 
-def _linear_explain(features: dict[str, float]) -> dict:
+def _linear_explain(profile: MSMEProfile) -> dict:
+    features = {name: getattr(profile, name) for name in FEATURE_NAMES}
     predicted = _linear_model.predict(features)
     contributions = _linear_model.shap_contributions(features)
     baseline = _linear_model.baseline_prediction
-    return _format_explanation(predicted, baseline, contributions)
-
-
-def _gbm_explain(features: dict[str, float]) -> dict:
-    assert _gbm_bundle is not None
-    matrix = [[features[name] for name in FEATURE_NAMES]]
-    predicted = float(_gbm_bundle["model"].predict(matrix)[0])
-    shap_values = _gbm_bundle["explainer"](matrix).values[0]
-    contributions = {name: float(value) for name, value in zip(FEATURE_NAMES, shap_values)}
-    return _format_explanation(predicted, _gbm_bundle["baseline"], contributions)
-
-
-def _format_explanation(predicted: float, baseline: float, contributions: dict[str, float]) -> dict:
-    raw_predicted = predicted
-    raw_baseline = baseline
-    predicted = max(0.0, min(100.0, raw_predicted))
-    baseline = max(0.0, min(100.0, raw_baseline))
-    contribution_sum = sum(contributions.values())
-    ranked = sorted(contributions.items(), key=lambda kv: abs(kv[1]), reverse=True)
-    top_reasons = [
-        f"{'+' if value >= 0 else ''}{value:.1f} pts from {name.replace('_', ' ')}"
-        for name, value in ranked[:4]
-    ]
-
     return {
-        "predicted_score": round(predicted, 1),
-        "baseline_score": round(baseline, 1),
-        "shap_contributions": {k: round(v, 2) for k, v in contributions.items()},
-        "top_reasons": top_reasons,
-        "provider": _runtime_status["active_provider"],
-        "shap_sum_check": round(contribution_sum - (raw_predicted - raw_baseline), 4),
+        "predicted_score": round(max(0.0, min(100.0, predicted)), 1),
+        "baseline_score": round(max(0.0, min(100.0, baseline)), 1),
+        "top_reasons": [
+            f"{'+' if value >= 0 else ''}{value:.1f} score pts from {name.replace('_', ' ')}"
+            for name, value in sorted(
+                contributions.items(), key=lambda item: abs(item[1]), reverse=True
+            )[:4]
+        ],
+        "provider": "linear_synthetic_fallback",
+        "shap_contributions": {
+            name: round(value, 2) for name, value in contributions.items()
+        },
+        "shap_sum_check": round(
+            sum(contributions.values()) - (predicted - baseline), 6
+        ),
     }
 
 
-def explain(p: MSMEProfile, pillars: dict[str, int]) -> dict:
-    if _gbm_bundle is not None:
-        return _gbm_explain(_to_features(p))
+def explain(profile: MSMEProfile, pillars: dict[str, int]) -> dict:
     if _pd_model is not None:
         return _pd_explain(pillars)
-    return _linear_explain(_to_features(p))
-
-
-_try_build_gbm()
+    return _linear_explain(profile)

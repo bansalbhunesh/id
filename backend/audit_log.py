@@ -1,28 +1,11 @@
-"""Append-only, hash-chained audit log for every scoring decision.
+"""Pseudonymised, persistent, hash-chained decision audit events."""
+from __future__ import annotations
 
-RBI's draft Guidance on Model Risk Management requires AI-assisted credit
-decisions to be "consistent, unbiased, explainable and verifiable" -- and
-notes that most regulated entities using AI do not keep audit logs. This
-module is UdyamPulse's answer: every scored decision is recorded with its
-grade, verdict, and top reasons, so any decision can be reconstructed and
-reviewed later.
-
-Each entry is chained to the previous one's hash (`prev_hash`/`entry_hash`),
-so `verify_chain` can detect if any past entry was edited or removed --
-append-only in practice, not just in name. Full records (including borrower
-name) are only exposed via the auditor-gated `GET /audit-log`; every public
-surface that touches audit data (see portfolio.py's `_redact_latest_decision`)
-redacts the name first.
-
-In-memory storage is the source of truth (works identically on a normal
-VM/Docker host or an ephemeral serverless function). Disk persistence to
-LOG_PATH is attempted best-effort on top of that -- serverless filesystems
-are often read-only or reset between invocations, so a failed disk write
-must never break a scoring request. A production pilot swaps this for a
-real database/log store with the same hash-chain contract.
-"""
 import hashlib
+import hmac
 import json
+import os
+import threading
 import time
 from pathlib import Path
 
@@ -31,71 +14,171 @@ GENESIS_HASH = "0" * 64
 
 _memory_log: list[dict] = []
 _last_hash: str = GENESIS_HASH
+_loaded_path: Path | None = None
+_lock = threading.RLock()
+
+
+class AuditIntegrityError(RuntimeError):
+    pass
 
 
 def _compute_entry_hash(entry_without_hash: dict, prev_hash: str) -> str:
-    payload = json.dumps({**entry_without_hash, "prev_hash": prev_hash}, sort_keys=True, default=str)
+    payload = json.dumps(
+        {**entry_without_hash, "prev_hash": prev_hash},
+        sort_keys=True,
+        separators=(",", ":"),
+        default=str,
+    )
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def _subject_ref(name: str) -> str:
+    # A deployment must override this key. The demo default is intentionally
+    # labelled and never protects real data; it merely keeps names out of logs.
+    key = os.getenv("UDYAMPULSE_AUDIT_HMAC_KEY", "public-demo-not-for-real-data")
+    digest = hmac.new(
+        key.encode("utf-8"),
+        name.strip().casefold().encode("utf-8"),
+        hashlib.sha256,
+    ).hexdigest()
+    return f"subject_{digest[:20]}"
+
+
+def verify_chain(entries: list[dict]) -> dict:
+    for index, entry in enumerate(entries):
+        claimed_hash = entry.get("entry_hash")
+        claimed_prev = entry.get("prev_hash")
+        if not claimed_hash or not claimed_prev:
+            return {
+                "valid": False,
+                "break_index": index,
+                "reason": "entry is missing prev_hash or entry_hash",
+            }
+        body = {
+            key: value
+            for key, value in entry.items()
+            if key not in ("prev_hash", "entry_hash")
+        }
+        if _compute_entry_hash(body, claimed_prev) != claimed_hash:
+            return {
+                "valid": False,
+                "break_index": index,
+                "reason": "entry_hash does not match recomputed hash",
+            }
+        if index > 0 and claimed_prev != entries[index - 1].get("entry_hash"):
+            return {
+                "valid": False,
+                "break_index": index,
+                "reason": "prev_hash does not match the preceding entry",
+            }
+    return {
+        "valid": True,
+        "break_index": None,
+        "reason": None,
+        "entries_checked": len(entries),
+    }
+
+
+def _ensure_initialized() -> None:
+    global _memory_log, _last_hash, _loaded_path
+    resolved = LOG_PATH.resolve()
+    if _loaded_path == resolved:
+        return
+
+    entries: list[dict] = []
+    if LOG_PATH.exists():
+        for line_number, line in enumerate(
+            LOG_PATH.read_text(encoding="utf-8").splitlines(), start=1
+        ):
+            if not line.strip():
+                continue
+            try:
+                entries.append(json.loads(line))
+            except json.JSONDecodeError as exc:
+                raise AuditIntegrityError(
+                    f"Audit log contains invalid JSON on line {line_number}"
+                ) from exc
+        legacy_entries = entries and any(
+            "prev_hash" not in entry or "entry_hash" not in entry for entry in entries
+        )
+        if legacy_entries:
+            migrated: list[dict] = []
+            previous = GENESIS_HASH
+            for index, old in enumerate(entries):
+                body = {
+                    key: value
+                    for key, value in old.items()
+                    if key not in ("name", "prev_hash", "entry_hash")
+                }
+                body.update(
+                    {
+                        "event_id": body.get(
+                            "event_id", f"legacy_{index}_{int(body.get('timestamp', 0) * 1_000_000)}"
+                        ),
+                        "subject_ref": _subject_ref(old.get("name", "unknown")),
+                        "data_classification": "pseudonymised_legacy_decision_metadata",
+                        "migrated_from_legacy": True,
+                    }
+                )
+                entry_hash = _compute_entry_hash(body, previous)
+                body["prev_hash"] = previous
+                body["entry_hash"] = entry_hash
+                migrated.append(body)
+                previous = entry_hash
+            temporary = LOG_PATH.with_suffix(".jsonl.migrating")
+            temporary.write_text(
+                "".join(json.dumps(entry, separators=(",", ":")) + "\n" for entry in migrated),
+                encoding="utf-8",
+            )
+            temporary.replace(LOG_PATH)
+            entries = migrated
+        verification = verify_chain(entries)
+        if not verification["valid"]:
+            raise AuditIntegrityError(
+                f"Audit chain failed at entry {verification['break_index']}: {verification['reason']}"
+            )
+
+    _memory_log = entries
+    _last_hash = entries[-1]["entry_hash"] if entries else GENESIS_HASH
+    _loaded_path = resolved
 
 
 def record(score_result: dict) -> None:
     global _last_hash
+    with _lock:
+        _ensure_initialized()
+        policy = score_result.get("policy", {})
+        entry = {
+            "event_id": f"decision_{time.time_ns()}",
+            "timestamp": time.time(),
+            "subject_ref": _subject_ref(score_result["name"]),
+            "data_classification": "pseudonymised_decision_metadata",
+            "score": score_result["score"],
+            "grade": score_result["grade"],
+            "risk_band": score_result.get("risk_band"),
+            "pd_estimate": score_result.get("pd_estimate"),
+            "eligible_limit": score_result.get("eligible_limit"),
+            "traditional_decision": score_result["traditional"]["decision"],
+            "alternate_data_decision": score_result["alternate_data_decision"],
+            "policy_version": policy.get("version"),
+            "policy_route": policy.get("route"),
+            "reasons": score_result["reasons"],
+        }
+        entry_hash = _compute_entry_hash(entry, _last_hash)
+        entry["prev_hash"] = _last_hash
+        entry["entry_hash"] = entry_hash
 
-    entry = {
-        "timestamp": time.time(),
-        "name": score_result["name"],
-        "score": score_result["score"],
-        "grade": score_result["grade"],
-        "risk_band": score_result.get("risk_band"),
-        "eligible_limit": score_result.get("eligible_limit"),
-        "traditional_decision": score_result["traditional"]["decision"],
-        "alternate_data_decision": score_result["alternate_data_decision"],
-        "reasons": score_result["reasons"],
-    }
-    prev_hash = _last_hash
-    entry_hash = _compute_entry_hash(entry, prev_hash)
-    entry["prev_hash"] = prev_hash
-    entry["entry_hash"] = entry_hash
-    _last_hash = entry_hash
+        LOG_PATH.parent.mkdir(parents=True, exist_ok=True)
+        with LOG_PATH.open("a", encoding="utf-8") as handle:
+            handle.write(json.dumps(entry, separators=(",", ":")) + "\n")
+            handle.flush()
 
-    _memory_log.append(entry)
-
-    try:
-        with LOG_PATH.open("a", encoding="utf-8") as f:
-            f.write(json.dumps(entry) + "\n")
-    except OSError:
-        pass  # read-only filesystem (e.g. serverless) -- in-memory log still holds it
+        _memory_log.append(entry)
+        _last_hash = entry_hash
 
 
 def read_recent(limit: int = 50) -> list[dict]:
-    limit = max(1, min(limit, 500))
-
-    if _memory_log:
-        return _memory_log[-limit:]
-
-    if not LOG_PATH.exists():
-        return []
-    lines = LOG_PATH.read_text(encoding="utf-8").strip().splitlines()
-    return [json.loads(line) for line in lines[-limit:]]
-
-
-def verify_chain(entries: list[dict]) -> dict:
-    """Recomputes each entry's hash from its own fields and checks it links
-    to the previous entry in this window. Returns the first break found, if
-    any. `entries` may be a truncated window (e.g. read_recent's limit), so
-    the first entry's prev_hash is only checked for internal consistency
-    (its own entry_hash recomputation), not against a global genesis -- a
-    window doesn't know what came before it.
-    """
-    for index, entry in enumerate(entries):
-        claimed_hash = entry.get("entry_hash")
-        claimed_prev = entry.get("prev_hash")
-        body = {k: v for k, v in entry.items() if k not in ("prev_hash", "entry_hash")}
-        recomputed = _compute_entry_hash(body, claimed_prev)
-
-        if recomputed != claimed_hash:
-            return {"valid": False, "break_index": index, "reason": "entry_hash does not match recomputed hash (entry was modified)"}
-        if index > 0 and claimed_prev != entries[index - 1].get("entry_hash"):
-            return {"valid": False, "break_index": index, "reason": "prev_hash does not match preceding entry in this window"}
-
-    return {"valid": True, "break_index": None, "reason": None, "entries_checked": len(entries)}
+    with _lock:
+        _ensure_initialized()
+        bounded = max(1, min(limit, 500))
+        return [dict(entry) for entry in _memory_log[-bounded:]]

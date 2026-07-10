@@ -1,0 +1,15 @@
+.git
+.github
+.venv
+venv
+**/__pycache__
+**/*.pyc
+**/.pytest_cache
+**/.pytest_tmp
+node_modules
+.env
+backend/audit_log.jsonl
+backend/model_training/data
+backend/model_training/.venv-training
+docs
+*.md

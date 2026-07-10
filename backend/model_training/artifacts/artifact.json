@@ -1,0 +1,23 @@
+{
+  "feature_names": [
+    "discipline",
+    "leverage",
+    "liquidity"
+  ],
+  "weights": {
+    "discipline": -8.146241656803685,
+    "leverage": -0.3759715779952243,
+    "liquidity": -0.2596165848873915
+  },
+  "intercept": 6.806648172277972,
+  "feature_means": {
+    "discipline": 0.9531058201058201,
+    "leverage": 0.6321751103008306,
+    "liquidity": 0.6109186415547906
+  },
+  "baseline_logit": -1.3538666479637058,
+  "baseline_probability": 0.20523894108979104,
+  "model_type": "logistic_regression_pd_v1",
+  "trained_at_utc": "2026-07-10T18:14:05.248722+00:00",
+  "dataset_sha256": "30c6be3abd8dcfd3e6096c828bad8c2f011238620f5369220bd60cfc82700933"
+}

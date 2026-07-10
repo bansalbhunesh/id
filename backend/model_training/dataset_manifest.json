@@ -1,0 +1,22 @@
+{
+  "name": "default_of_credit_card_clients",
+  "source_url": "https://archive.ics.uci.edu/ml/machine-learning-databases/00350/default%20of%20credit%20card%20clients.xls",
+  "source_repository": "UCI Machine Learning Repository",
+  "citation": "Yeh, I. C., & Lien, C. H. (2009). The comparisons of data mining techniques for the predictive accuracy of probability of default of credit card clients. Expert Systems with Applications, 36(2), 2473-2480.",
+  "sha256": "30c6be3abd8dcfd3e6096c828bad8c2f011238620f5369220bd60cfc82700933",
+  "retrieved_utc": "2026-07-10",
+  "rows": 30000,
+  "outcome_label_column": "default payment next month",
+  "outcome_base_rate": 0.2212,
+  "columns_used_for_training": [
+    "PAY_0", "PAY_2", "PAY_3", "PAY_4", "PAY_5", "PAY_6",
+    "BILL_AMT1", "BILL_AMT2", "BILL_AMT3", "BILL_AMT4", "BILL_AMT5", "BILL_AMT6",
+    "LIMIT_BAL"
+  ],
+  "columns_deliberately_excluded": {
+    "demographic": ["SEX", "EDUCATION", "MARRIAGE", "AGE"],
+    "reason": "Fair-lending practice: never use protected/proxy-for-protected attributes as risk-model inputs. Not used at training time or inference time; demographic parity is instead monitored on model *outputs* (see portfolio.py fairness monitors)."
+  },
+  "license_note": "Public UCI ML Repository research dataset, anonymized individual credit-card accounts (Taiwan, 2005). Used here as an honestly-labeled public proxy for a default outcome, not as real MSME/Indian data. No IDBI, bank, or third-party hackathon-team data of any kind is included.",
+  "why_this_dataset": "No public dataset of real Indian MSME GST/UPI/EPFO alternate-data with an observed default outcome exists -- that gap is exactly what the IDBI sandbox (post-shortlisting) is for. This dataset is used only to validate a real outcome-label training pipeline via the 3-feature universal risk bridge documented in feature_bridge.py, and must be replaced by real IDBI sandbox repayment outcomes before any production use."
+}

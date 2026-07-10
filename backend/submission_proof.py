@@ -7,30 +7,10 @@ from __future__ import annotations
 
 from typing import Any
 
+from ml import model_evaluation
 from portfolio import build_governance_summary, build_portfolio_snapshot
 from sample_data import SAMPLE_PROFILES
 from scoring import score_profile
-from validation import ValidationRecord, build_validation_report
-
-
-def _demo_validation() -> dict[str, Any]:
-    development = [
-        ValidationRecord(score=82, defaulted=False, period="2026-Q1", reasons=["Strong GST filing"]),
-        ValidationRecord(score=74, defaulted=False, period="2026-Q1", reasons=["Strong UPI velocity"]),
-        ValidationRecord(score=66, defaulted=False, period="2026-Q1", reasons=["Strong counterparty breadth"]),
-        ValidationRecord(score=54, defaulted=True, period="2026-Q1", reasons=["Watch: high leverage"]),
-        ValidationRecord(score=43, defaulted=True, period="2026-Q1", reasons=["Watch: cheque bounce rate"]),
-        ValidationRecord(score=35, defaulted=True, period="2026-Q1", reasons=["Watch: volatile cash flow"]),
-    ]
-    out_of_time = [
-        ValidationRecord(score=81, defaulted=False, period="2026-Q2", reasons=["Strong GST filing"]),
-        ValidationRecord(score=73, defaulted=False, period="2026-Q2", reasons=["Strong UPI velocity"]),
-        ValidationRecord(score=65, defaulted=False, period="2026-Q2", reasons=["Strong counterparty breadth"]),
-        ValidationRecord(score=52, defaulted=True, period="2026-Q2", reasons=["Watch: high leverage"]),
-        ValidationRecord(score=44, defaulted=True, period="2026-Q2", reasons=["Watch: cheque bounce rate"]),
-        ValidationRecord(score=36, defaulted=True, period="2026-Q2", reasons=["Watch: volatile cash flow"]),
-    ]
-    return build_validation_report(development, out_of_time)
 
 
 API_CATALOG = [
@@ -203,7 +183,7 @@ JUDGE_RUNBOOK = [
 def build_submission_proof(audit_events: list[dict]) -> dict[str, Any]:
     portfolio = build_portfolio_snapshot()
     governance = build_governance_summary(audit_events)
-    validation = _demo_validation()
+    evaluation = model_evaluation()
     hero = score_profile(SAMPLE_PROFILES["ntc_hero"], record_audit=False)
 
     return {
@@ -250,6 +230,23 @@ def build_submission_proof(audit_events: list[dict]) -> dict[str, Any]:
             ],
         },
         "governance_controls": governance["controls"],
-        "validation_metrics": validation["metrics"],
-        "validation_status": validation["status"],
+        "validation_metrics": (
+            {
+                "evidence_type": "held_out_model_evaluation",
+                "auc": evaluation["splits"]["out_of_time"]["auc"],
+                "gini": evaluation["splits"]["out_of_time"]["gini"],
+                "ks": evaluation["splits"]["out_of_time"]["ks"],
+                "pr_auc": evaluation["splits"]["out_of_time"]["pr_auc"],
+                "brier_score": evaluation["splits"]["out_of_time"]["brier_score"],
+                "n": evaluation["splits"]["out_of_time"]["n"],
+                "dataset": evaluation["dataset"]["name"],
+                "note": "Real held-out metrics from the trained PD model (GET /model/evaluation), not an illustrative fixture.",
+            }
+            if evaluation is not None
+            else {
+                "evidence_type": "unavailable",
+                "note": "No trained PD artifact found. Run backend/model_training/train_pd_model.py.",
+            }
+        ),
+        "validation_status": "ready" if evaluation is not None else "insufficient_sample",
     }

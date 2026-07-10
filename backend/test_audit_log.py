@@ -6,6 +6,7 @@ import audit_log
 def test_scoring_appends_to_audit_log(tmp_path, monkeypatch):
     monkeypatch.setattr(audit_log, "LOG_PATH", tmp_path / "audit_log.jsonl")
     monkeypatch.setattr(audit_log, "_memory_log", [])
+    monkeypatch.setattr(audit_log, "_last_hash", audit_log.GENESIS_HASH)
 
     score_profile(SAMPLE_PROFILES["ntc_hero"])
     after = audit_log.read_recent()
@@ -13,3 +14,37 @@ def test_scoring_appends_to_audit_log(tmp_path, monkeypatch):
     assert len(after) == 1
     assert after[-1]["grade"] in "ABCDE"
     assert "timestamp" in after[-1]
+    assert after[-1]["prev_hash"] == audit_log.GENESIS_HASH
+    assert after[-1]["entry_hash"]
+
+
+def test_hash_chain_links_consecutive_entries(tmp_path, monkeypatch):
+    monkeypatch.setattr(audit_log, "LOG_PATH", tmp_path / "audit_log.jsonl")
+    monkeypatch.setattr(audit_log, "_memory_log", [])
+    monkeypatch.setattr(audit_log, "_last_hash", audit_log.GENESIS_HASH)
+
+    score_profile(SAMPLE_PROFILES["ntc_hero"])
+    score_profile(SAMPLE_PROFILES["stressed_retailer"])
+    entries = audit_log.read_recent()
+
+    assert entries[1]["prev_hash"] == entries[0]["entry_hash"]
+    result = audit_log.verify_chain(entries)
+    assert result["valid"] is True
+    assert result["entries_checked"] == 2
+
+
+def test_verify_chain_detects_tampering(tmp_path, monkeypatch):
+    monkeypatch.setattr(audit_log, "LOG_PATH", tmp_path / "audit_log.jsonl")
+    monkeypatch.setattr(audit_log, "_memory_log", [])
+    monkeypatch.setattr(audit_log, "_last_hash", audit_log.GENESIS_HASH)
+
+    score_profile(SAMPLE_PROFILES["ntc_hero"])
+    score_profile(SAMPLE_PROFILES["stressed_retailer"])
+    entries = audit_log.read_recent()
+
+    tampered = [dict(e) for e in entries]
+    tampered[0]["score"] = 999  # simulate a retroactive edit to a past decision
+
+    result = audit_log.verify_chain(tampered)
+    assert result["valid"] is False
+    assert result["break_index"] == 0

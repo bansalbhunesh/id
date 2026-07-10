@@ -28,21 +28,37 @@ def test_recovers_known_linear_relationship():
     assert abs(model.intercept - 10) < 1e-6
 
 
-def test_explain_returns_reasons_for_sample_profile():
+def test_explain_returns_pd_estimate_for_sample_profile():
     from ml import explain, model_status
+    from feature_bridge import UNIVERSAL_FEATURES
     from sample_data import SAMPLE_PROFILES
+    from scoring import score_liquidity, score_discipline, score_momentum, score_leverage, score_digital_footprint
 
-    result = explain(SAMPLE_PROFILES["ntc_hero"])
+    profile = SAMPLE_PROFILES["ntc_hero"]
+    pillars = {
+        "liquidity": score_liquidity(profile),
+        "discipline": score_discipline(profile),
+        "momentum": score_momentum(profile),
+        "leverage": score_leverage(profile),
+        "digital_footprint": score_digital_footprint(profile),
+    }
+
+    result = explain(profile, pillars)
     assert 0 <= result["predicted_score"] <= 100
-    assert len(result["top_reasons"]) == 4
-    assert len(result["shap_contributions"]) == len(FEATURE_NAMES)
+    assert 0 <= result["pd_estimate"] <= 1
+    assert len(result["top_reasons"]) == len(UNIVERSAL_FEATURES)
     assert result["provider"] == model_status()["active_provider"]
 
 
-def test_model_status_reports_active_fallback_contract():
+def test_model_status_reports_active_provider_contract():
     from ml import model_status
 
     status = model_status()
-    assert status["active_provider"] in {"linear", "xgboost", "lightgbm"}
-    assert status["records"] > 0
+    assert status["active_provider"] in {
+        "logistic_pd_v1",
+        "linear_synthetic_fallback",
+        "xgboost",
+        "lightgbm",
+    }
     assert "explainability" in status
+    assert status["fallback"] is None, "committed PD artifact should be loaded by default"

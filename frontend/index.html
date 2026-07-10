@@ -1122,8 +1122,8 @@
       const items = [
         ["NTC rescues", summary.ntc_rescues, "thin-file files approved with alternate data"],
         ["Credit unlocked", formatCurrency(summary.credit_unlocked), "public demo cohort"],
-        ["Approval lift", pilot ? `+${pilot.ntc_ntb_approval_lift_pct}%` : `+${summary.alternate_data_approvals - summary.traditional_approvals}`, "not a bank benchmark"],
-        ["Decision time", pilot ? `${pilot.decision_time_reduction_pct}% saved` : `${summary.decision_time_minutes} min`, `from ${summary.manual_baseline_days} day manual baseline`],
+        ["Approval lift (target)", pilot ? `+${pilot.ntc_ntb_approval_lift_pct.value}%` : `+${summary.alternate_data_approvals - summary.traditional_approvals}`, "pilot target, not a measured benchmark"],
+        ["Decision time (target)", pilot ? `${pilot.decision_time_reduction_pct.value}% saved` : `${summary.decision_time_minutes} min`, `assumed vs ${summary.manual_baseline_days} day manual baseline, not timed`],
       ];
       els.portfolioMetrics.innerHTML = items.map(([label, value, detail]) => `
         <article class="impact-item">
@@ -1362,8 +1362,8 @@
         <section class="detail-section">
           <h3 class="section-title">Pilot KPI targets</h3>
           ${pilot ? miniLedger([
-            ["NTC/NTB lift", `+${pilot.ntc_ntb_approval_lift_pct}%`],
-            ["Decision time", `${pilot.decision_time_reduction_pct}% saved`],
+            ["NTC/NTB lift", `+${pilot.ntc_ntb_approval_lift_pct.value}%`],
+            ["Decision time", `${pilot.decision_time_reduction_pct.value}% saved`],
             ["Approved sectors", pilot.portfolio_diversification.approved_sector_count],
             ["Approved districts", pilot.portfolio_diversification.approved_district_count],
           ]) : `<div class="empty-state">No pilot KPI rows.</div>`}

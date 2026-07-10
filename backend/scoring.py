@@ -24,6 +24,7 @@ class MSMEProfile(BaseModel):
     unique_counterparties: int = Field(ge=0)
     outstanding_debt_to_inflow: float = Field(ge=0)  # ratio
     has_bureau_history: bool = True  # False = New-to-Credit / New-to-Bank
+    consent_status: str = "Not applicable: public synthetic demo data, no real consent required"
 
 
 PILLAR_MAX = 20
@@ -140,7 +141,7 @@ def policy_guardrails(p: MSMEProfile, pillars: dict[str, int], total: int) -> li
         {
             "control": "Consent data boundary",
             "status": "Pass",
-            "detail": "Public cohort uses synthetic AA/GST/UPI/EPFO-like fields; authenticated sandbox feeds use the same scoring contract.",
+            "detail": p.consent_status,
         },
         {
             "control": "Debt-load cap",
@@ -243,6 +244,11 @@ def score_profile(p: MSMEProfile, record_audit: bool = True) -> dict:
     grade = grade_for(total)
     traditional = traditional_verdict(p)
     alternate_data_decision = "Approved" if grade in ("A", "B", "C") else "Rejected"
+    policy = {
+        "version": "policy-v1",
+        "rule": "Approve grades A-C (composite score >= 50); grade C routed to human review lane.",
+        "decision": alternate_data_decision,
+    }
     result = {
         "name": p.name,
         "profile": {
@@ -261,6 +267,7 @@ def score_profile(p: MSMEProfile, record_audit: bool = True) -> dict:
         "reasons": reason_codes(pillars),
         "traditional": traditional,
         "alternate_data_decision": alternate_data_decision,
+        "policy": policy,
         "improvement_plan": improvement_plan(pillars, p),
         "data_sources": data_source_signals(p),
         "policy_guardrails": policy_guardrails(p, pillars, total),
@@ -271,7 +278,8 @@ def score_profile(p: MSMEProfile, record_audit: bool = True) -> dict:
     from agent_memo import generate_memo
     import audit_log
 
-    result["ml"] = explain(p)
+    result["ml"] = explain(p, pillars)
+    result["pd_estimate"] = result["ml"].get("pd_estimate")
     result["memo"] = generate_memo(result)
     if record_audit:
         audit_log.record(result)

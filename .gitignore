@@ -6,3 +6,5 @@ __pycache__/
 node_modules/
 .env
 backend/audit_log.jsonl
+backend/model_training/data/
+backend/model_training/.venv-training/

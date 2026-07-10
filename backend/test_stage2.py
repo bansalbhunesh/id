@@ -1,3 +1,5 @@
+from datetime import datetime, timedelta, timezone
+
 from fastapi.testclient import TestClient
 
 from agent_memo import generate_memo
@@ -11,9 +13,22 @@ from scoring import score_profile
 client = TestClient(app)
 
 
-def sandbox_payload() -> dict:
+def _consent(*, expired: bool = False) -> dict:
+    now = datetime.now(timezone.utc)
+    granted = now - timedelta(days=2)
+    expires = (now - timedelta(minutes=1)) if expired else (now + timedelta(days=90))
     return {
         "consent_id": "consent-demo-001",
+        "purpose": "msme_underwriting",
+        "scope": ["account_aggregator", "gst", "upi", "epfo", "bureau"],
+        "granted_at": granted.isoformat(),
+        "expires_at": expires.isoformat(),
+    }
+
+
+def sandbox_payload(*, expired_consent: bool = False) -> dict:
+    return {
+        "consent": _consent(expired=expired_consent),
         "profile": {
             "name": "Asha Precision Works",
             "sector": "Manufacturing",
@@ -74,6 +89,32 @@ def test_sandbox_score_rejects_impossible_feed_values():
     response = client.post("/sandbox/score", json=payload)
 
     assert response.status_code == 422
+
+
+def test_sandbox_score_rejects_missing_consent():
+    payload = sandbox_payload()
+    del payload["consent"]
+
+    response = client.post("/sandbox/score", json=payload)
+
+    assert response.status_code == 422
+
+
+def test_sandbox_score_rejects_expired_consent():
+    response = client.post("/sandbox/score", json=sandbox_payload(expired_consent=True))
+
+    assert response.status_code == 403
+    assert "expired" in response.json()["detail"].lower()
+
+
+def test_sandbox_score_guardrail_reflects_verified_consent():
+    response = client.post("/sandbox/score", json=sandbox_payload())
+
+    assert response.status_code == 200
+    guardrails = {g["control"]: g for g in response.json()["policy_guardrails"]}
+    detail = guardrails["Consent data boundary"]["detail"]
+    assert "Verified: consent consent-demo-001" in detail
+    assert "msme_underwriting" in detail
 
 
 def test_sandbox_recalibration_report_profiles_real_feed_distributions():
@@ -170,7 +211,8 @@ def test_portfolio_snapshot_has_stage2_fairness_and_pilot_kpis():
     snapshot = build_portfolio_snapshot()
 
     assert "pilot_metrics" in snapshot
-    assert snapshot["pilot_metrics"]["decision_time_reduction_pct"] > 90
+    assert snapshot["pilot_metrics"]["decision_time_reduction_pct"]["status"] == "pilot_target"
+    assert snapshot["pilot_metrics"]["decision_time_reduction_pct"]["value"] > 90
     assert snapshot["fairness"]["by_sector"]
     assert snapshot["fairness"]["by_geography"]
     assert snapshot["fairness"]["by_vintage"]
@@ -191,7 +233,12 @@ def test_model_status_endpoint_exposes_runtime_provider():
     response = client.get("/model/status")
 
     assert response.status_code == 200
-    assert response.json()["active_provider"] in {"linear", "xgboost", "lightgbm"}
+    assert response.json()["active_provider"] in {
+        "logistic_pd_v1",
+        "linear_synthetic_fallback",
+        "xgboost",
+        "lightgbm",
+    }
 
 
 def test_bedrock_memo_provider_falls_back_without_model_id(monkeypatch):
@@ -206,7 +253,61 @@ def test_bedrock_memo_provider_falls_back_without_model_id(monkeypatch):
     assert "eligible limit" in memo
 
 
+AUDITOR_HEADERS = {"Authorization": "Bearer udyampulse-demo-auditor-key"}
+
+
 def test_audit_log_limit_is_validated():
-    response = client.get("/audit-log?limit=0")
+    response = client.get("/audit-log?limit=0", headers=AUDITOR_HEADERS)
 
     assert response.status_code == 422
+
+
+def test_audit_log_requires_authentication():
+    response = client.get("/audit-log")
+
+    assert response.status_code == 401
+
+
+def test_audit_log_rejects_bad_key():
+    response = client.get("/audit-log", headers={"Authorization": "Bearer not-a-real-key"})
+
+    assert response.status_code == 401
+
+
+def test_audit_log_accepts_demo_auditor_key():
+    response = client.get("/audit-log", headers=AUDITOR_HEADERS)
+
+    assert response.status_code == 200
+    assert isinstance(response.json(), list)
+
+
+def test_governance_redacts_latest_borrower_name():
+    client.post("/score", json={
+        "name": "Should Not Leak Pvt Ltd",
+        "avg_monthly_inflow": 100000,
+        "inflow_volatility": 0.1,
+        "cheque_bounce_rate": 0.0,
+        "gst_filing_streak_months": 24,
+        "gst_turnover_growth_pct": 5,
+        "upi_txn_count_monthly": 100,
+        "unique_counterparties": 20,
+        "outstanding_debt_to_inflow": 0.1,
+    })
+
+    response = client.get("/governance")
+
+    assert response.status_code == 200
+    latest = response.json()["audit"]["latest_decision"]
+    if latest is not None:
+        assert "Should Not Leak Pvt Ltd" not in latest.get("name", "")
+
+
+def test_model_evaluation_exposes_real_held_out_metrics():
+    response = client.get("/model/evaluation")
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["evidence_type"] == "held_out_model_evaluation"
+    oot = body["splits"]["out_of_time"]
+    assert oot["auc"] > 0.65
+    assert oot["n"] > 1000

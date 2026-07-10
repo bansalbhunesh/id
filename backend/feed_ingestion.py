@@ -7,6 +7,7 @@ underwriting features into `MSMEProfile`.
 """
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from math import sqrt
 from statistics import mean
 from typing import Annotated
@@ -60,6 +61,29 @@ class BureauFeed(BaseModel):
     has_bureau_history: bool = True
 
 
+class ConsentRecord(BaseModel):
+    """A real sandbox feed (unlike the public synthetic demo) must carry a
+    purpose-bound, scoped, time-limited consent -- not just an opaque
+    optional ID that's reported as present/absent and never checked."""
+
+    consent_id: str = Field(min_length=1)
+    purpose: str = Field(min_length=1)
+    scope: list[str] = Field(min_length=1)
+    granted_at: datetime
+    expires_at: datetime
+
+    @model_validator(mode="after")
+    def expiry_after_grant(self):
+        if self.expires_at <= self.granted_at:
+            raise ValueError("consent.expires_at must be after consent.granted_at")
+        return self
+
+    def is_expired(self, *, now: datetime | None = None) -> bool:
+        now = now or datetime.now(timezone.utc)
+        expires = self.expires_at if self.expires_at.tzinfo else self.expires_at.replace(tzinfo=timezone.utc)
+        return expires <= now
+
+
 class IDBISandboxPayload(BaseModel):
     profile: ProfileFeed
     account_aggregator: AccountAggregatorFeed
@@ -67,7 +91,7 @@ class IDBISandboxPayload(BaseModel):
     upi: UPIFeed
     epfo: EPFOFeed
     bureau: BureauFeed = Field(default_factory=BureauFeed)
-    consent_id: str | None = None
+    consent: ConsentRecord
 
 
 def _coefficient_of_variation(values: list[float]) -> float:
@@ -101,7 +125,9 @@ def readiness(payload: IDBISandboxPayload) -> dict:
     connected = [name for name, ok in sources.items() if ok]
     return {
         "mode": "idbi_sandbox_payload",
-        "consent_id_present": bool(payload.consent_id),
+        "consent_id_present": True,
+        "consent_scope": payload.consent.scope,
+        "consent_expired": payload.consent.is_expired(),
         "sources_connected": connected,
         "coverage_pct": round(len(connected) / len(sources) * 100, 1),
         "missing_sources": [name for name, ok in sources.items() if not ok],
@@ -114,6 +140,10 @@ def to_profile(payload: IDBISandboxPayload) -> MSMEProfile:
     cheque_presentations = max(payload.account_aggregator.cheque_presentations, 1)
     bounce_rate = payload.account_aggregator.cheque_bounces / cheque_presentations
     debt_to_inflow = payload.account_aggregator.outstanding_debt / avg_inflow if avg_inflow else 1
+    consent_status = (
+        f"Verified: consent {payload.consent.consent_id} for purpose '{payload.consent.purpose}', "
+        f"scope {payload.consent.scope}, expires {payload.consent.expires_at.isoformat()}"
+    )
 
     return MSMEProfile(
         name=payload.profile.name,
@@ -131,4 +161,5 @@ def to_profile(payload: IDBISandboxPayload) -> MSMEProfile:
         unique_counterparties=payload.upi.unique_counterparties,
         outstanding_debt_to_inflow=round(debt_to_inflow, 4),
         has_bureau_history=payload.bureau.has_bureau_history,
+        consent_status=consent_status,
     )

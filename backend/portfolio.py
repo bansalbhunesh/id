@@ -175,10 +175,25 @@ def build_portfolio_snapshot() -> dict:
     return snapshot
 
 
+def _redact_latest_decision(entry: dict | None) -> dict | None:
+    """GET /governance and /submission/proof are public (no login flow for
+    the judge-facing demo), so the most recent borrower's name is redacted
+    here. Full records (name included) are only available via the
+    auditor-gated GET /audit-log."""
+    if entry is None:
+        return None
+    redacted = dict(entry)
+    redacted["name"] = "[redacted -- see authenticated /audit-log for full record]"
+    return redacted
+
+
 def build_governance_summary(audit_events: list[dict]) -> dict:
     portfolio = build_portfolio_snapshot()
-    latest = audit_events[-1] if audit_events else None
+    latest = _redact_latest_decision(audit_events[-1] if audit_events else None)
     from ml import model_status
+    from audit_log import verify_chain
+
+    chain = verify_chain(audit_events)
 
     return {
         "model": {
@@ -196,8 +211,10 @@ def build_governance_summary(audit_events: list[dict]) -> dict:
             },
             {
                 "control": "Audit reconstruction",
-                "evidence": "Every scoring call appends borrower, score, grade, verdict, and reasons to /audit-log.",
-                "status": "Live",
+                "evidence": "Every scoring call appends borrower, score, grade, verdict, and reasons to /audit-log, "
+                f"hash-chained entry to entry (chain_valid={chain['valid']}, entries_checked={len(audit_events)}). "
+                "Full records require the auditor role; this evidence is redaction-safe.",
+                "status": "Live" if chain["valid"] else "Broken",
             },
             {
                 "control": "Human override lane",

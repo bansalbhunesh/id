@@ -1,14 +1,17 @@
 """UdyamPulse API - MSME Financial Health Card."""
+import os
 from pathlib import Path
 
-from fastapi import FastAPI, HTTPException, Query
+from fastapi import Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 
 import audit_log
+from auth import require_role
 from feed_ingestion import IDBISandboxPayload, readiness, to_profile
 from pilot_metrics import build_pilot_metrics
 from portfolio import build_governance_summary, build_portfolio_snapshot
+from rate_limit import rate_limit
 from recalibration import SandboxRecalibrationRequest, build_recalibration_report
 from scoring import MSMEProfile, score_profile
 from sample_data import SAMPLE_PROFILES
@@ -19,11 +22,22 @@ FRONTEND_DIR = Path(__file__).parent.parent / "frontend"
 
 app = FastAPI(title="UdyamPulse", version="0.3.0")
 
+# The frontend is served from this same FastAPI process (StaticFiles mount
+# below) so the live demo never needs CORS at all -- it's same-origin. This
+# list is only for local dev (opening the frontend on a different port) and
+# any future external API consumer; wildcard is gone.
+_DEFAULT_ORIGINS = "http://localhost:5500,http://127.0.0.1:5500,http://localhost:8000,http://127.0.0.1:8000,https://id-ysm9.onrender.com"
+ALLOWED_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv("UDYAMPULSE_ALLOWED_ORIGINS", _DEFAULT_ORIGINS).split(",")
+    if origin.strip()
+]
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["*"],
-    allow_headers=["*"],
+    allow_origins=ALLOWED_ORIGINS,
+    allow_methods=["GET", "POST"],
+    allow_headers=["Authorization", "Content-Type"],
 )
 
 
@@ -55,13 +69,18 @@ def get_score(msme_id: str):
     return score_profile(profile)
 
 
-@app.post("/score")
+@app.post("/score", dependencies=[Depends(rate_limit(max_requests=60))])
 def score_custom(profile: MSMEProfile):
     return score_profile(profile)
 
 
-@app.post("/sandbox/score")
+@app.post("/sandbox/score", dependencies=[Depends(rate_limit(max_requests=60))])
 def score_sandbox_payload(payload: IDBISandboxPayload):
+    if payload.consent.is_expired():
+        raise HTTPException(
+            status_code=403,
+            detail=f"Consent {payload.consent.consent_id} expired at {payload.consent.expires_at.isoformat()}.",
+        )
     profile = to_profile(payload)
     source_readiness = readiness(payload)
     result = score_profile(profile)
@@ -106,6 +125,21 @@ def get_model_status():
     return model_status()
 
 
+@app.get("/model/evaluation")
+def get_model_evaluation():
+    from ml import model_evaluation
+
+    evaluation = model_evaluation()
+    if evaluation is None:
+        raise HTTPException(
+            status_code=404,
+            detail="No trained PD model artifact found. Run backend/model_training/train_pd_model.py.",
+        )
+    evaluation = dict(evaluation)
+    evaluation["evidence_type"] = "held_out_model_evaluation"
+    return evaluation
+
+
 @app.get("/submission/proof")
 def get_submission_proof():
     return build_submission_proof(audit_log.read_recent())
@@ -113,7 +147,9 @@ def get_submission_proof():
 
 @app.post("/validation/report")
 def validation_report(request: ValidationRequest):
-    return build_validation_report(request.development, request.out_of_time)
+    report = build_validation_report(request.development, request.out_of_time)
+    report["evidence_type"] = "submitted_batch_validation"
+    return report
 
 
 @app.get("/validation/demo")
@@ -136,11 +172,19 @@ def validation_demo():
     ]
     report = build_validation_report(development, out_of_time)
     report["mode"] = "demo_validation_fixture"
+    report["evidence_type"] = "illustrative_fixture"
+    report["evidence_note"] = (
+        "This is a 6+6 hand-separated illustrative fixture, not model performance. "
+        "For the trained PD model's held-out evaluation, see GET /model/evaluation."
+    )
     return report
 
 
 @app.get("/audit-log")
-def get_audit_log(limit: int = Query(default=50, ge=1, le=500)):
+def get_audit_log(
+    limit: int = Query(default=50, ge=1, le=500),
+    role: str = Depends(require_role("auditor")),
+):
     return audit_log.read_recent(limit)
 
 

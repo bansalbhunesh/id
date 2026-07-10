@@ -39,7 +39,8 @@ def test_submission_proof_endpoint_exposes_backend_evidence():
     assert body["hero_reversal"]["traditional_decision"] == "Rejected"
     assert body["hero_reversal"]["alternate_data_decision"] == "Approved"
     assert body["portfolio_impact"]["credit_unlocked"] > 0
-    assert body["validation_metrics"]["auc"] == 1.0
+    assert body["validation_metrics"]["evidence_type"] == "held_out_model_evaluation"
+    assert body["validation_metrics"]["auc"] > 0.65
     assert len(body["rubric_scorecard"]) >= 6
     assert len(body["competitor_gap_map"]) >= 5
     assert len(body["judge_runbook"]) >= 5

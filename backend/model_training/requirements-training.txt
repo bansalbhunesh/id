@@ -1,0 +1,5 @@
+# Training-time only. The serving app (backend/requirements.txt) never
+# imports pandas/xlrd -- it loads the committed artifacts/artifact.json with
+# stdlib json + the dependency-free pd_model.LogisticModel.
+pandas>=2.0
+xlrd>=2.0

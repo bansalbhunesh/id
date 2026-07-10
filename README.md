@@ -236,24 +236,24 @@ docker run -p 8000:8000 udyampulse
 <table>
   <tr>
     <td width="50%" valign="top">
-      <img src="docs/deck/assets/live-cockpit-viewport.png" width="100%" alt="UdyamPulse first viewport with impact metrics, borrower queue, and NTC approval reversal" />
+      <img src="docs/deck/assets/live-cockpit-viewport.png" width="100%" alt="UdyamPulse first viewport showing a calm decision stage, top index, borrower strip, and stamped approval card" />
       <br />
       <strong>First viewport</strong><br />
-      Judge path starts with the NTC rejected-to-approved reversal, service status, model mode, and portfolio impact.
+      Judge path starts with one clear NTC rejection reversal, a top review index, and optional slide-over detail instead of a wall of boxes.
     </td>
     <td width="50%" valign="top">
-      <img src="docs/deck/assets/decision-pack.png" width="100%" alt="Decision pack showing score, health pillars, reason codes, memo, and policy guardrails" />
+      <img src="docs/deck/assets/decision-pack.png" width="100%" alt="Decision slide-over showing the five-pillar health ledger and reason-code journal" />
       <br />
       <strong>Decision pack</strong><br />
-      Health pillars, reason codes, Shapley attribution, memo, decision path, and guardrails in one review surface.
+      Half-page slide-over reveals the five-pillar health ledger, reason-code journal, memo, and improvement note on demand.
     </td>
   </tr>
   <tr>
     <td width="50%" valign="top">
-      <img src="docs/deck/assets/governance-evidence.png" width="100%" alt="Governance evidence view with validation, pilot KPIs, fairness checks, and source map" />
+      <img src="docs/deck/assets/governance-evidence.png" width="100%" alt="Governance slide-over with model audit, out-of-time validation, pilot KPI targets, and fairness checks" />
       <br />
       <strong>Governance evidence</strong><br />
-      Audit count, model-risk controls, OOT validation, pilot KPIs, fairness slices, and source-map proof.
+      Governance, validation, pilot KPIs, controls, and fairness slices stay inspectable without crowding the first viewport.
     </td>
     <td width="50%" valign="top">
       <img src="docs/deck/assets/proof-runbook.png" width="100%" alt="Proof tab showing truth boundary, rubric scorecard, judge runbook, and backend API catalog" />

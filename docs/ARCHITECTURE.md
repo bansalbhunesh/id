@@ -5,34 +5,54 @@
 One Python 3.12 Docker service runs FastAPI and serves the static review cockpit. The zero-build frontend and API stay same-origin; API route definitions are mounted before `StaticFiles`.
 
 ```mermaid
-flowchart LR
-  User["Judge / underwriter"] --> UI["Static review cockpit"]
-  UI --> Public["Public synthetic GET routes"]
-  User --> Auth["Bearer role check"]
-  Auth --> Write["Custom / sandbox / validation writes"]
-  Write --> Consent["Purpose + scope + expiry consent"]
-  Write --> Outcomes["Dated 12-month pilot outcomes"]
-  Outcomes --> Maturity["365-day maturity + duplicate/leakage checks"]
-  Maturity --> Temporal["Chronological development / calibration / OOT"]
-  Public --> Score["Five-pillar health score"]
-  Consent --> Score
-  Score --> PD["Calibrated XGBoost champion"]
-  PD --> SHAP["Native exact TreeSHAP"]
-  SHAP --> Policy["Policy v2: approve / review / reject"]
-  Policy --> Memo["Deterministic memo / optional Bedrock"]
-  Memo --> Audit["Pseudonymised SHA256 event chain"]
-  PD --> Evidence["Holdout metrics + intervals + fairness + PSI"]
-  Audit --> Governance["Governance and submission proof"]
-  Evidence --> Governance
-  Temporal --> Promotion["Model + infrastructure promotion gates"]
+flowchart TB
+  subgraph Experience["Review experience"]
+    Reviewer["Judge / underwriter"] --> Cockpit["Static same-origin cockpit"]
+    Cockpit --> Views["Decision | Evidence | Governance | Proof | Sources"]
+  end
+
+  subgraph Runtime["FastAPI runtime boundary"]
+    Edge["Request ID | body limit | CSP | rate limit"] --> Routes["Public sample + protected bank-data routes"]
+    Routes --> Intake["Pydantic + consent + feed normalisation"]
+    Intake --> Score["Five-pillar health score + proposed limit"]
+    Score --> Champion["Calibrated monotonic XGBoost"]
+    Champion --> Explain["Exact TreeSHAP in calibrated logit space"]
+    Explain --> Policy["Versioned approve / review / reject policy"]
+    Policy --> Memo["Deterministic memo; optional Bedrock"]
+  end
+
+  subgraph Evidence["Evidence and control plane"]
+    Audit["Genesis-anchored pseudonymous audit chain"]
+    Monitor["AUC | Gini | KS | calibration | PSI | fairness"]
+    Readiness["Dated outcomes | 365-day maturity | temporal split"]
+    Promotion["Artifact | OOT | identity | audit promotion gates"]
+  end
+
+  subgraph Pilot["Approved pilot boundary - absent from public demo"]
+    BankFeeds["IDBI / AA sandbox feeds"]
+    Outcomes["Dated repayment outcomes"]
+    Offline["Offline champion / challenger training"]
+    Durable["Private identity + WORM audit"]
+  end
+
+  Views --> Edge
+  Memo --> Audit
+  Champion --> Monitor
   Audit --> Promotion
-  Promotion -->|"all pass"| Pilot["Pilot / production runtime"]
-  Promotion -->|"any block"| Stop["Fail-closed startup"]
+  Monitor --> Promotion
+  Readiness --> Promotion
+  BankFeeds -.-> Intake
+  Outcomes -.-> Readiness
+  Outcomes -.-> Offline
+  Offline -.-> Champion
+  Durable -.-> Promotion
+  Promotion -->|"all pass"| PilotRuntime["Pilot runtime starts"]
+  Promotion -->|"any block"| Refuse["Startup refused"]
 ```
 
 ## Decision Contract
 
-UdyamPulse intentionally avoids one opaque “AI score”:
+UdyamPulse intentionally avoids one opaque "AI score":
 
 1. `scoring.py` computes five descriptive pillars, grade and proposed limit.
 2. `ml.py` loads the committed champion manifest and returns PD plus exact attribution.
@@ -58,8 +78,10 @@ The cross-sectional source cannot provide OOT validation. `evaluation.json` stat
 
 | Module | Responsibility |
 |---|---|
-| `main.py` | Routes, role wiring, CORS, rate limits, security headers and static mount |
+| `main.py` | Routes, role wiring, liveness/readiness, middleware and static mount |
+| `operational.py` | Release metadata, payload ceiling, request IDs and browser/security header policy |
 | `auth.py` | API-key role hierarchy |
+| `rate_limit.py` | Thread-safe sliding windows, stale-key cleanup and quota response headers |
 | `feed_ingestion.py` | AA/GST/UPI/EPFO/Bureau contracts and consent enforcement |
 | `pilot_readiness.py` | Dated outcome schema, maturity checks, chronological splits, segment/source gates and privacy-safe report |
 | `deployment_gate.py` | Runtime modes and fail-closed model/identity/OOT/audit promotion policy |
@@ -69,7 +91,8 @@ The cross-sectional source cannot provide OOT validation. `evaluation.json` stat
 | `xgb_pd_model.py` | XGBoost inference and exact calibrated TreeSHAP reconstruction |
 | `pd_model.py` | Calibrated dependency-free logistic fallback and exact linear Shapley |
 | `model_training/` | Offline training, metrics, selection, uncertainty and fairness evidence |
-| `audit_log.py` | HMAC pseudonyms, restart-safe persistence, migration and hash chain |
+| `validation.py` | Production-scale O(n log n) AUC/KS, PSI and reason-code stability |
+| `audit_log.py` | HMAC pseudonyms, fsync persistence, genesis verification, migration and hash chain |
 | `portfolio.py` | Synthetic portfolio views, public redaction and governance controls |
 | `submission_proof.py` | Judge-facing proof assembled from live backend state |
 
@@ -79,10 +102,11 @@ The cross-sectional source cannot provide OOT validation. `evaluation.json` stat
 |---|---|
 | Public browser to sample data | Fixed synthetic GET responses only |
 | Caller data to API | Underwriter bearer role, rate limit and Pydantic validation |
+| Internet request to runtime | Declared-body ceiling, request trace, CSP, frame denial and no-store JSON |
 | Sandbox sources to scoring | Active purpose-bound consent with complete source scope |
 | Audit reader | Auditor role |
 | Audit subject identity | HMAC pseudonym; no raw borrower name retained |
-| Historical event mutation | SHA256 chain verified after restart and on governance reads |
+| Historical event mutation | Genesis-anchored SHA256 chain verified after restart and on governance reads |
 | Model evidence | Dataset/artifact hashes and deterministic retraining command |
 | Public proxy to bank pilot | Startup block until artifact scope, true OOT, private credentials/HMAC and durable audit storage pass |
 | Pilot outcome upload | Underwriter role, in-memory analysis only, no returned identifiers, explicit 365-day maturity |
@@ -94,6 +118,8 @@ The cross-sectional source cannot provide OOT validation. `evaluation.json` stat
 - Calibrate policy thresholds to IDBI loss economics and early-NPA guardrails.
 - Replace demo API keys with IDBI SSO and JSONL with a durable WORM-capable audit store.
 - Enable Bedrock only behind approved prompts, output schema checks and the deterministic fallback.
+
+The operational sequence, sign-offs and rollback triggers are in [PILOT_RUNBOOK.md](PILOT_RUNBOOK.md). Threats and residual controls are in [THREAT_MODEL.md](THREAT_MODEL.md).
 
 ## Promotion State Machine
 

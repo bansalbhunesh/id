@@ -20,20 +20,20 @@
 }
 
 :root {
-  --bg: #f2f5f3;
-  --bg-panel: #ffffff;
-  --ink: #10201f;
-  --ink-muted: #51655f;
-  --line: rgba(16,32,31,0.12);
-  --brand: #155e56;
-  --brand-ink: #0d3b36;
-  --accent: #b8842e;
-  --accent-soft: rgba(184,132,46,0.14);
-  --good: #2e7d5b;
-  --good-soft: rgba(46,125,91,0.12);
-  --bad: #b23b3b;
-  --bad-soft: rgba(178,59,59,0.10);
-  --shadow: 0 1px 2px rgba(16,32,31,0.06), 0 8px 24px rgba(16,32,31,0.06);
+  --bg: #f4ebdd;
+  --bg-panel: #fbf7f0;
+  --ink: #1b2a2f;
+  --ink-muted: #566a6e;
+  --line: rgba(27,42,47,0.14);
+  --brand: #5b4a8b;
+  --brand-ink: #3f3266;
+  --accent: #c88a2d;
+  --accent-soft: rgba(200,138,45,0.14);
+  --good: #2e5e7e;
+  --good-soft: rgba(46,94,126,0.12);
+  --bad: #9b3a32;
+  --bad-soft: rgba(155,58,50,0.10);
+  --shadow: 0 1px 2px rgba(27,42,47,0.06), 0 8px 24px rgba(27,42,47,0.06);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -63,12 +63,12 @@
   --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.3);
 }
 :root[data-theme="light"] {
-  --bg: #f2f5f3; --bg-panel: #ffffff; --ink: #10201f; --ink-muted: #51655f;
-  --line: rgba(16,32,31,0.12); --brand: #155e56; --brand-ink: #0d3b36;
-  --accent: #b8842e; --accent-soft: rgba(184,132,46,0.14);
-  --good: #2e7d5b; --good-soft: rgba(46,125,91,0.12);
-  --bad: #b23b3b; --bad-soft: rgba(178,59,59,0.10);
-  --shadow: 0 1px 2px rgba(16,32,31,0.06), 0 8px 24px rgba(16,32,31,0.06);
+  --bg: #f4ebdd; --bg-panel: #fbf7f0; --ink: #1b2a2f; --ink-muted: #566a6e;
+  --line: rgba(27,42,47,0.14); --brand: #5b4a8b; --brand-ink: #3f3266;
+  --accent: #c88a2d; --accent-soft: rgba(200,138,45,0.14);
+  --good: #2e5e7e; --good-soft: rgba(46,94,126,0.12);
+  --bad: #9b3a32; --bad-soft: rgba(155,58,50,0.10);
+  --shadow: 0 1px 2px rgba(27,42,47,0.06), 0 8px 24px rgba(27,42,47,0.06);
 }
 
 * { box-sizing: border-box; }
@@ -399,12 +399,12 @@ table.tech-table td:last-child { color: var(--ink-muted); }
 
   <section class="slide">
     <div class="eyebrow"><span class="num">07</span> Architecture</div>
-    <h2>One service. Two engines. A full audit trail.</h2>
-    <div class="grid cols-2 cols-4-print" style="grid-template-columns:repeat(4,1fr);">
-      <div class="card"><h3>Single FastAPI Service</h3><p>One process serves the API and the frontend — one Dockerfile, one deploy target.</p></div>
-      <div class="card"><h3>Rule + ML Dual Engine</h3><p>Transparent 5-pillar rules alongside a trained model with exact Shapley attribution.</p></div>
-      <div class="card"><h3>Temporal Evidence Gate</h3><p>Dated outcomes, 365-day maturity, chronological development/calibration/OOT, segment-volume controls.</p></div>
-      <div class="card"><h3>Promotion & Audit Gate</h3><p>Pseudonymous SHA-256 audit plus fail-closed pilot startup until model, OOT, identity, and storage pass.</p></div>
+    <h2>One service. Four inspectable control planes.</h2>
+    <div class="grid cols-2 cols-4-print" style="grid-template-columns:repeat(4,1fr);flex:0 0 auto;">
+      <div class="card"><h3>Operational Edge</h3><p>Request IDs, body ceilings, readiness probes, security headers, rate controls, and a non-root container.</p></div>
+      <div class="card"><h3>Decision + Evidence</h3><p>Five transparent pillars, calibrated PD, exact TreeSHAP attribution, policy checks, and reason codes.</p></div>
+      <div class="card"><h3>Temporal Validation</h3><p>Dated outcomes, 365-day maturity, chronological development/calibration/OOT, PSI, KS, AUC, and Gini.</p></div>
+      <div class="card"><h3>Promotion + Audit</h3><p>Pseudonymous hash-chain evidence and fail-closed pilot startup until model, OOT, identity, and storage pass.</p></div>
     </div>
     <div class="footer-mark">UdyamPulse · IDBI Innovate 2026</div>
   </section>
@@ -415,8 +415,8 @@ table.tech-table td:last-child { color: var(--ink-muted); }
     <table class="tech-table">
       <tr><td>Backend</td><td>Python, FastAPI, Pydantic, pytest</td></tr>
       <tr><td>ML layer</td><td>Calibrated monotonic XGBoost champion with native exact TreeSHAP; calibrated logistic fallback</td></tr>
-      <tr><td>Frontend</td><td>Vanilla HTML / CSS / JS, no build step</td></tr>
-      <tr><td>Deployment &amp; CI</td><td>Docker, Render web service, render.yaml Blueprint, GitHub Actions</td></tr>
+      <tr><td>Frontend</td><td>Accessible, deep-linkable HTML / CSS / JS cockpit with no build step</td></tr>
+      <tr><td>Deployment &amp; CI</td><td>Non-root Docker runtime, readiness probe, Render Blueprint, two-job GitHub Actions</td></tr>
       <tr><td>Stage 2 targets</td><td>Supply IDBI sandbox records to the shipped outcome/temporal gates; add SSO/KMS and durable shared audit storage</td></tr>
     </table>
     <div class="footer-mark">UdyamPulse · IDBI Innovate 2026</div>
@@ -460,7 +460,7 @@ table.tech-table td:last-child { color: var(--ink-muted); }
     <div class="eyebrow"><span class="num">11</span> Performance Report / Benchmarking</div>
     <h2>Verified, not just claimed.</h2>
     <div class="stat-row">
-      <div class="stat"><div class="value">61/61</div><div class="label">Automated tests passing</div></div>
+      <div class="stat"><div class="value">69/69</div><div class="label">Automated tests passing</div></div>
       <div class="stat"><div class="value">0.750</div><div class="label">Untouched holdout AUC</div></div>
       <div class="stat"><div class="value">0.499</div><div class="label">Holdout Gini</div></div>
       <div class="stat"><div class="value">0.012</div><div class="label">Calibration error</div></div>

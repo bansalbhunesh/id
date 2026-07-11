@@ -96,8 +96,9 @@ The current gender AUC gap is 0.0175. Age-band recall gaps are larger and remain
 - Custom, sandbox, recalibration, pilot-readiness and submitted-validation routes require the `underwriter` role.
 - Audit access requires the `auditor` role.
 - Sandbox consent enforces underwriting purpose, active status, expiry, maximum duration, supported scopes, and coverage of every supplied feed.
-- Audit events contain a stable HMAC pseudonym instead of borrower name, persist across restarts, and form a SHA256 chain. Mixed legacy logs are pseudonymised and re-chained during one-time migration.
-- CORS is allowlisted, write routes are rate-limited, and security headers are emitted.
+- Audit events contain a stable HMAC pseudonym instead of borrower name, persist with fsync, and form a genesis-anchored SHA256 chain. Mixed legacy logs are pseudonymised and re-chained during one-time migration.
+- CORS is allowlisted; write routes are rate-limited; requests are traced; JSON is `no-store`; and the application emits a strict CSP plus browser hardening headers.
+- Request bodies and validation/recalibration arrays are bounded. AUC and KS monitoring use O(n log n) rank/sweep algorithms rather than pairwise work.
 
 ## Pilot Promotion Boundary
 
@@ -132,7 +133,7 @@ The retraining command rewrites the logistic artifact, XGBoost model, XGBoost me
 
 - Cross-domain transfer from Taiwan consumer credit to Indian MSMEs is unvalidated. Absolute PD must not be treated as bank calibration.
 - There is no true OOT window, NTC/NTB outcome slice, sector/geography/vintage outcome slice, or early-NPA evidence before sandbox labels arrive.
-- The public demo uses published scoped credentials and an in-process rate limiter. IDBI SSO, per-user tenancy, KMS-managed secrets, durable shared audit storage and distributed rate limiting remain pilot work.
+- The public demo uses published scoped credentials and an in-process bounded rate limiter. IDBI SSO, per-user tenancy, KMS-managed secrets, durable shared audit storage and distributed rate limiting remain pilot work.
 - The dated outcome and promotion machinery is implemented, but no IDBI records have been supplied. Current pilot blockers are intentional evidence of fail-closed behavior, not production readiness.
 - AWS Bedrock memo generation is optional; deterministic generation is the default fallback.
 

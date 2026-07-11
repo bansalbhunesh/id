@@ -9,20 +9,20 @@
 <link rel="stylesheet" href="https://use.typekit.net/vad3crs.css">
 <style>
 :root {
-  --bg: #f2f5f3;
-  --bg-panel: #ffffff;
-  --ink: #10201f;
-  --ink-muted: #51655f;
-  --line: rgba(16,32,31,0.12);
-  --brand: #155e56;
-  --brand-ink: #0d3b36;
-  --accent: #b8842e;
-  --accent-soft: rgba(184,132,46,0.14);
-  --good: #2e7d5b;
-  --good-soft: rgba(46,125,91,0.12);
-  --bad: #b23b3b;
-  --bad-soft: rgba(178,59,59,0.10);
-  --shadow: 0 1px 2px rgba(16,32,31,0.06), 0 8px 24px rgba(16,32,31,0.06);
+  --bg: #f4ebdd;
+  --bg-panel: #fbf7f0;
+  --ink: #1b2a2f;
+  --ink-muted: #566a6e;
+  --line: rgba(27,42,47,0.14);
+  --brand: #5b4a8b;
+  --brand-ink: #3f3266;
+  --accent: #c88a2d;
+  --accent-soft: rgba(200,138,45,0.14);
+  --good: #2e5e7e;
+  --good-soft: rgba(46,94,126,0.12);
+  --bad: #9b3a32;
+  --bad-soft: rgba(155,58,50,0.10);
+  --shadow: 0 1px 2px rgba(27,42,47,0.06), 0 8px 24px rgba(27,42,47,0.06);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -52,19 +52,19 @@
   --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px rgba(0,0,0,0.3);
 }
 :root[data-theme="light"] {
-  --bg: #f2f5f3; --bg-panel: #ffffff; --ink: #10201f; --ink-muted: #51655f;
-  --line: rgba(16,32,31,0.12); --brand: #155e56; --brand-ink: #0d3b36;
-  --accent: #b8842e; --accent-soft: rgba(184,132,46,0.14);
-  --good: #2e7d5b; --good-soft: rgba(46,125,91,0.12);
-  --bad: #b23b3b; --bad-soft: rgba(178,59,59,0.10);
-  --shadow: 0 1px 2px rgba(16,32,31,0.06), 0 8px 24px rgba(16,32,31,0.06);
+  --bg: #f4ebdd; --bg-panel: #fbf7f0; --ink: #1b2a2f; --ink-muted: #566a6e;
+  --line: rgba(27,42,47,0.14); --brand: #5b4a8b; --brand-ink: #3f3266;
+  --accent: #c88a2d; --accent-soft: rgba(200,138,45,0.14);
+  --good: #2e5e7e; --good-soft: rgba(46,94,126,0.12);
+  --bad: #9b3a32; --bad-soft: rgba(155,58,50,0.10);
+  --shadow: 0 1px 2px rgba(27,42,47,0.06), 0 8px 24px rgba(27,42,47,0.06);
 }
 
 * { box-sizing: border-box; }
 html, body { margin: 0; padding: 0; }
 body {
-  background: #f2f5f3;
-  color: #10201f;
+  background: #f4ebdd;
+  color: #1b2a2f;
   font-family: "source-sans-3", system-ui, sans-serif;
   font-variant-numeric: tabular-nums;
 }
@@ -84,10 +84,10 @@ h1, h2, h3 { font-family: "source-serif-4", Georgia, serif; text-wrap: balance; 
   width: 1280px;
   height: 720px;
   padding: 64px 72px 56px;
-  border: 1px solid rgba(16,32,31,0.12);
+  border: 1px solid rgba(27,42,47,0.12);
   border-radius: 6px;
-  background: #f2f5f3;
-  box-shadow: 0 1px 2px rgba(16,32,31,0.06), 0 8px 24px rgba(16,32,31,0.06);
+  background: #f4ebdd;
+  box-shadow: 0 1px 2px rgba(27,42,47,0.06), 0 8px 24px rgba(27,42,47,0.06);
   display: flex;
   flex-direction: column;
   gap: 24px;
@@ -102,19 +102,19 @@ h1, h2, h3 { font-family: "source-serif-4", Georgia, serif; text-wrap: balance; 
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: #155e56;
+  color: #5b4a8b;
 }
-.eyebrow .num { font-family: "source-serif-4", serif; font-size: 1.1rem; color: #b8842e; }
+.eyebrow .num { font-family: "source-serif-4", serif; font-size: 1.1rem; color: #c88a2d; }
 
 .slide h2 {
   font-size: clamp(1.7rem, 2.6vw, 2.35rem);
   font-weight: 700;
-  color: #10201f;
+  color: #1b2a2f;
   max-width: 22ch;
 }
 .slide .kicker {
   font-size: 1.05rem;
-  color: #51655f;
+  color: #566a6e;
   max-width: 62ch;
   line-height: 1.5;
 }
@@ -131,25 +131,25 @@ h1, h2, h3 { font-family: "source-serif-4", Georgia, serif; text-wrap: balance; 
 
 .card {
   min-width: 0;
-  background: #ffffff;
-  border: 1px solid rgba(16,32,31,0.12);
+  background: #fbf7f0;
+  border: 1px solid rgba(27,42,47,0.12);
   border-radius: 4px;
   padding: 22px 24px;
-  box-shadow: 0 1px 2px rgba(16,32,31,0.06), 0 8px 24px rgba(16,32,31,0.06);
+  box-shadow: 0 1px 2px rgba(27,42,47,0.06), 0 8px 24px rgba(27,42,47,0.06);
   display: flex;
   flex-direction: column;
   gap: 10px;
 }
-.card h3 { font-size: 1.05rem; font-weight: 600; color: #0d3b36; }
-.card p { margin: 0; color: #51655f; line-height: 1.55; font-size: 0.95rem; }
+.card h3 { font-size: 1.05rem; font-weight: 600; color: #3f3266; }
+.card p { margin: 0; color: #566a6e; line-height: 1.55; font-size: 0.95rem; }
 .card .tag {
   align-self: flex-start;
   font-size: 0.7rem;
   font-weight: 600;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  color: #b8842e;
-  background: rgba(184,132,46,0.14);
+  color: #c88a2d;
+  background: rgba(200,138,45,0.14);
   padding: 3px 9px;
   border-radius: 3px;
 }
@@ -158,35 +158,35 @@ h1, h2, h3 { font-family: "source-serif-4", Georgia, serif; text-wrap: balance; 
 .verdict {
   border-radius: 4px;
   padding: 20px 22px;
-  border: 1px solid rgba(16,32,31,0.12);
+  border: 1px solid rgba(27,42,47,0.12);
 }
-.verdict.bad { background: rgba(178,59,59,0.10); }
-.verdict.good { background: rgba(46,125,91,0.12); }
-.verdict .label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #51655f; }
+.verdict.bad { background: rgba(155,58,50,0.10); }
+.verdict.good { background: rgba(46,94,126,0.12); }
+.verdict .label { font-size: 0.72rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: #566a6e; }
 .verdict .decision { font-family: "source-serif-4", serif; font-size: 1.6rem; font-weight: 700; margin-top: 4px; }
-.verdict.bad .decision { color: #b23b3b; }
-.verdict.good .decision { color: #2e7d5b; }
-.verdict .reason { margin-top: 6px; color: #51655f; font-size: 0.9rem; }
+.verdict.bad .decision { color: #9b3a32; }
+.verdict.good .decision { color: #2e5e7e; }
+.verdict .reason { margin-top: 6px; color: #566a6e; font-size: 0.9rem; }
 
 .stat-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; }
 .stat { text-align: left; min-width: 0; }
-.stat .value { font-family: "source-serif-4", serif; font-size: 2.4rem; font-weight: 700; color: #155e56; line-height: 1.2; }
-.stat .label { margin-top: 6px; font-size: 0.85rem; color: #51655f; }
+.stat .value { font-family: "source-serif-4", serif; font-size: 2.4rem; font-weight: 700; color: #5b4a8b; line-height: 1.2; }
+.stat .label { margin-top: 6px; font-size: 0.85rem; color: #566a6e; }
 
 .flow { display: flex; align-items: stretch; gap: 0; flex: 1; min-width: 0; }
 .flow-step {
   flex: 1;
   min-width: 0;
-  background: #ffffff;
-  border: 1px solid rgba(16,32,31,0.12);
+  background: #fbf7f0;
+  border: 1px solid rgba(27,42,47,0.12);
   border-radius: 4px;
   padding: 20px;
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
-.flow-step .step-num { font-family: "source-serif-4", serif; color: #b8842e; font-size: 1.3rem; font-weight: 700; }
-.flow-arrow { display: flex; align-items: center; padding: 0 10px; color: #51655f; font-size: 1.3rem; flex: 0 0 auto; }
+.flow-step .step-num { font-family: "source-serif-4", serif; color: #c88a2d; font-size: 1.3rem; font-weight: 700; }
+.flow-arrow { display: flex; align-items: center; padding: 0 10px; color: #566a6e; font-size: 1.3rem; flex: 0 0 auto; }
 
 .roadmap { display: flex; flex-direction: column; gap: 0; flex: 1; min-width: 0; }
 .phase {
@@ -194,12 +194,12 @@ h1, h2, h3 { font-family: "source-serif-4", Georgia, serif; text-wrap: balance; 
   grid-template-columns: 140px minmax(0, 1fr);
   gap: 24px;
   padding: 18px 0;
-  border-top: 1px solid rgba(16,32,31,0.12);
+  border-top: 1px solid rgba(27,42,47,0.12);
 }
 .phase:first-child { border-top: none; }
-.phase .period { font-family: "source-serif-4", serif; font-weight: 700; color: #b8842e; font-size: 1.05rem; }
+.phase .period { font-family: "source-serif-4", serif; font-weight: 700; color: #c88a2d; font-size: 1.05rem; }
 .phase h4 { margin: 0 0 4px; font-size: 1.05rem; font-weight: 600; }
-.phase p { margin: 0; color: #51655f; font-size: 0.92rem; line-height: 1.5; }
+.phase p { margin: 0; color: #566a6e; font-size: 0.92rem; line-height: 1.5; }
 
 .links-list { display: flex; flex-direction: column; gap: 16px; flex: 1; justify-content: center; }
 .link-row {
@@ -207,15 +207,15 @@ h1, h2, h3 { font-family: "source-serif-4", Georgia, serif; text-wrap: balance; 
   align-items: center;
   gap: 18px;
   padding: 18px 22px;
-  background: #ffffff;
-  border: 1px solid rgba(16,32,31,0.12);
+  background: #fbf7f0;
+  border: 1px solid rgba(27,42,47,0.12);
   border-radius: 4px;
 }
-.link-row .icon { font-family: "source-serif-4", serif; color: #b8842e; font-size: 1.3rem; }
+.link-row .icon { font-family: "source-serif-4", serif; color: #c88a2d; font-size: 1.3rem; }
 .link-row .link-label { font-weight: 600; min-width: 220px; }
-.link-row .link-value { color: #51655f; font-size: 0.95rem; }
+.link-row .link-value { color: #566a6e; font-size: 0.95rem; }
 .link-row .link-value a { color: inherit; text-decoration: none; }
-.link-row .link-value.ready { color: #0d3b36; font-weight: 600; }
+.link-row .link-value.ready { color: #3f3266; font-weight: 600; }
 
 .snapshot-grid {
   display: grid;
@@ -234,10 +234,10 @@ h1, h2, h3 { font-family: "source-serif-4", Georgia, serif; text-wrap: balance; 
   margin: 0;
   min-width: 0;
   min-height: 0;
-  background: #ffffff;
-  border: 1px solid rgba(16,32,31,0.12);
+  background: #fbf7f0;
+  border: 1px solid rgba(27,42,47,0.12);
   border-radius: 4px;
-  box-shadow: 0 1px 2px rgba(16,32,31,0.06), 0 8px 24px rgba(16,32,31,0.06);
+  box-shadow: 0 1px 2px rgba(27,42,47,0.06), 0 8px 24px rgba(27,42,47,0.06);
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -252,37 +252,37 @@ h1, h2, h3 { font-family: "source-serif-4", Georgia, serif; text-wrap: balance; 
 }
 .shot-frame.featured img { aspect-ratio: 16 / 9; }
 .shot-caption {
-  border-top: 1px solid rgba(16,32,31,0.12);
+  border-top: 1px solid rgba(27,42,47,0.12);
   padding: 10px 12px;
-  color: #51655f;
+  color: #566a6e;
   font-size: 0.78rem;
   line-height: 1.35;
-  background: #ffffff;
+  background: #fbf7f0;
 }
 
 .brief-item { display: flex; gap: 14px; min-width: 0; }
 .brief-item > div { min-width: 0; }
-.brief-item .idx { font-family: "source-serif-4", serif; color: #b8842e; font-weight: 700; font-size: 1.1rem; min-width: 1.4em; }
-.brief-item div p { margin: 4px 0 0; color: #51655f; line-height: 1.55; }
-.brief-item div strong { color: #10201f; }
+.brief-item .idx { font-family: "source-serif-4", serif; color: #c88a2d; font-weight: 700; font-size: 1.1rem; min-width: 1.4em; }
+.brief-item div p { margin: 4px 0 0; color: #566a6e; line-height: 1.55; }
+.brief-item div strong { color: #1b2a2f; }
 
 .team-block { display: flex; flex-direction: column; gap: 10px; margin-top: 8px; }
 .team-block .row { display: flex; gap: 12px; font-size: 1.05rem; }
-.team-block .row .k { color: #51655f; min-width: 160px; }
+.team-block .row .k { color: #566a6e; min-width: 160px; }
 .team-block .row .v { font-weight: 600; }
 
 table.tech-table { width: 100%; border-collapse: collapse; flex: 1; }
-table.tech-table td { padding: 14px 18px; border-top: 1px solid rgba(16,32,31,0.12); vertical-align: top; }
+table.tech-table td { padding: 14px 18px; border-top: 1px solid rgba(27,42,47,0.12); vertical-align: top; }
 table.tech-table tr:first-child td { border-top: none; }
-table.tech-table td:first-child { font-weight: 600; width: 220px; color: #0d3b36; }
-table.tech-table td:last-child { color: #51655f; }
+table.tech-table td:first-child { font-weight: 600; width: 220px; color: #3f3266; }
+table.tech-table td:last-child { color: #566a6e; }
 
 .footer-mark {
   position: absolute;
   bottom: 24px;
   right: 72px;
   font-size: 0.72rem;
-  color: #51655f;
+  color: #566a6e;
   letter-spacing: 0.04em;
 }
 
@@ -356,19 +356,19 @@ table.tech-table td:last-child { color: #51655f; }
     <div class="eyebrow"><span class="num">05</span> Process Flow</div>
     <h2>From consented data to an auditable decision.</h2>
     <div class="flow">
-      <div class="flow-step"><span class="step-num">01</span><h3>Data intake</h3><p style="color:#51655f;font-size:0.9rem;">AA statements, GST, UPI, EPFO</p></div>
+      <div class="flow-step"><span class="step-num">01</span><h3>Data intake</h3><p style="color:#566a6e;font-size:0.9rem;">AA statements, GST, UPI, EPFO</p></div>
       <div class="flow-arrow">→</div>
-      <div class="flow-step"><span class="step-num">02</span><h3>Dual scoring</h3><p style="color:#51655f;font-size:0.9rem;">Rule engine + ML model, in parallel</p></div>
+      <div class="flow-step"><span class="step-num">02</span><h3>Dual scoring</h3><p style="color:#566a6e;font-size:0.9rem;">Rule engine + ML model, in parallel</p></div>
       <div class="flow-arrow">→</div>
-      <div class="flow-step"><span class="step-num">03</span><h3>Verdict & explain</h3><p style="color:#51655f;font-size:0.9rem;">Traditional vs. alternate, Shapley reasons</p></div>
+      <div class="flow-step"><span class="step-num">03</span><h3>Verdict & explain</h3><p style="color:#566a6e;font-size:0.9rem;">Traditional vs. alternate, Shapley reasons</p></div>
       <div class="flow-arrow">→</div>
-      <div class="flow-step"><span class="step-num">04</span><h3>Memo & audit</h3><p style="color:#51655f;font-size:0.9rem;">Underwriter memo, decision logged</p></div>
+      <div class="flow-step"><span class="step-num">04</span><h3>Memo & audit</h3><p style="color:#566a6e;font-size:0.9rem;">Underwriter memo, decision logged</p></div>
     </div>
     <div class="footer-mark">UdyamPulse · IDBI Innovate 2026</div>
   </section>
 
   <section class="slide" data-canvas-width="1280" data-canvas-height="720">
-    <div class="eyebrow"><span class="num">06</span> Wireframes / Mock Diagrams <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#51655f;">(optional)</span></div>
+    <div class="eyebrow"><span class="num">06</span> Wireframes / Mock Diagrams <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#566a6e;">(optional)</span></div>
     <h2>The rejected → approved moment.</h2>
     <p class="kicker">The NTC hero (Shree Ganesh Textiles) has zero bureau history — declined instantly by a traditional process, approved on alternate data by UdyamPulse.</p>
     <div class="verdict-row">
@@ -388,12 +388,12 @@ table.tech-table td:last-child { color: #51655f; }
 
   <section class="slide" data-canvas-width="1280" data-canvas-height="720">
     <div class="eyebrow"><span class="num">07</span> Architecture</div>
-    <h2>One service. Two engines. A full audit trail.</h2>
-    <div class="grid cols-2 cols-4-print" style="grid-template-columns:repeat(4,1fr);">
-      <div class="card"><h3>Single FastAPI Service</h3><p>One process serves the API and the frontend — one Dockerfile, one deploy target.</p></div>
-      <div class="card"><h3>Rule + ML Dual Engine</h3><p>Transparent 5-pillar rules alongside a trained model with exact Shapley attribution.</p></div>
-      <div class="card"><h3>Temporal Evidence Gate</h3><p>Dated outcomes, 365-day maturity, chronological development/calibration/OOT, segment-volume controls.</p></div>
-      <div class="card"><h3>Promotion & Audit Gate</h3><p>Pseudonymous SHA-256 audit plus fail-closed pilot startup until model, OOT, identity, and storage pass.</p></div>
+    <h2>One service. Four inspectable control planes.</h2>
+    <div class="grid cols-2 cols-4-print" style="grid-template-columns:repeat(4,1fr);flex:0 0 auto;">
+      <div class="card"><h3>Operational Edge</h3><p>Request IDs, body ceilings, readiness probes, security headers, rate controls, and a non-root container.</p></div>
+      <div class="card"><h3>Decision + Evidence</h3><p>Five transparent pillars, calibrated PD, exact TreeSHAP attribution, policy checks, and reason codes.</p></div>
+      <div class="card"><h3>Temporal Validation</h3><p>Dated outcomes, 365-day maturity, chronological development/calibration/OOT, PSI, KS, AUC, and Gini.</p></div>
+      <div class="card"><h3>Promotion + Audit</h3><p>Pseudonymous hash-chain evidence and fail-closed pilot startup until model, OOT, identity, and storage pass.</p></div>
     </div>
     <div class="footer-mark">UdyamPulse · IDBI Innovate 2026</div>
   </section>
@@ -404,15 +404,15 @@ table.tech-table td:last-child { color: #51655f; }
     <table class="tech-table">
       <tr><td>Backend</td><td>Python, FastAPI, Pydantic, pytest</td></tr>
       <tr><td>ML layer</td><td>Calibrated monotonic XGBoost champion with native exact TreeSHAP; calibrated logistic fallback</td></tr>
-      <tr><td>Frontend</td><td>Vanilla HTML / CSS / JS, no build step</td></tr>
-      <tr><td>Deployment &amp; CI</td><td>Docker, Render web service, render.yaml Blueprint, GitHub Actions</td></tr>
+      <tr><td>Frontend</td><td>Accessible, deep-linkable HTML / CSS / JS cockpit with no build step</td></tr>
+      <tr><td>Deployment &amp; CI</td><td>Non-root Docker runtime, readiness probe, Render Blueprint, two-job GitHub Actions</td></tr>
       <tr><td>Stage 2 targets</td><td>Supply IDBI sandbox records to the shipped outcome/temporal gates; add SSO/KMS and durable shared audit storage</td></tr>
     </table>
     <div class="footer-mark">UdyamPulse · IDBI Innovate 2026</div>
   </section>
 
   <section class="slide" data-canvas-width="1280" data-canvas-height="720">
-    <div class="eyebrow"><span class="num">09</span> Estimated Implementation Cost <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#51655f;">(optional)</span></div>
+    <div class="eyebrow"><span class="num">09</span> Estimated Implementation Cost <span style="font-weight:400;text-transform:none;letter-spacing:0;color:#566a6e;">(optional)</span></div>
     <h2>Near-zero to prototype. Scoped jointly for Stage 2.</h2>
     <p class="kicker" style="font-size:1.15rem;">The prototype runs entirely on an open-source stack and free-tier hosting. Stage 2 production cost scales with transaction volume and is best scoped jointly with IDBI during the sandbox mentorship phase, once real data volume is known.</p>
     <div class="footer-mark">UdyamPulse · IDBI Innovate 2026</div>
@@ -445,7 +445,7 @@ table.tech-table td:last-child { color: #51655f; }
     <div class="eyebrow"><span class="num">11</span> Performance Report / Benchmarking</div>
     <h2>Verified, not just claimed.</h2>
     <div class="stat-row">
-      <div class="stat"><div class="value">61/61</div><div class="label">Automated tests passing</div></div>
+      <div class="stat"><div class="value">69/69</div><div class="label">Automated tests passing</div></div>
       <div class="stat"><div class="value">0.750</div><div class="label">Untouched holdout AUC</div></div>
       <div class="stat"><div class="value">0.499</div><div class="label">Holdout Gini</div></div>
       <div class="stat"><div class="value">0.012</div><div class="label">Calibration error</div></div>

@@ -7,13 +7,14 @@
 [Live demo](https://id-ysm9.onrender.com) |
 [Submission deck](docs/deck/UdyamPulse-IDBI-Submission-Deck.pdf) |
 [Walkthrough video](docs/demo.webm) |
-[Model card](MODEL_CARD.md)
+[Model card](MODEL_CARD.md) |
+[Pilot runbook](docs/PILOT_RUNBOOK.md)
 
 [![tests](https://github.com/bansalbhunesh/id/actions/workflows/tests.yml/badge.svg)](https://github.com/bansalbhunesh/id/actions/workflows/tests.yml)
 ![Python](https://img.shields.io/badge/python-3.12+-blue)
 ![FastAPI](https://img.shields.io/badge/backend-FastAPI-009688)
 ![Model](https://img.shields.io/badge/model-calibrated%20XGBoost%20%2B%20TreeSHAP-1f6f5f)
-![Status](https://img.shields.io/badge/status-pre--sandbox%20pilot--gated-brightgreen)
+![Status](https://img.shields.io/badge/status-flagship%20public%20demo%20%7C%20pilot%20gated-5B4A8B)
 
 Built for **IDBI Innovate 2026** - Problem Statement 3: Financial Health Score - Team **Looper**
 
@@ -21,7 +22,7 @@ Built for **IDBI Innovate 2026** - Problem Statement 3: Financial Health Score -
 
 ---
 
-## Table Of Contents
+## Contents
 
 - [Overview](#overview)
 - [Demo](#demo)
@@ -51,10 +52,13 @@ The core demo moment is a New-to-Credit case traditional underwriting rejects be
 - Live app: [https://id-ysm9.onrender.com](https://id-ysm9.onrender.com)
 - Live API proof: [https://id-ysm9.onrender.com/submission/proof](https://id-ysm9.onrender.com/submission/proof)
 - OpenAPI docs: [https://id-ysm9.onrender.com/docs](https://id-ysm9.onrender.com/docs)
+- Runtime readiness: [https://id-ysm9.onrender.com/health/ready](https://id-ysm9.onrender.com/health/ready)
 - Walkthrough video: [docs/demo.webm](docs/demo.webm)
 - Lightweight fallback: [docs/demo.gif](docs/demo.gif)
 - Submission deck: [docs/deck/UdyamPulse-IDBI-Submission-Deck.pdf](docs/deck/UdyamPulse-IDBI-Submission-Deck.pdf)
 - First-round rules check: [docs/FIRST_ROUND_RULES_CHECK.md](docs/FIRST_ROUND_RULES_CHECK.md)
+- Pilot promotion runbook: [docs/PILOT_RUNBOOK.md](docs/PILOT_RUNBOOK.md)
+- Threat model: [docs/THREAT_MODEL.md](docs/THREAT_MODEL.md)
 
 What to verify in under three minutes:
 
@@ -69,6 +73,7 @@ The backend is not a mock response behind a polished screen. The judge can verif
 
 | Proof surface | What it proves |
 |---|---|
+| `GET /health/ready` | Release version, serving provider, runtime permission and verified artifact integrity used by container/Render readiness checks. |
 | `GET /submission/proof` | One payload summarizing the NTC reversal, truth boundary, backend capability map, judge runbook, rubric scorecard, competitor gap map, API catalog, validation metrics, controls, and Stage 2 swap points. |
 | `GET /msmes/ntc_hero/score` | Full decision packet: score, grade, limit, reason codes, exact Shapley attribution, memo, guardrails, source map, and decision path. |
 | `GET /model/evaluation` | Untouched proxy holdout AUC/Gini/KS/PR-AUC/Brier/ECE, bootstrap intervals, fairness slices, PSI, candidate comparison, and artifact hashes. |
@@ -84,6 +89,7 @@ Quick backend checks:
 
 ```bash
 curl https://id-ysm9.onrender.com/submission/proof
+curl https://id-ysm9.onrender.com/health/ready
 curl https://id-ysm9.onrender.com/msmes/ntc_hero/score
 curl https://id-ysm9.onrender.com/governance
 curl https://id-ysm9.onrender.com/deployment/readiness
@@ -94,19 +100,19 @@ Rubric coverage is implemented as backend data, not only README copy:
 | Judge lens | Verifiable proof |
 |---|---|
 | Innovation | NTC bureau rejection becomes an explainable alternate-data approval with memo, reasons, guardrails, and audit. |
-| Feasibility | One FastAPI service, static cockpit, Dockerfile, Render Blueprint, GitHub Actions, and no mandatory paid API dependency. |
-| Scalability | Separate ingestion, scoring, attribution, validation, audit, temporal readiness, and fail-closed promotion gates. |
+| Feasibility | One FastAPI service, zero-build static cockpit, non-root container, readiness probe, Render Blueprint, GitHub Actions, and no mandatory paid API dependency. |
+| Scalability | Separate ingestion, scoring, attribution, O(n log n) validation, audit, temporal readiness, bounded payloads, and fail-closed promotion gates. |
 | Business impact | Portfolio impact, NTC rescues, credit unlocked, pilot KPIs, early-risk guardrail, and diversification measures. |
 | Technical implementation | Calibrated monotonic XGBoost, native exact TreeSHAP, logistic fallback, score/PD/policy separation, scoped APIs, and artifact-backed evidence. |
 | Governance readiness | Honest random-holdout boundary, dated outcome contract, true-OOT readiness gates, model-disagreement review, pseudonymised audit, and fail-closed pilot promotion. |
 
 ## Features
 
-- Underwriter cockpit with borrower queue, score, grade, risk band, credit-line recommendation, and decision comparison.
+- Deep-linkable, keyboard-accessible underwriter cockpit with borrower queue, score, grade, risk band, credit-line recommendation, and decision comparison.
 - Five-pillar financial health card: Liquidity, Discipline, Momentum, Leverage, and Digital Footprint.
 - Calibrated monotonic XGBoost champion with native exact TreeSHAP, a calibrated logistic fallback, and an untouched 4,500-row public-proxy holdout -- not a regressor fit against a synthetic score. See [MODEL_CARD.md](MODEL_CARD.md).
 - Deterministic underwriter memo and borrower improvement plan; optional AWS Bedrock memo generation is a Stage 2 configuration path.
-- Underwriter/auditor role gates, source-scoped consent, security headers, rate limits, and restart-safe pseudonymised hash-chain audit events.
+- Underwriter/auditor role gates, source-scoped consent, strict app CSP, request IDs, body/array bounds, quota headers, and fsync-backed genesis-anchored pseudonymised audit events.
 - Sandbox-ready ingestion via `POST /sandbox/score` for AA/GST/UPI/EPFO/Bureau-style payloads, with enforced purpose/scope/expiry consent.
 - Recalibration and monitoring APIs for holdout AUC/Gini/KS/PR-AUC/Brier/ECE, bootstrap intervals, PSI, reason stability, pilot targets, and proxy fairness slices -- see `GET /model/evaluation`.
 - Dated `bad_12m` outcome contract with 365-day maturity checks and automatic chronological development/calibration/OOT cohorts -- see `GET /sandbox/outcome-contract` and `POST /sandbox/pilot-readiness`.
@@ -115,93 +121,30 @@ Rubric coverage is implemented as backend data, not only README copy:
 ## Architecture
 
 ```mermaid
-flowchart TB
-  Judge["Judge / underwriter reviewer"]
-
-  subgraph Review["Review surfaces"]
-    UI["Static credit cockpit<br/>Decision, Evidence, Governance, Proof, Sources"]
-    README["README + deck + model card"]
-    OpenAPI["OpenAPI docs"]
-  end
-
-  subgraph FastAPI["Single FastAPI deployable"]
-    Routes["main.py routes"]
-    Health["/health"]
-    Proof["/submission/proof<br/>rubric, runbook, gap map, truth boundary"]
-    ScoreAPI["/msmes/{id}/score + /score"]
-    SandboxAPI["/sandbox/score + /sandbox/recalibration/report"]
-    PilotAPI["/sandbox/pilot-readiness<br/>dated outcome + temporal gates"]
-    PromotionAPI["/deployment/readiness<br/>fail-closed promotion"]
-    GovernanceAPI["/governance + /portfolio + /pilot-metrics"]
-    ValidationAPI["/validation/demo + /validation/report"]
-    AuditAPI["/audit-log + /model/status + /model/evaluation"]
-  end
-
-  subgraph Core["Decision core"]
-    Validate["Pydantic profile/feed validation"]
-    Ingest["AA/GST/UPI/EPFO/Bureau feed normalization"]
-    Score["Five-pillar scorecard<br/>health grade + proposed limit"]
-    Explain["Calibrated monotonic XGBoost<br/>native exact TreeSHAP"]
-    Policy["Versioned score + PD policy<br/>approve / review / reject"]
-    Memo["Deterministic memo<br/>optional Bedrock provider"]
-    Audit["Pseudonymised hash-chain event"]
-  end
-
-  subgraph Controls["Governance and monitoring"]
-    Portfolio["NTC rescues + credit unlocked"]
-    Validation["Holdout AUC, Gini, KS, PR-AUC<br/>Brier, ECE, intervals, PSI"]
-    Fairness["Sector, geography, vintage, gender-ready, bureau-history slices"]
-    Pilot["Approval lift, decision-time reduction, early-NPA guardrail"]
-  end
-
-  subgraph Stage2["Post-shortlisting swap points"]
-    IDBI["Approved IDBI sandbox feeds"]
-    Outcomes["Repayment outcomes"]
-    Storage["Persistent audit storage"]
-    ModelUpgrade["Retrain champion/challenger<br/>on dated IDBI outcomes"]
-  end
-
-  Judge --> UI
-  Judge --> README
-  Judge --> OpenAPI
-  UI --> Routes
-  README --> Proof
-  OpenAPI --> Routes
-  Routes --> Health
-  Routes --> Proof
-  Routes --> ScoreAPI
-  Routes --> SandboxAPI
-  Routes --> PilotAPI
-  Routes --> PromotionAPI
-  Routes --> GovernanceAPI
-  Routes --> ValidationAPI
-  Routes --> AuditAPI
-  ScoreAPI --> Validate --> Score
-  SandboxAPI --> Ingest --> Validate
-  Score --> Explain --> Policy --> Memo --> Audit
-  Audit --> GovernanceAPI
-  Score --> Portfolio
-  Score --> Validation
-  Score --> Fairness
-  Score --> Pilot
-  Portfolio --> Proof
-  Validation --> Proof
-  Fairness --> Proof
-  Pilot --> Proof
-  Audit --> Proof
-  IDBI -.-> Ingest
-  Outcomes -.-> Validation
-  Outcomes -.-> PilotAPI
-  PilotAPI -.-> ModelUpgrade
-  ModelUpgrade -.-> PromotionAPI
-  Storage -.-> Audit
-  ModelUpgrade -.-> Explain
+flowchart LR
+  Reviewer["Judge / underwriter"] --> Cockpit["Deep-linkable credit cockpit"]
+  Cockpit --> Guard["Request trace | CSP | limits | RBAC"]
+  Guard --> Intake["Consent + AA/GST/UPI/EPFO normalisation"]
+  Intake --> Score["Five-pillar health score"]
+  Score --> Model["Calibrated monotonic XGBoost"]
+  Model --> Explain["Exact TreeSHAP"]
+  Explain --> Policy["Versioned lending policy"]
+  Policy --> Memo["Memo + proposed limit"]
+  Memo --> Audit["Genesis-anchored audit chain"]
+  Model --> Monitor["Holdout + drift + fairness evidence"]
+  Audit --> Gate["Fail-closed promotion gate"]
+  Monitor --> Gate
+  Outcomes["Dated IDBI outcomes - pending"] -.-> Temporal["365-day maturity + true OOT"]
+  Temporal -.-> Gate
+  Gate -->|"all pass"| Pilot["Approved pilot runtime"]
+  Gate -->|"any block"| Refuse["Startup refused"]
 ```
 
 Important endpoints:
 
 | Endpoint | Purpose |
 |---|---|
+| `GET /health/live`, `GET /health/ready` | Process liveness and release/model/artifact readiness |
 | `GET /msmes` and `GET /msmes/{id}/score` | Demo cohort and score packets |
 | `GET /submission/proof` | Judge-facing capability, architecture, rubric, runbook, competitor-gap, and truth-boundary proof |
 | `POST /score` | Underwriter-authenticated custom MSME scoring |
@@ -229,29 +172,29 @@ Demo-scoped credentials for protected write/audit routes are documented in [docs
 Run tests:
 
 ```bash
-cd backend
-pytest -q
+python -m pytest backend -q
 ```
 
 Container deploy:
 
 ```bash
 docker build -t udyampulse .
-docker run -p 8000:8000 udyampulse
+docker run -d --name udyampulse -p 8000:8000 udyampulse
+docker inspect --format='{{json .State.Health}}' udyampulse
 ```
 
-`Dockerfile` and `render.yaml` are included for a single-service Render deployment.
+The image runs as a non-root user and probes `/health/ready`. `Dockerfile` and `render.yaml` define the same single-service deployment used by Render.
 
 ## Evidence
 
-- Test suite: 61 tests covering scoring/policy routes, NTC reversal, model monotonicity, exact TreeSHAP reconstruction, runtime artifact hashes, honest holdout evidence, consent-at-decision scope, temporal leakage/maturity/split gates, fail-closed runtime modes and pilot promotion, restart-safe pseudonymised audit chaining, and API proof.
+- Test suite: 69 tests covering scoring/policy routes, NTC reversal, model monotonicity, exact TreeSHAP reconstruction, runtime artifact hashes, honest holdout evidence, consent-at-decision scope, temporal leakage/maturity/split gates, production-scale validation, resource ceilings, request traces, fail-closed runtime modes, genesis-anchored audit chaining, and API proof.
 - Model evidence: `GET /model/evaluation` reports random-holdout ROC-AUC **0.7497** (bootstrap 95% interval **0.7314-0.7678**), Gini **0.4993**, KS **0.4225**, PR-AUC **0.4948**, Brier **0.1415**, and ECE **0.0122**. It is reproducible with `python backend/model_training/train_pd_model.py` and explicitly not called OOT.
 - Public cohort impact: 2 NTC rescues and Rs 30,80,000 credit unlocked in the synthetic demo cohort (pilot targets, not measured lift -- see `GET /pilot-metrics`).
 - Governance evidence: policy guardrails with real consent-verification detail, source map, hash-chained audit count, real validation metrics, pilot KPI targets, and fairness slices are visible in the app.
 - Backend evidence: `/submission/proof` exposes the capability map, judge runbook, route catalog, rubric scorecard, competitor gap map, architecture flow, real held-out validation metrics, controls, and Stage 2 swap points directly from backend functions.
-- Security: custom/sandbox/validation writes require `underwriter`; `/audit-log` requires `auditor`; logs retain HMAC subject references rather than borrower names; CORS and consent scope are enforced. See [docs/SECURITY_COMPLIANCE.md](docs/SECURITY_COMPLIANCE.md).
+- Security: custom/sandbox/validation writes require `underwriter`; `/audit-log` requires `auditor`; logs retain HMAC subject references rather than borrower names; CSP, CORS, consent, payload ceilings and rate budgets are enforced. See [docs/SECURITY_COMPLIANCE.md](docs/SECURITY_COMPLIANCE.md) and [docs/THREAT_MODEL.md](docs/THREAT_MODEL.md).
 - Promotion safety: the live public proxy is explicitly blocked from pilot use. `UDYAMPULSE_MODE=pilot` or `production` refuses startup until all machine-readable deployment gates pass.
-- Model transparency: [MODEL_CARD.md](MODEL_CARD.md) documents the real training data/label, the domain-bridge feature mapping, explainability, intended use, and limitations. [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) documents module responsibilities, model versioning, and security boundaries.
+- Model transparency: [MODEL_CARD.md](MODEL_CARD.md) documents the real training data/label, domain bridge, explainability, intended use and limitations. [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) documents implementation boundaries; [docs/PILOT_RUNBOOK.md](docs/PILOT_RUNBOOK.md) defines promotion, sign-off and rollback.
 
 ## Screenshots
 

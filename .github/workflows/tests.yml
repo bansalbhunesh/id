@@ -45,6 +45,8 @@ jobs:
             sleep 1
           done
           curl --fail --silent http://127.0.0.1:8000/deployment/readiness
+          curl --fail --silent http://127.0.0.1:8000/msmes/ntc_hero/score
+          docker exec udyampulse-ci test -s /app/runtime/audit_log.jsonl
           if docker run --rm -e UDYAMPULSE_MODE=pilot udyampulse:ci; then
             echo "Pilot mode started without passing promotion gates"
             exit 1

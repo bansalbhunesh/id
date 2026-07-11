@@ -17,7 +17,7 @@ What is in the repo:
 - `MODEL_CARD.md`, `docs/COMPETITIVE_RESEARCH.md`, `docs/SUBMISSION_CHECKLIST.md`, and `docs/DEMO_SCRIPT.md`.
 - Submission deck source and PDF under `docs/deck/`.
 - Render Blueprint at `render.yaml`.
-- 69 passing tests; RBAC; scoped consent; genesis-anchored audit; request/resource controls; dated pilot-outcome and temporal/OOT readiness gates; fail-closed pilot promotion; random-holdout proxy evidence at `GET /model/evaluation` (AUC 0.7497, explicitly not OOT). See `docs/ARCHITECTURE.md` and `docs/SECURITY_COMPLIANCE.md`.
+- 70 passing tests; RBAC; scoped consent; genesis-anchored audit; request/resource controls; dated pilot-outcome and temporal/OOT readiness gates; fail-closed pilot promotion; random-holdout proxy evidence at `GET /model/evaluation` (AUC 0.7497, explicitly not OOT). See `docs/ARCHITECTURE.md` and `docs/SECURITY_COMPLIANCE.md`.
 
 ## Verified
 

@@ -10,7 +10,15 @@ import time
 from datetime import datetime, timezone
 from pathlib import Path
 
-LOG_PATH = Path(__file__).parent / "audit_log.jsonl"
+DEFAULT_LOG_PATH = Path(__file__).parent / "audit_log.jsonl"
+
+
+def configured_log_path() -> Path:
+    configured = os.getenv("UDYAMPULSE_AUDIT_LOG_PATH", "").strip()
+    return Path(configured) if configured else DEFAULT_LOG_PATH
+
+
+LOG_PATH = configured_log_path()
 GENESIS_HASH = "0" * 64
 
 _memory_log: list[dict] = []

@@ -5,12 +5,14 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
+    UDYAMPULSE_AUDIT_LOG_PATH=/app/runtime/audit_log.jsonl \
     PORT=8000
 
 COPY backend/requirements.txt backend/requirements.txt
 RUN pip install --no-cache-dir -r backend/requirements.txt \
     && groupadd --system app \
-    && useradd --system --gid app --home-dir /app app
+    && useradd --system --gid app --home-dir /app app \
+    && install -d -o app -g app /app/runtime
 
 COPY --chown=app:app backend/ backend/
 COPY --chown=app:app frontend/ frontend/

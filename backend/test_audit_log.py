@@ -37,6 +37,13 @@ def test_hash_chain_links_consecutive_entries(tmp_path, monkeypatch):
     assert result["entries_checked"] == 2
 
 
+def test_audit_log_path_can_target_a_writable_runtime_directory(tmp_path, monkeypatch):
+    runtime_log = tmp_path / "runtime" / "audit.jsonl"
+    monkeypatch.setenv("UDYAMPULSE_AUDIT_LOG_PATH", str(runtime_log))
+
+    assert audit_log.configured_log_path() == runtime_log
+
+
 def test_verify_chain_detects_tampering(tmp_path, monkeypatch):
     monkeypatch.setattr(audit_log, "LOG_PATH", tmp_path / "audit_log.jsonl")
     monkeypatch.setattr(audit_log, "_memory_log", [])

@@ -63,7 +63,7 @@
     <button id="drawerToggle" class="drawer-launch" type="button" aria-haspopup="dialog" aria-controls="reviewDrawer" data-inert-when-drawer>Review packet</button>
     <div id="drawerScrim" class="scrim" aria-hidden="true"></div>
 
-    <aside id="reviewDrawer" class="review-drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle" aria-hidden="true" inert>
+    <div id="reviewDrawer" class="review-drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle" aria-hidden="true" inert>
       <div class="drawer-head">
         <div>
           <h2 id="drawerTitle" class="drawer-title" tabindex="-1">Decision packet</h2>
@@ -74,10 +74,10 @@
       <section id="decisionStamp" class="drawer-stamp" aria-label="Decision summary">
         <div class="skeleton">Loading decision stamp...</div>
       </section>
-      <div id="tabContent" class="drawer-body" role="tabpanel" aria-labelledby="tab-decision">
+      <div id="tabContent" class="drawer-body" role="tabpanel" aria-labelledby="tab-decision" tabindex="0">
         <div class="skeleton">Preparing review packet...</div>
       </div>
-    </aside>
+    </div>
   </div>
 
   <noscript>UdyamPulse needs JavaScript to load the credit-review evidence.</noscript>

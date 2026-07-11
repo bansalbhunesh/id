@@ -197,7 +197,7 @@ The image runs as a non-root user and probes `/health/ready`. `Dockerfile` and `
 
 ## Evidence
 
-- Test suite: 70 tests covering scoring/policy routes, NTC reversal, model monotonicity, exact TreeSHAP reconstruction, runtime artifact hashes, honest holdout evidence, consent-at-decision scope, temporal leakage/maturity/split gates, production-scale validation, resource ceilings, request traces, fail-closed runtime modes, writable non-root audit persistence, genesis-anchored audit chaining, and API proof.
+- Test suite: 83 tests covering scoring/policy routes, NTC reversal, model monotonicity, exact TreeSHAP reconstruction, runtime artifact hashes, honest holdout evidence, consent-at-decision scope, temporal leakage/maturity/split gates, production-scale validation, resource ceilings, request traces, fail-closed runtime modes, writable non-root audit persistence, genesis-anchored audit chaining, missing-source review routing, counterparty-concentration limit sizing, generative-memo fact-checking, and API proof.
 - Model evidence: `GET /model/evaluation` reports random-holdout ROC-AUC **0.7497** (bootstrap 95% interval **0.7314-0.7678**), Gini **0.4993**, KS **0.4225**, PR-AUC **0.4948**, Brier **0.1415**, and ECE **0.0122**. It is reproducible with `python backend/model_training/train_pd_model.py` and explicitly not called OOT.
 - Public cohort impact: 2 NTC rescues and Rs 30,80,000 credit unlocked in the synthetic demo cohort (pilot targets, not measured lift -- see `GET /pilot-metrics`).
 - Governance evidence: policy guardrails with real consent-verification detail, source map, hash-chained audit count, real validation metrics, pilot KPI targets, and fairness slices are visible in the app.

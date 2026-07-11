@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from deployment_gate import build_deployment_readiness
 from ml import model_evaluation
 from portfolio import build_governance_summary, build_portfolio_snapshot
 from sample_data import SAMPLE_PROFILES
@@ -37,6 +38,18 @@ API_CATALOG = [
         "path": "/sandbox/recalibration/report",
         "layer": "Recalibration",
         "proves": "Sandbox distributions, source coverage, outcome labels, and GBM/SHAP readiness are profiled before pilot rollout.",
+    },
+    {
+        "method": "POST",
+        "path": "/sandbox/pilot-readiness",
+        "layer": "Temporal data gate",
+        "proves": "Dated sandbox outcomes are maturity-checked and split chronologically into development, calibration and true later-period OOT cohorts.",
+    },
+    {
+        "method": "GET",
+        "path": "/deployment/readiness",
+        "layer": "Promotion control",
+        "proves": "Pilot/production startup blockers are machine-readable and fail closed outside public-demo mode.",
     },
     {
         "method": "POST",
@@ -72,8 +85,8 @@ BACKEND_CAPABILITIES = [
     },
     {
         "layer": "Sandbox ingestion",
-        "modules": ["feed_ingestion.py", "recalibration.py"],
-        "implemented": "IDBI sandbox-style AA/GST/UPI/EPFO/Bureau contracts, source readiness, distribution profiling, label readiness checks.",
+        "modules": ["feed_ingestion.py", "recalibration.py", "pilot_readiness.py"],
+        "implemented": "IDBI sandbox-style feed contracts, source profiling, a dated 12-month outcome contract, automatic chronological splits, maturity checks, and segment-volume gates.",
     },
     {
         "layer": "Model governance",
@@ -84,6 +97,11 @@ BACKEND_CAPABILITIES = [
         "layer": "Audit and memo",
         "modules": ["audit_log.py", "agent_memo.py"],
         "implemented": "Pseudonymised restart-safe hash-chain events and deterministic underwriter memo with optional Bedrock provider fallback.",
+    },
+    {
+        "layer": "Deployment promotion",
+        "modules": ["deployment_gate.py", "auth.py", "main.py"],
+        "implemented": "Public demo mode is explicit; pilot/production startup fails closed until private credentials, IDBI model scope, true OOT evidence, and durable audit storage pass.",
     },
 ]
 
@@ -101,8 +119,8 @@ RUBRIC_SCORECARD = [
     },
     {
         "criterion": "Scalability",
-        "proof": "Separates validation, ingestion, scoring, attribution, audit, recalibration, and governance so Stage 2 can swap data/model/storage without rewriting the cockpit.",
-        "evidence": ["/sandbox/score", "/sandbox/recalibration/report", "/model/status"],
+        "proof": "Separates validation, ingestion, scoring, attribution, audit, temporal readiness and promotion gates so Stage 2 can swap data/model/storage without rewriting the cockpit.",
+        "evidence": ["/sandbox/score", "/sandbox/pilot-readiness", "/deployment/readiness"],
     },
     {
         "criterion": "Business impact",
@@ -116,8 +134,8 @@ RUBRIC_SCORECARD = [
     },
     {
         "criterion": "Governance readiness",
-        "proof": "Surfaces domain-transfer limits, model-disagreement review, pseudonymised audit reconstruction, fairness monitoring, PSI, confidence intervals, and deterministic memo fallback.",
-        "evidence": ["MODEL_CARD.md", "/audit-log", "/governance"],
+        "proof": "Surfaces domain-transfer limits, model-disagreement review, temporal/OOT gates, pseudonymised audit reconstruction, fairness monitoring, and fail-closed pilot promotion.",
+        "evidence": ["MODEL_CARD.md", "/deployment/readiness", "/governance"],
     },
 ]
 
@@ -145,8 +163,8 @@ COMPETITOR_GAP_MAP = [
     },
     {
         "common_pattern": "Missing model-risk story",
-        "udyampulse_advantage": "Governance endpoint exposes audit, validation, drift, reason stability, fairness slices, pilot KPIs, and deployment caveats.",
-        "proof": "/governance",
+        "udyampulse_advantage": "Governance exposes model evidence and a machine-enforced promotion gate; public-proxy artifacts cannot start in pilot mode.",
+        "proof": "/deployment/readiness",
     },
 ]
 
@@ -175,7 +193,12 @@ JUDGE_RUNBOOK = [
     {
         "step": "5. Confirm sandbox readiness without fake data claims",
         "endpoint": "/submission/proof",
-        "expected": "truth boundary says private IDBI data is not claimed while sandbox ingestion and recalibration swap points are implemented.",
+        "expected": "truth boundary says private IDBI data is not claimed while sandbox ingestion, temporal validation and promotion gates are implemented.",
+    },
+    {
+        "step": "6. Inspect fail-closed pilot promotion",
+        "endpoint": "/deployment/readiness",
+        "expected": "public demo remains available while pilot mode is explicitly blocked on private credentials, IDBI outcomes, true OOT evidence, and durable audit storage.",
     },
 ]
 
@@ -183,17 +206,20 @@ JUDGE_RUNBOOK = [
 def build_submission_proof(audit_events: list[dict]) -> dict[str, Any]:
     portfolio = build_portfolio_snapshot()
     governance = build_governance_summary(audit_events)
+    deployment = build_deployment_readiness()
     evaluation = model_evaluation()
     hero = score_profile(SAMPLE_PROFILES["ntc_hero"], record_audit=False)
 
     return {
         "status": "submission_ready_backend_proof",
+        "stage2_status": "temporal_and_deployment_gates_live",
         "truth_boundary": {
             "public_data": "synthetic_demo_cohort",
             "private_idbi_data": "not_claimed",
             "sandbox_access": "designed_for_post_shortlisting_api_access",
             "production_model": "public_proxy_xgboost_not_bank_calibrated; retraining_on_idbi_outcomes_required",
         },
+        "pilot_promotion": "fail_closed_until_all_deployment_gates_pass",
         "hero_reversal": {
             "case": hero["name"],
             "traditional_decision": hero["traditional"]["decision"],
@@ -221,16 +247,19 @@ def build_submission_proof(audit_events: list[dict]) -> dict[str, Any]:
                 "Memo layer creates deterministic underwriter memo",
                 "Audit log records reconstructable decision event",
                 "Governance APIs expose validation, drift, fairness, and pilot KPIs",
+                "Deployment gate blocks public-proxy promotion into pilot/production mode",
             ],
             "stage2_swap_points": [
                 "Replace public synthetic cohort with consented IDBI sandbox feeds",
                 "Run /sandbox/recalibration/report on real feature distributions and repayment labels",
+                "Run /sandbox/pilot-readiness to create mature chronological development/calibration/OOT cohorts",
                 "Retrain the existing champion/challenger pipeline on approved labelled sandbox outcomes",
                 "Enable AWS Bedrock memo provider with deterministic fallback still active",
                 "Swap in persistent audit storage for pilot operations",
             ],
         },
         "governance_controls": governance["controls"],
+        "deployment_readiness": deployment,
         "validation_metrics": (
             {
                 "evidence_type": "held_out_model_evaluation",

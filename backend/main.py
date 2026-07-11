@@ -8,7 +8,13 @@ from fastapi.staticfiles import StaticFiles
 
 import audit_log
 from auth import require_role
+from deployment_gate import assert_deployment_allowed, build_deployment_readiness
 from feed_ingestion import IDBISandboxPayload, readiness, to_profile
+from pilot_readiness import (
+    PilotReadinessRequest,
+    build_pilot_readiness_report,
+    outcome_contract,
+)
 from pilot_metrics import build_pilot_metrics
 from portfolio import build_governance_summary, build_portfolio_snapshot
 from rate_limit import rate_limit
@@ -20,7 +26,9 @@ from validation import ValidationRecord, ValidationRequest, build_validation_rep
 
 FRONTEND_DIR = Path(__file__).parent.parent / "frontend"
 
-app = FastAPI(title="UdyamPulse", version="0.3.0")
+assert_deployment_allowed()
+
+app = FastAPI(title="UdyamPulse", version="0.6.0")
 
 # The frontend is served from this same FastAPI process (StaticFiles mount
 # below) so the live demo never needs CORS at all -- it's same-origin. This
@@ -44,6 +52,7 @@ app.add_middleware(
 @app.middleware("http")
 async def security_headers(request, call_next):
     response = await call_next(request)
+    response.headers["X-UdyamPulse-Mode"] = os.getenv("UDYAMPULSE_MODE", "public_demo")
     response.headers["X-Content-Type-Options"] = "nosniff"
     response.headers["X-Frame-Options"] = "DENY"
     response.headers["Referrer-Policy"] = "no-referrer"
@@ -54,7 +63,17 @@ async def security_headers(request, call_next):
 
 @app.get("/health")
 def health():
-    return {"status": "ok"}
+    deployment = build_deployment_readiness()
+    return {
+        "status": "ok",
+        "mode": deployment["mode"],
+        "pilot_ready": deployment["pilot_ready"],
+    }
+
+
+@app.get("/deployment/readiness")
+def deployment_readiness():
+    return build_deployment_readiness()
 
 
 @app.get("/msmes")
@@ -123,6 +142,22 @@ def sandbox_recalibration_report(
     role: str = Depends(require_role("underwriter")),
 ):
     return build_recalibration_report(request)
+
+
+@app.get("/sandbox/outcome-contract")
+def sandbox_outcome_contract():
+    return outcome_contract()
+
+
+@app.post(
+    "/sandbox/pilot-readiness",
+    dependencies=[Depends(rate_limit(max_requests=10))],
+)
+def sandbox_pilot_readiness(
+    request: PilotReadinessRequest,
+    role: str = Depends(require_role("underwriter")),
+):
+    return build_pilot_readiness_report(request)
 
 
 @app.get("/portfolio")

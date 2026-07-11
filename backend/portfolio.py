@@ -193,13 +193,14 @@ def build_governance_summary(audit_events: list[dict]) -> dict:
     latest = _redact_latest_decision(audit_events[-1] if audit_events else None)
     from ml import model_status
     from audit_log import verify_chain
+    from deployment_gate import build_deployment_readiness
 
     chain = verify_chain(audit_events)
 
     return {
         "model": {
             "name": "UdyamPulse scorecard + calibrated PD champion/challenger",
-            "version": "0.5.0-public-proxy",
+            "version": "0.6.0-stage2-gated",
             "training_data": "Public borrower cohort is synthetic. The PD benchmark is trained on a 30,000-row public consumer-credit proxy; neither is IDBI/MSME outcome data.",
             "explainability": "Calibrated XGBoost uses native exact TreeSHAP in logit space; calibrated logistic remains the deterministic fallback.",
             "runtime": model_status(),
@@ -232,6 +233,11 @@ def build_governance_summary(audit_events: list[dict]) -> dict:
                 "evidence": "Public evidence reports untouched holdout AUC/Gini/KS/PR-AUC/Brier/ECE, bootstrap intervals and PSI. True dated OOT remains blocked on IDBI sandbox outcomes and is not faked.",
                 "status": "Holdout live / OOT pending sandbox",
             },
+            {
+                "control": "Pilot promotion gate",
+                "evidence": "Pilot and production startup fail closed until private identity/HMAC credentials, an IDBI-scoped model, true OOT evidence, and durable audit storage are present.",
+                "status": "Enforced",
+            },
         ],
         "audit": {
             "events_recorded": len(audit_events),
@@ -240,6 +246,7 @@ def build_governance_summary(audit_events: list[dict]) -> dict:
         "fairness": portfolio["fairness"],
         "pilot_metrics": portfolio["pilot_metrics"],
         "deployment": {
+            **build_deployment_readiness(),
             "surface": "Single FastAPI service serving API plus static frontend",
             "fallback": "Deterministic memo generation keeps underwriting stable without live LLM credentials.",
             "stage2_swap": "AWS Bedrock memos and IDBI sandbox data plug into the current API contracts without changing the cockpit.",

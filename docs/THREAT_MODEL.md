@@ -15,6 +15,11 @@ This model covers the public UdyamPulse prototype and the controls required befo
 
 ## Trust Boundaries
 
+![UdyamPulse trust boundaries](diagrams/threat-model-trust-boundaries.svg)
+
+<details>
+<summary>Mermaid source (renders live on GitHub too; the image above is a committed fallback so the diagram never depends on a client-side renderer)</summary>
+
 ```mermaid
 flowchart LR
   Browser["Judge / underwriter browser"] -->|TLS| Edge["Render or approved bank edge"]
@@ -26,6 +31,10 @@ flowchart LR
   Training -->|signed promotion package| Model
   Bedrock["AWS Bedrock"] -.->|optional, approved pilot only| API
 ```
+
+Regenerate the image after editing the source: save the block above to a `.mmd` file and run `mmdc -i file.mmd -o diagrams/threat-model-trust-boundaries.svg`.
+
+</details>
 
 ## Threat Register
 

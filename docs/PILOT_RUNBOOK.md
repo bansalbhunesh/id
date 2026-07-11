@@ -6,6 +6,11 @@ This runbook defines how UdyamPulse moves from the public demonstration into an 
 
 The public service cannot become a pilot through configuration alone. Promotion requires new bank-approved data evidence, a newly scoped model artifact, private identity and audit controls, and independent sign-off.
 
+![UdyamPulse pilot promotion flow](diagrams/pilot-promotion-flow.svg)
+
+<details>
+<summary>Mermaid source (renders live on GitHub too; the image above is a committed fallback so the diagram never depends on a client-side renderer)</summary>
+
 ```mermaid
 flowchart LR
   Intake["Approved sandbox extract"] --> Contract["Outcome contract validation"]
@@ -19,6 +24,10 @@ flowchart LR
   Gate -->|all pass| Pilot["Pilot runtime"]
   Gate -->|any block| Stop["Startup refused"]
 ```
+
+Regenerate the image after editing the source: save the block above to a `.mmd` file and run `mmdc -i file.mmd -o diagrams/pilot-promotion-flow.svg`.
+
+</details>
 
 ## Required Inputs
 

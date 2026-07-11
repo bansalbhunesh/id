@@ -343,7 +343,7 @@ function renderPillars(score) {
     return `
       <div class="meter-row">
         <div class="meter-head"><span>${esc(titleize(key))}</span><strong>${esc(value)}/20</strong></div>
-        <div class="score-rule" aria-hidden="true"><span style="--value: ${width}%;"></span></div>
+        <div class="score-rule" aria-hidden="true"><span data-meter-value="${width}"></span></div>
       </div>
     `;
   }).join("");
@@ -612,6 +612,16 @@ function renderSourcesTab(score) {
   `;
 }
 
+function applyMeterWidths(container) {
+  // The page's CSP has no style-src 'unsafe-inline', so a literal
+  // style="--value: n%" attribute is silently dropped by the browser.
+  // Setting the custom property through the CSSOM instead isn't subject
+  // to that restriction.
+  container.querySelectorAll("[data-meter-value]").forEach((el) => {
+    el.style.setProperty("--value", `${el.dataset.meterValue}%`);
+  });
+}
+
 function renderTabContent() {
   const score = state.activeScore;
   if (!score) {
@@ -628,6 +638,7 @@ function renderTabContent() {
   els.drawerTitle.textContent = drawerTitles[state.activeTab] || "Review packet";
   els.tabContent.setAttribute("aria-labelledby", `tab-${state.activeTab}`);
   els.tabContent.innerHTML = views[state.activeTab]?.() || views.decision();
+  applyMeterWidths(els.tabContent);
   els.tabContent.scrollTop = 0;
 }
 

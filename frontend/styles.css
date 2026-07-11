@@ -5,8 +5,9 @@
   --gst-ruled-blue: #2E5E7E;
   --stamp-violet: #5B4A8B;
   --marigold-audit: #C88A2D;
+  --marigold-ink: #8E6220;
   --entry-red: #9B3A32;
-  --ink-muted: color-mix(in srgb, var(--ledger-ink) 60%, white);
+  --ink-muted: color-mix(in srgb, var(--ledger-ink) 70%, white);
   --line: color-mix(in srgb, var(--ledger-ink) 15%, transparent);
   --line-strong: color-mix(in srgb, var(--ledger-ink) 30%, transparent);
   --veil: color-mix(in srgb, var(--passbook-paper) 66%, transparent);
@@ -96,7 +97,9 @@ button {
 }
 
 :where(a, button, select, [tabindex]):focus-visible {
-  outline: 3px solid var(--marigold-audit);
+  /* marigold-ink, not marigold-audit: the focus ring needs >=3:1 against
+     the paper background, which the brighter audit tone falls short of. */
+  outline: 3px solid var(--marigold-ink);
   outline-offset: 3px;
 }
 
@@ -499,7 +502,9 @@ code {
 }
 
 .decision-word.review {
-  color: var(--marigold-audit);
+  /* marigold-ink: marigold-audit is only ~2.5:1 against the paper
+     background, well under WCAG AA for text. */
+  color: var(--marigold-ink);
 }
 
 .source-glance {
@@ -677,22 +682,6 @@ body.drawer-open .review-drawer {
 body.drawer-open .drawer-launch {
   opacity: 0;
   pointer-events: none;
-}
-
-.detail-grid,
-.detail-grid-3,
-.memo-grid {
-  display: grid;
-  gap: 16px;
-}
-
-.detail-grid,
-.memo-grid {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-}
-
-.detail-grid-3 {
-  grid-template-columns: repeat(3, minmax(0, 1fr));
 }
 
 .detail-section {
@@ -963,9 +952,6 @@ body.drawer-open .drawer-launch {
   .decision-line div,
   .stamp-score,
   .stamp-ledger,
-  .detail-grid,
-  .detail-grid-3,
-  .memo-grid,
   .source-glance,
   .portfolio-ribbon {
     grid-template-columns: 1fr;

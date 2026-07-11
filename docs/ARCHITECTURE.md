@@ -4,6 +4,11 @@
 
 One Python 3.12 Docker service runs FastAPI and serves the static review cockpit. The zero-build frontend and API stay same-origin; API route definitions are mounted before `StaticFiles`.
 
+![UdyamPulse runtime architecture](diagrams/architecture-flow.svg)
+
+<details>
+<summary>Mermaid source (renders live on GitHub too; the image above is a committed fallback so the diagram never depends on a client-side renderer)</summary>
+
 ```mermaid
 flowchart TB
   subgraph Experience["Review experience"]
@@ -49,6 +54,10 @@ flowchart TB
   Promotion -->|"all pass"| PilotRuntime["Pilot runtime starts"]
   Promotion -->|"any block"| Refuse["Startup refused"]
 ```
+
+Regenerate the image after editing the source: save the block above to a `.mmd` file and run `mmdc -i file.mmd -o diagrams/architecture-flow.svg`.
+
+</details>
 
 ## Decision Contract
 
@@ -123,6 +132,11 @@ The operational sequence, sign-offs and rollback triggers are in [PILOT_RUNBOOK.
 
 ## Promotion State Machine
 
+![UdyamPulse promotion state machine](diagrams/promotion-state.svg)
+
+<details>
+<summary>Mermaid source (renders live on GitHub too; the image above is a committed fallback so the diagram never depends on a client-side renderer)</summary>
+
 ```mermaid
 stateDiagram-v2
   [*] --> PublicDemo
@@ -131,5 +145,9 @@ stateDiagram-v2
   PilotBlocked --> PilotReady: all gates remediated
   PilotReady --> ProductionReview: independent model-risk and policy approval
 ```
+
+Regenerate the image after editing the source: save the block above to a `.mmd` file and run `mmdc -i file.mmd -o diagrams/promotion-state.svg`.
+
+</details>
 
 The current repository remains in `PublicDemo`. It cannot enter `PilotReady` with the committed public-proxy manifest.

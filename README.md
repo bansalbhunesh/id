@@ -120,6 +120,11 @@ Rubric coverage is implemented as backend data, not only README copy:
 
 ## Architecture
 
+![UdyamPulse architecture flow](docs/diagrams/readme-architecture.svg)
+
+<details>
+<summary>Mermaid source (renders live on GitHub too; the image above is a committed fallback so the diagram never depends on a client-side renderer)</summary>
+
 ```mermaid
 flowchart LR
   Reviewer["Judge / underwriter"] --> Cockpit["Deep-linkable credit cockpit"]
@@ -139,6 +144,10 @@ flowchart LR
   Gate -->|"all pass"| Pilot["Approved pilot runtime"]
   Gate -->|"any block"| Refuse["Startup refused"]
 ```
+
+Regenerate the image after editing the source: save the block above to a `.mmd` file and run `mmdc -i file.mmd -o docs/diagrams/readme-architecture.svg`.
+
+</details>
 
 Important endpoints:
 

@@ -50,3 +50,26 @@ def test_memo_mentions_rejection_reversal_for_ntc_hero():
     result = score_profile(SAMPLE_PROFILES["ntc_hero"])
     assert "decline" in result["memo"].lower() or "reject" in result["memo"].lower()
     assert result["name"] in result["memo"]
+
+
+def test_ews_signals_cover_every_pillar_with_a_recognised_category():
+    for profile in SAMPLE_PROFILES.values():
+        result = score_profile(profile)
+        signals = result["ews_signals"]
+        assert len(signals) == len(result["pillars"])
+        for signal in signals:
+            assert signal["status"] in ("Clear", "Monitor", "Flagged")
+            assert signal["control"]
+            assert signal["detail"]
+
+
+def test_next_best_action_present_and_urgency_matches_policy_decision():
+    for profile in SAMPLE_PROFILES.values():
+        result = score_profile(profile)
+        action = result["next_best_action"]
+        assert action["action"]
+        assert action["urgency"] in ("none", "low", "medium", "high")
+        if result["policy"]["decision"] == "Rejected":
+            assert action["urgency"] == "none"
+        if result["policy"]["decision"] == "Review":
+            assert action["urgency"] in ("medium", "high")

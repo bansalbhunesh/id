@@ -389,14 +389,27 @@ function renderDecisionTab(score) {
   const improvementText = improvement
     ? `${improvement.action} Potential grade: ${improvement.potential_grade}; limit uplift: ${formatCurrency(improvement.limit_increase)}.`
     : "Maintain GST filing continuity, low bounce rate, and broad digital counterparties to preserve the current fast-track grade.";
+  const nextAction = score.next_best_action;
   return `
     <section class="detail-section">
       <h3 class="section-title">Five-pillar health ledger</h3>
       <div class="meter-list">${renderPillars(score)}</div>
     </section>
     <section class="detail-section">
+      <h3 class="section-title">EWS-style monitoring signals</h3>
+      <p class="muted">Same five pillars, framed in the monitoring categories a credit officer tracks under bank early-warning practice -- our own descriptive labels, not regulatory text.</p>
+      <div class="journal-list">${renderJournal(score.ews_signals, "No monitoring signals available.")}</div>
+    </section>
+    <section class="detail-section">
       <h3 class="section-title">Reason-code journal</h3>
       <div class="reason-list">${renderReasons(score.reasons)}</div>
+    </section>
+    <section class="detail-section">
+      <h3 class="section-title">Underwriter next step</h3>
+      <article class="reason-row">
+        <span class="journal-state ${statusClass(nextAction.urgency)}">${esc(nextAction.urgency)} urgency</span>
+        <strong>${esc(nextAction.action)}</strong>
+      </article>
     </section>
     <section class="detail-section">
       <h3 class="section-title">Underwriter memo</h3>

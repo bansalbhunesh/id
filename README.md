@@ -112,6 +112,7 @@ Rubric coverage is implemented as backend data, not only README copy:
 - Five-pillar financial health card: Liquidity, Discipline, Momentum, Leverage, and Digital Footprint.
 - Calibrated monotonic XGBoost champion with native exact TreeSHAP, a calibrated logistic fallback, and an untouched 4,500-row public-proxy holdout -- not a regressor fit against a synthetic score. See [MODEL_CARD.md](MODEL_CARD.md).
 - Deterministic underwriter memo and borrower improvement plan; optional AWS Bedrock memo generation is a Stage 2 configuration path.
+- EWS-style monitoring signals (bank-recognisable categories for the same five pillars) and a deterministic, rule-based underwriter next-best-action recommendation, both derived from the already-computed score -- not generative output.
 - Underwriter/auditor role gates, source-scoped consent, strict app CSP, request IDs, body/array bounds, quota headers, and fsync-backed genesis-anchored pseudonymised audit events.
 - Sandbox-ready ingestion via `POST /sandbox/score` for AA/GST/UPI/EPFO/Bureau-style payloads, with enforced purpose/scope/expiry consent.
 - Recalibration and monitoring APIs for holdout AUC/Gini/KS/PR-AUC/Brier/ECE, bootstrap intervals, PSI, reason stability, pilot targets, and proxy fairness slices -- see `GET /model/evaluation`.

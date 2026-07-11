@@ -293,6 +293,84 @@ def reason_codes(pillars: dict[str, int]) -> list[str]:
     return reasons
 
 
+# Descriptive labels only -- our own category names for the kind of signals
+# banks commonly monitor under SMA/NPA early-warning frameworks (cheque/bill
+# returns, GST filing lapses, turnover decline, leverage build-up). This is
+# not a reproduction of any specific RBI circular text and carries no
+# regulatory certification; it exists so an underwriter sees a recognisable
+# monitoring theme alongside the pillar score, not just internal jargon.
+EWS_TRIGGER_CATEGORIES = {
+    "liquidity": "Cash-Flow Stability",
+    "discipline": "Cheque Discipline & GST Filing",
+    "momentum": "Turnover Momentum",
+    "leverage": "Leverage / Debt-Servicing",
+    "digital_footprint": "Digital Transaction Footprint",
+}
+
+
+def ews_style_signals(pillars: dict[str, int]) -> list[dict]:
+    signals = []
+    for pillar, value in pillars.items():
+        if value >= 16:
+            status = "Clear"
+        elif value <= 8:
+            status = "Flagged"
+        else:
+            status = "Monitor"
+        signals.append({
+            "status": status,
+            "control": EWS_TRIGGER_CATEGORIES[pillar],
+            "detail": f"{pillar.replace('_', ' ').title()} pillar: {value}/20.",
+        })
+    return signals
+
+
+_NEXT_ACTION_BY_PILLAR = {
+    "discipline": "Request the latest 3-month bank statement and confirm cheque-bounce reasons directly with the borrower.",
+    "liquidity": "Request updated cash-flow projections and confirm the seasonal inflow pattern.",
+    "leverage": "Request the current liability schedule and verify outstanding debt against inflow.",
+    "momentum": "Request the latest GST returns to confirm the turnover trend is continuing.",
+    "digital_footprint": "Confirm counterparty concentration is not a single-buyer dependency risk.",
+}
+
+
+def next_best_action(pillars: dict[str, int], policy: dict, traditional: dict) -> dict:
+    """Deterministic, rule-based recommendation for the reviewing underwriter.
+
+    Derived entirely from already-computed pillar and policy signals -- not a
+    generative or LLM suggestion, so it is reproducible and auditable the same
+    way the rest of the decision path is.
+    """
+    weakest_pillar = min(pillars, key=pillars.get)
+    weakest_label = weakest_pillar.replace("_", " ")
+
+    if policy["decision"] == "Rejected":
+        return {"action": "Decline per policy; no further underwriter action required.", "urgency": "none"}
+
+    if policy["decision"] == "Review" and policy.get("route") == "model_disagreement_review":
+        return {
+            "action": (
+                f"Resolve the scorecard/model disagreement: re-verify the {weakest_label} "
+                "inputs against source documents before sign-off."
+            ),
+            "urgency": "high",
+        }
+
+    if policy["decision"] == "Review":
+        return {"action": _NEXT_ACTION_BY_PILLAR[weakest_pillar], "urgency": "medium"}
+
+    if traditional["decision"] == "Rejected":
+        return {
+            "action": "Document the bureau-rejection reversal rationale in the credit file for the audit trail.",
+            "urgency": "low",
+        }
+
+    return {
+        "action": f"Approve per policy; monitor {weakest_label} at the next quarterly review.",
+        "urgency": "low",
+    }
+
+
 def score_profile(p: MSMEProfile, record_audit: bool = True) -> dict:
     pillars = {
         "liquidity": score_liquidity(p),
@@ -337,6 +415,8 @@ def score_profile(p: MSMEProfile, record_audit: bool = True) -> dict:
         "data_sources": data_source_signals(p),
         "policy_guardrails": policy_guardrails(p, pillars, total, policy),
         "decision_path": decision_path(p, total, grade, traditional, policy),
+        "ews_signals": ews_style_signals(pillars),
+        "next_best_action": next_best_action(pillars, policy, traditional),
     }
 
     from agent_memo import generate_memo

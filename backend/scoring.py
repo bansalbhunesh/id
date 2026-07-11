@@ -71,9 +71,23 @@ def grade_for(total: int) -> str:
     return "E"
 
 
+CONCENTRATION_WATCH_THRESHOLD_PCT = 40  # shared with the "Counterparty concentration" guardrail
+CONCENTRATION_LIMIT_HAIRCUT = 0.85  # 15% reduction: exposure to one counterparty's own payment risk
+
+
+def concentration_multiplier(p: MSMEProfile) -> float:
+    """A single counterparty accounting for 40%+ of digital inflow value is a
+    direct exposure to that counterparty's own payment behaviour, not just a
+    disclosure point -- the eligible limit is sized down accordingly rather
+    than purely off the grade."""
+    if p.top_counterparty_share_pct >= CONCENTRATION_WATCH_THRESHOLD_PCT:
+        return CONCENTRATION_LIMIT_HAIRCUT
+    return 1.0
+
+
 def eligible_limit(total: int, p: MSMEProfile) -> float:
-    multiplier = {"A": 6, "B": 4, "C": 2.5, "D": 1, "E": 0}[grade_for(total)]
-    return round(p.avg_monthly_inflow * multiplier, 2)
+    grade_multiplier = {"A": 6, "B": 4, "C": 2.5, "D": 1, "E": 0}[grade_for(total)]
+    return round(p.avg_monthly_inflow * grade_multiplier * concentration_multiplier(p), 2)
 
 
 def risk_band_for(grade: str) -> str:
@@ -155,15 +169,17 @@ def policy_guardrails(
         },
         {
             "control": "Counterparty concentration",
-            "status": "Watch" if p.top_counterparty_share_pct >= 40 else "Pass",
+            "status": "Watch" if p.top_counterparty_share_pct >= CONCENTRATION_WATCH_THRESHOLD_PCT else "Pass",
             "detail": (
                 f"{p.top_counterparty_share_pct:.0f}% of digital inflow value depends on a single "
                 "counterparty; a payment disruption from that buyer would directly hit this "
-                "borrower's cash flow."
-                if p.top_counterparty_share_pct >= 40
-                else f"No single counterparty exceeds 40% of digital inflow value ({p.top_counterparty_share_pct:.0f}% max)."
+                f"borrower's cash flow, so the eligible limit is reduced {(1 - CONCENTRATION_LIMIT_HAIRCUT):.0%} "
+                "below the grade-only amount."
+                if p.top_counterparty_share_pct >= CONCENTRATION_WATCH_THRESHOLD_PCT
+                else f"No single counterparty exceeds {CONCENTRATION_WATCH_THRESHOLD_PCT}% of digital inflow "
+                f"value ({p.top_counterparty_share_pct:.0f}% max); no limit reduction applied."
                 if p.top_counterparty_share_pct > 0
-                else "Counterparty concentration not supplied for this application."
+                else "Counterparty concentration not supplied for this application; no limit reduction applied."
             ),
         },
         {

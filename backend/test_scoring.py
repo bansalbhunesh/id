@@ -86,3 +86,23 @@ def test_counterparty_concentration_guardrail_passes_when_diversified():
     result = score_profile(SAMPLE_PROFILES["ntc_hero"])
     guardrail = next(g for g in result["policy_guardrails"] if g["control"] == "Counterparty concentration")
     assert guardrail["status"] == "Pass"
+
+
+def test_high_counterparty_concentration_reduces_eligible_limit():
+    from scoring import eligible_limit
+
+    profile = SAMPLE_PROFILES["stressed_retailer"]
+    total = score_profile(profile)["score"]
+    diversified = profile.model_copy(update={"top_counterparty_share_pct": 0})
+
+    concentrated_limit = eligible_limit(total, profile)
+    diversified_limit = eligible_limit(total, diversified)
+
+    assert concentrated_limit == round(diversified_limit * 0.85, 2)
+    assert concentrated_limit < diversified_limit
+
+
+def test_low_counterparty_concentration_does_not_reduce_eligible_limit():
+    from scoring import concentration_multiplier
+
+    assert concentration_multiplier(SAMPLE_PROFILES["ntc_hero"]) == 1.0

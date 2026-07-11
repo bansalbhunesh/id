@@ -1,1 +1,18 @@
+# Normalize text files to LF regardless of the contributor's OS line-ending
+# settings, so git stops warning "LF will be replaced by CRLF" on every diff.
+* text=auto eol=lf
+
 backend/model_training/artifacts/*.json text eol=lf
+
+# Explicit binary marks so git never attempts EOL/diff normalisation on these.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.svg binary
+*.pdf binary
+*.webm binary
+*.pkl binary
+*.joblib binary
+*.woff binary
+*.woff2 binary

@@ -15,6 +15,7 @@
 ![FastAPI](https://img.shields.io/badge/backend-FastAPI-009688)
 ![Model](https://img.shields.io/badge/model-calibrated%20XGBoost%20%2B%20TreeSHAP-1f6f5f)
 ![Status](https://img.shields.io/badge/status-flagship%20public%20demo%20%7C%20pilot%20gated-5B4A8B)
+[![License](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
 
 Built for **IDBI Innovate 2026** - Problem Statement 3: Financial Health Score - Team **Looper**
 
@@ -34,6 +35,7 @@ Built for **IDBI Innovate 2026** - Problem Statement 3: Financial Health Score -
 - [Screenshots](#screenshots)
 - [Judging Proof](#judging-proof)
 - [Limitations](#limitations)
+- [License](#license)
 
 ## Overview
 
@@ -271,3 +273,7 @@ Full-resolution images remain in [docs/deck/assets](docs/deck/assets) for detail
 - Pilot mode is intentionally not ready today: `/deployment/readiness` blocks it on public-proxy model scope, absent true OOT evidence, demo credentials/HMAC, and local JSONL audit storage.
 - AWS Bedrock memo generation is optional and requires configured credentials and a model ID; deterministic memo generation remains the default fallback.
 - UdyamPulse is decision support for underwriters, not a fully automated approve/decline system without human review.
+
+## License
+
+MIT - see [LICENSE](LICENSE). The public synthetic cohort, model artifacts, and documentation in this repository are covered by the same terms; this does not extend to any IDBI, AA, GST, UPI, or EPFO data or credentials, which are never present in this codebase.

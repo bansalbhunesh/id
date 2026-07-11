@@ -184,7 +184,12 @@ def score_sandbox_payload(
         )
     profile = to_profile(payload)
     source_readiness = readiness(payload)
-    result = score_profile(profile)
+    missing_pillar_sources = frozenset(source_readiness["missing_sources"]) & {
+        "Account Aggregator",
+        "GST",
+        "UPI",
+    }
+    result = score_profile(profile, missing_data_sources=missing_pillar_sources)
     result["source_mode"] = "idbi_sandbox_payload"
     result["sandbox_readiness"] = source_readiness
     connected_sources = set(source_readiness["sources_connected"])

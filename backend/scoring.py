@@ -175,6 +175,16 @@ def policy_guardrails(
                 f"{policy['pd_review_threshold']:.1%}. The proxy can route to review but never auto-declines."
             ),
         },
+        {
+            "control": "Data sufficiency",
+            "status": "Watch" if policy["missing_data_sources"] else "Pass",
+            "detail": (
+                f"Source(s) not connected: {', '.join(policy['missing_data_sources'])}. Affected pillars "
+                "reflect a missing signal, not confirmed risk, and cannot drive an auto-decision."
+                if policy["missing_data_sources"]
+                else "Every pillar is backed by a connected source."
+            ),
+        },
     ]
 
 
@@ -207,34 +217,51 @@ def decision_path(
     ]
 
 
-def apply_decision_policy(grade: str, pd_estimate: float | None, pd_threshold: float | None) -> dict:
+def apply_decision_policy(
+    grade: str,
+    pd_estimate: float | None,
+    pd_threshold: float | None,
+    *,
+    missing_data_sources: frozenset[str] = frozenset(),
+) -> dict:
     """Separate descriptive score, risk estimate and lending policy.
 
     The public proxy PD may route a nominally bankable file to human review,
     but it is never allowed to auto-decline an MSME across domains. Grades D/E
     remain rule-policy declines; grade C is always reviewed.
+
+    A pillar computed from a source the caller never connected (as opposed to
+    a source that was connected and genuinely reported a weak signal) is a
+    missing input, not an observed risk. Silently scoring that pillar at its
+    worst-case floor and then auto-approving or auto-declining on it would
+    penalise absence as if it were confirmed risk, so any missing pillar
+    source always routes to review regardless of what the score/PD say.
     """
     estimate = float(pd_estimate) if pd_estimate is not None else 0.0
     threshold = float(pd_threshold) if pd_threshold is not None else 1.0
     pd_triggered = pd_estimate is not None and estimate >= threshold
-    if grade in ("D", "E"):
-        decision = "Rejected"
-        route = "policy_decline"
+
+    if missing_data_sources:
+        decision, route = "Review", "insufficient_data_review"
+        reason = (
+            f"Source(s) not connected for this application: {', '.join(sorted(missing_data_sources))}. "
+            "The affected pillar(s) reflect a missing signal, not confirmed risk, so this cannot be "
+            "auto-approved or auto-declined; connect the source or have an underwriter verify it manually."
+        )
+    elif grade in ("D", "E"):
+        decision, route = "Rejected", "policy_decline"
         reason = f"Grade {grade} is outside the bankable scorecard range."
     elif grade == "C":
-        decision = "Review"
-        route = "mandatory_human_review"
+        decision, route = "Review", "mandatory_human_review"
         reason = "Grade C is bankable only with conditions and mandatory underwriter review."
     elif pd_triggered:
-        decision = "Review"
-        route = "model_disagreement_review"
+        decision, route = "Review", "model_disagreement_review"
         reason = (
             "The scorecard is bankable but the cross-domain proxy PD crossed its calibrated "
             "review threshold; an underwriter must resolve the disagreement."
         )
     else:
-        decision = "Approved"
-        route = "fast_track_eligible"
+        decision, route = "Approved", "fast_track_eligible"
         reason = "Grade A/B and proxy PD below the review threshold; eligible for fast-track approval."
     return {
         "version": "policy-v2-score-pd-separation",
@@ -245,6 +272,7 @@ def apply_decision_policy(grade: str, pd_estimate: float | None, pd_threshold: f
         "pd_review_threshold": threshold,
         "pd_guardrail_triggered": pd_triggered,
         "auto_decline_from_proxy_model": False,
+        "missing_data_sources": sorted(missing_data_sources),
     }
 
 
@@ -344,6 +372,15 @@ def next_best_action(pillars: dict[str, int], policy: dict, traditional: dict) -
     weakest_pillar = min(pillars, key=pillars.get)
     weakest_label = weakest_pillar.replace("_", " ")
 
+    if policy.get("route") == "insufficient_data_review":
+        return {
+            "action": (
+                f"Connect or manually verify: {', '.join(policy['missing_data_sources'])}. "
+                "Do not approve or decline until the missing source is confirmed."
+            ),
+            "urgency": "high",
+        }
+
     if policy["decision"] == "Rejected":
         return {"action": "Decline per policy; no further underwriter action required.", "urgency": "none"}
 
@@ -371,7 +408,12 @@ def next_best_action(pillars: dict[str, int], policy: dict, traditional: dict) -
     }
 
 
-def score_profile(p: MSMEProfile, record_audit: bool = True) -> dict:
+def score_profile(
+    p: MSMEProfile,
+    record_audit: bool = True,
+    *,
+    missing_data_sources: frozenset[str] = frozenset(),
+) -> dict:
     pillars = {
         "liquidity": score_liquidity(p),
         "discipline": score_discipline(p),
@@ -390,6 +432,7 @@ def score_profile(p: MSMEProfile, record_audit: bool = True) -> dict:
         grade,
         model_explanation.get("pd_estimate"),
         pd_policy_threshold(),
+        missing_data_sources=missing_data_sources,
     )
     alternate_data_decision = policy["decision"]
     result = {

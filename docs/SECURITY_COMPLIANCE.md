@@ -24,6 +24,7 @@ This is a public hackathon control set, not an assertion of IDBI production cert
 | Temporal outcome integrity | Observation follows decision, 365-day maturity, no duplicate IDs, chronological 70/15/15 splits and both classes per cohort | `test_pilot_phase.py` |
 | Fail-closed promotion | `pilot`/`production` startup blocks the public proxy, demo credentials/HMAC, absent true OOT evidence and local JSONL | `test_public_demo_is_allowed_but_pilot_mode_fails_closed` |
 | Upload minimisation | Pilot readiness validates in memory, persists no submitted records and returns no application IDs | pilot endpoint contract test |
+| Missing-source fairness | A sandbox source the caller never connected always routes to mandatory review instead of silently scoring the affected pillar at its worst-case floor and auto-deciding on it | `test_sandbox_score_routes_to_review_when_a_pillar_source_is_missing` |
 
 ## Demo Credentials
 

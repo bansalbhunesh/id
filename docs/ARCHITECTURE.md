@@ -68,6 +68,7 @@ UdyamPulse intentionally avoids one opaque "AI score":
 3. `apply_decision_policy` combines grade and the calibrated PD review threshold.
 4. The public proxy may route an A/B disagreement to review, but cannot auto-decline.
 5. Grade C is always reviewed; D/E remains a transparent scorecard-policy decline.
+6. A sandbox source the caller never connected (as opposed to one that reported a genuinely weak signal) always routes to review, regardless of what the score or PD say -- a missing pillar input is not the same as an observed risk, and `POST /sandbox/score` cannot auto-approve or auto-decline on a pillar it never actually measured.
 
 ## Champion/Challenger Training
 

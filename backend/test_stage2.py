@@ -82,6 +82,22 @@ def test_sandbox_score_endpoint_marks_connected_real_feeds():
     assert {item["status"] for item in body["data_sources"]} <= {"Connected", "Present"}
 
 
+def test_sandbox_score_routes_to_review_when_a_pillar_source_is_missing():
+    payload = sandbox_payload()
+    payload["upi"] = {"monthly_transaction_count": 0, "unique_counterparties": 0}
+    payload["consent"]["scope"] = ["account_aggregator", "gst", "epfo", "bureau"]
+
+    response = client.post("/sandbox/score", json=payload, headers=UNDERWRITER_HEADERS)
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["policy"]["route"] == "insufficient_data_review"
+    assert body["alternate_data_decision"] == "Review"
+    assert body["policy"]["missing_data_sources"] == ["UPI"]
+    assert body["next_best_action"]["urgency"] == "high"
+    assert any(item["control"] == "Data sufficiency" and item["status"] == "Watch" for item in body["policy_guardrails"])
+
+
 def test_sandbox_score_rejects_impossible_feed_values():
     payload = sandbox_payload()
     payload["account_aggregator"]["cheque_bounces"] = 4

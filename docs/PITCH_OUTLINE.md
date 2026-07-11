@@ -73,7 +73,7 @@ Single-service architecture:
 
 Python, FastAPI, Pydantic, pytest, vanilla HTML/CSS/JS, Docker, Render web service, render.yaml Blueprint, GitHub Actions.
 
-Stage 2 targets: live IDBI sandbox credentials and repayment labels, XGBoost/LightGBM, SHAP, Postgres audit store, and production monitoring. The repo already includes sandbox-style feed contracts, a recalibration report endpoint, validation metrics, fairness gap checks, pilot KPIs, and optional Bedrock fallback wiring.
+Stage 2 targets: live IDBI sandbox credentials and repayment labels, an IDBI-calibrated champion, SSO/KMS, durable audit storage, and production monitoring. The repo already includes feed contracts, a dated 12-month outcome schema, chronological development/calibration/OOT readiness gates, fail-closed promotion, validation metrics, fairness support checks, pilot KPIs, and optional Bedrock fallback wiring.
 
 ## Slide 9 - Estimated Implementation Cost
 
@@ -91,17 +91,17 @@ Use the committed screenshots from `docs/deck/assets/`:
 
 ## Slide 11 - Prototype Performance Report / Benchmarking
 
-- 50 automated tests passing, reproducible from a clean venv with pinned dependency versions.
+- 61 automated tests passing, reproducible from a clean venv with pinned dependency versions.
 - Public proxy holdout evidence: ROC-AUC 0.7497 (bootstrap 95% interval 0.7314-0.7678), Gini 0.4993, KS 0.4225, Brier 0.1415, ECE 0.0122 on 4,500 untouched rows. Cross-sectional random holdout, not OOT; reproducible with `python backend/model_training/train_pd_model.py`.
 - Coverage includes scoring, input validation, grade boundaries, NTC reversal, improvement plan, hash-chained audit logging and tamper detection, consent enforcement, auth/RBAC, ML Shapley invariants, sandbox feed mapping, recalibration reports, validation metrics, portfolio impact, governance summary, and API endpoints.
 - Public cohort impact (pilot targets, not measured lift): 5 synthetic MSME files, 4 alternate-data approvals, 2 NTC rescues, Rs 30,80,000 credit unlocked.
 - Runtime browser verification: no console errors and no horizontal overflow at desktop or mobile widths.
-- Stage 2 validation APIs: KS, AUC, Gini, PSI drift, reason-code stability, and disparate-impact slices, all computed on the real trained model's own outputs via `GET /model/evaluation`.
+- Stage 2 validation APIs: KS, AUC, Gini, PSI drift, reason-code stability, dated-outcome maturity, chronological OOT, source coverage, NTC volume, and fairness-slice support.
 
 ## Slide 12 - Additional Details / Future Development
 
 1. Connect authenticated IDBI sandbox AA/GST/UPI/EPFO feeds to the implemented `/sandbox/score` contract.
-2. Retrain the PD model on real repayment/portfolio outcomes via `/sandbox/recalibration/report` and `train_pd_model.py`, replacing the public proxy dataset.
+2. Validate dated repayment outcomes through `/sandbox/pilot-readiness`, then retrain the champion/challenger pipeline offline and promote only after `/deployment/readiness` passes.
 3. Enable `UDYAMPULSE_MODEL_PROVIDER=xgboost|lightgbm` and benchmark SHAP-backed GBM output against the transparent scorecard.
 4. Enable AWS Bedrock memo generation in the pilot environment, with deterministic fallback already present.
 5. Move policy from grade-based to PD-threshold-based (`policy-v2`), and move RBAC/audit storage from the current public-demo scope (bearer-token roles, in-memory hash-chained log) to full IDBI SSO and persistent multi-instance storage -- see `docs/SECURITY_COMPLIANCE.md` for what's already implemented versus deferred.

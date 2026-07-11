@@ -17,7 +17,7 @@ What is in the repo:
 - `MODEL_CARD.md`, `docs/COMPETITIVE_RESEARCH.md`, `docs/SUBMISSION_CHECKLIST.md`, and `docs/DEMO_SCRIPT.md`.
 - Submission deck source and PDF under `docs/deck/`.
 - Render Blueprint at `render.yaml`.
-- 50 passing tests; underwriter/auditor RBAC; scoped consent; restart-safe pseudonymised hash-chain audit; random-holdout proxy evidence at `GET /model/evaluation` (AUC 0.7497, explicitly not OOT). See `docs/ARCHITECTURE.md` and `docs/SECURITY_COMPLIANCE.md`.
+- 61 passing tests; RBAC; scoped consent; pseudonymised hash-chain audit; dated pilot-outcome and temporal/OOT readiness gates; fail-closed pilot promotion; random-holdout proxy evidence at `GET /model/evaluation` (AUC 0.7497, explicitly not OOT). See `docs/ARCHITECTURE.md` and `docs/SECURITY_COMPLIANCE.md`.
 
 ## Verified
 
@@ -26,7 +26,7 @@ Backend tests:
 ```bash
 cd backend
 ..\.venv\Scripts\python -m pytest -q --basetemp ..\.pytest_tmp
-# 50 passed, 1 warning (third-party Starlette TestClient deprecation notice)
+# 58 passed, 1 warning (third-party Starlette TestClient deprecation notice)
 ```
 
 Full model-evidence pipeline (reproducible, byte-identical on re-run):

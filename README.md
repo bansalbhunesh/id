@@ -13,7 +13,7 @@
 ![Python](https://img.shields.io/badge/python-3.12+-blue)
 ![FastAPI](https://img.shields.io/badge/backend-FastAPI-009688)
 ![Model](https://img.shields.io/badge/model-calibrated%20XGBoost%20%2B%20TreeSHAP-1f6f5f)
-![Status](https://img.shields.io/badge/status-first--round%20ready-brightgreen)
+![Status](https://img.shields.io/badge/status-pre--sandbox%20pilot--gated-brightgreen)
 
 Built for **IDBI Innovate 2026** - Problem Statement 3: Financial Health Score - Team **Looper**
 
@@ -74,6 +74,9 @@ The backend is not a mock response behind a polished screen. The judge can verif
 | `GET /model/evaluation` | Untouched proxy holdout AUC/Gini/KS/PR-AUC/Brier/ECE, bootstrap intervals, fairness slices, PSI, candidate comparison, and artifact hashes. |
 | `POST /sandbox/score` | Underwriter-authenticated, purpose/scoped/expiry-checked AA/GST/UPI/EPFO/Bureau payloads normalize into the cockpit contract. |
 | `POST /sandbox/recalibration/report` | Underwriter-authenticated sandbox distribution, coverage, labels, and retraining readiness evidence. |
+| `GET /sandbox/outcome-contract` | Machine-readable dated 12-month outcome schema, maturity rule, chronological split policy, and privacy boundary. |
+| `POST /sandbox/pilot-readiness` | Underwriter-authenticated maturity, volume, temporal/OOT, source-coverage, NTC/NTB, and fairness-slice gates without record persistence. |
+| `GET /deployment/readiness` | Fail-closed model and infrastructure promotion gates for pilot/production mode. |
 | `POST /validation/report` | Underwriter-authenticated AUC, Gini, KS, PSI, and reason-code stability for caller-supplied dated cohorts. |
 | `GET /governance` | Audit count, model status, live controls, fairness slices, pilot KPIs, and deployment caveats are inspectable. |
 
@@ -83,6 +86,7 @@ Quick backend checks:
 curl https://id-ysm9.onrender.com/submission/proof
 curl https://id-ysm9.onrender.com/msmes/ntc_hero/score
 curl https://id-ysm9.onrender.com/governance
+curl https://id-ysm9.onrender.com/deployment/readiness
 ```
 
 Rubric coverage is implemented as backend data, not only README copy:
@@ -91,10 +95,10 @@ Rubric coverage is implemented as backend data, not only README copy:
 |---|---|
 | Innovation | NTC bureau rejection becomes an explainable alternate-data approval with memo, reasons, guardrails, and audit. |
 | Feasibility | One FastAPI service, static cockpit, Dockerfile, Render Blueprint, GitHub Actions, and no mandatory paid API dependency. |
-| Scalability | Separate ingestion, scoring, attribution, validation, audit, governance, and Stage 2 model swap points. |
+| Scalability | Separate ingestion, scoring, attribution, validation, audit, temporal readiness, and fail-closed promotion gates. |
 | Business impact | Portfolio impact, NTC rescues, credit unlocked, pilot KPIs, early-risk guardrail, and diversification measures. |
 | Technical implementation | Calibrated monotonic XGBoost, native exact TreeSHAP, logistic fallback, score/PD/policy separation, scoped APIs, and artifact-backed evidence. |
-| Governance readiness | Honest random-holdout boundary, bootstrap intervals, proxy fairness slices, model-disagreement review, pseudonymised hash-chain audit, and deterministic memo fallback. |
+| Governance readiness | Honest random-holdout boundary, dated outcome contract, true-OOT readiness gates, model-disagreement review, pseudonymised audit, and fail-closed pilot promotion. |
 
 ## Features
 
@@ -105,6 +109,8 @@ Rubric coverage is implemented as backend data, not only README copy:
 - Underwriter/auditor role gates, source-scoped consent, security headers, rate limits, and restart-safe pseudonymised hash-chain audit events.
 - Sandbox-ready ingestion via `POST /sandbox/score` for AA/GST/UPI/EPFO/Bureau-style payloads, with enforced purpose/scope/expiry consent.
 - Recalibration and monitoring APIs for holdout AUC/Gini/KS/PR-AUC/Brier/ECE, bootstrap intervals, PSI, reason stability, pilot targets, and proxy fairness slices -- see `GET /model/evaluation`.
+- Dated `bad_12m` outcome contract with 365-day maturity checks and automatic chronological development/calibration/OOT cohorts -- see `GET /sandbox/outcome-contract` and `POST /sandbox/pilot-readiness`.
+- Explicit `public_demo`, `pilot`, and `production` modes. Pilot/production startup fails closed until private credentials, IDBI-scoped artifacts, true OOT evidence, and durable audit storage pass -- see `GET /deployment/readiness`.
 
 ## Architecture
 
@@ -124,6 +130,8 @@ flowchart TB
     Proof["/submission/proof<br/>rubric, runbook, gap map, truth boundary"]
     ScoreAPI["/msmes/{id}/score + /score"]
     SandboxAPI["/sandbox/score + /sandbox/recalibration/report"]
+    PilotAPI["/sandbox/pilot-readiness<br/>dated outcome + temporal gates"]
+    PromotionAPI["/deployment/readiness<br/>fail-closed promotion"]
     GovernanceAPI["/governance + /portfolio + /pilot-metrics"]
     ValidationAPI["/validation/demo + /validation/report"]
     AuditAPI["/audit-log + /model/status + /model/evaluation"]
@@ -163,6 +171,8 @@ flowchart TB
   Routes --> Proof
   Routes --> ScoreAPI
   Routes --> SandboxAPI
+  Routes --> PilotAPI
+  Routes --> PromotionAPI
   Routes --> GovernanceAPI
   Routes --> ValidationAPI
   Routes --> AuditAPI
@@ -181,6 +191,9 @@ flowchart TB
   Audit --> Proof
   IDBI -.-> Ingest
   Outcomes -.-> Validation
+  Outcomes -.-> PilotAPI
+  PilotAPI -.-> ModelUpgrade
+  ModelUpgrade -.-> PromotionAPI
   Storage -.-> Audit
   ModelUpgrade -.-> Explain
 ```
@@ -194,6 +207,8 @@ Important endpoints:
 | `POST /score` | Underwriter-authenticated custom MSME scoring |
 | `POST /sandbox/score` | Normalize and score sandbox-style AA/GST/UPI/EPFO/Bureau payloads |
 | `POST /sandbox/recalibration/report` | Profile sandbox distributions and readiness for GBM/SHAP |
+| `GET /sandbox/outcome-contract`, `POST /sandbox/pilot-readiness` | Validate dated 12-month labels, maturity, chronological splits, NTC volume, and monitoring support |
+| `GET /deployment/readiness` | Show and enforce model/identity/OOT/audit promotion blockers |
 | `GET /portfolio`, `/governance`, `/pilot-metrics` | Portfolio impact and control evidence |
 | `GET /model/evaluation` | Champion/challenger selection, holdout metrics, uncertainty, fairness and artifact integrity |
 | `GET /validation/demo`, `POST /validation/report` | Explicit fixture contract and authenticated caller-supplied cohort validation |
@@ -229,12 +244,13 @@ docker run -p 8000:8000 udyampulse
 
 ## Evidence
 
-- Test suite: 50 tests covering scoring/policy routes, NTC reversal, model monotonicity, exact TreeSHAP reconstruction, artifact hashes, honest holdout evidence, bootstrap/fairness contracts, consent scope, protected writes, restart-safe pseudonymised audit chaining, and API proof.
+- Test suite: 61 tests covering scoring/policy routes, NTC reversal, model monotonicity, exact TreeSHAP reconstruction, runtime artifact hashes, honest holdout evidence, consent-at-decision scope, temporal leakage/maturity/split gates, fail-closed runtime modes and pilot promotion, restart-safe pseudonymised audit chaining, and API proof.
 - Model evidence: `GET /model/evaluation` reports random-holdout ROC-AUC **0.7497** (bootstrap 95% interval **0.7314-0.7678**), Gini **0.4993**, KS **0.4225**, PR-AUC **0.4948**, Brier **0.1415**, and ECE **0.0122**. It is reproducible with `python backend/model_training/train_pd_model.py` and explicitly not called OOT.
 - Public cohort impact: 2 NTC rescues and Rs 30,80,000 credit unlocked in the synthetic demo cohort (pilot targets, not measured lift -- see `GET /pilot-metrics`).
 - Governance evidence: policy guardrails with real consent-verification detail, source map, hash-chained audit count, real validation metrics, pilot KPI targets, and fairness slices are visible in the app.
 - Backend evidence: `/submission/proof` exposes the capability map, judge runbook, route catalog, rubric scorecard, competitor gap map, architecture flow, real held-out validation metrics, controls, and Stage 2 swap points directly from backend functions.
 - Security: custom/sandbox/validation writes require `underwriter`; `/audit-log` requires `auditor`; logs retain HMAC subject references rather than borrower names; CORS and consent scope are enforced. See [docs/SECURITY_COMPLIANCE.md](docs/SECURITY_COMPLIANCE.md).
+- Promotion safety: the live public proxy is explicitly blocked from pilot use. `UDYAMPULSE_MODE=pilot` or `production` refuses startup until all machine-readable deployment gates pass.
 - Model transparency: [MODEL_CARD.md](MODEL_CARD.md) documents the real training data/label, the domain-bridge feature mapping, explainability, intended use, and limitations. [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) documents module responsibilities, model versioning, and security boundaries.
 
 ## Screenshots
@@ -256,10 +272,10 @@ docker run -p 8000:8000 udyampulse
   </tr>
   <tr>
     <td width="50%" valign="top">
-      <img src="docs/deck/assets/governance-evidence.png" width="100%" alt="Governance slide-over with model audit, holdout validation, pilot KPI targets, and fairness checks" />
+      <img src="docs/deck/assets/governance-evidence.png" width="100%" alt="Governance slide-over with public proxy evidence and fail-closed pilot promotion status" />
       <br />
       <strong>Governance evidence</strong><br />
-      Governance, validation, pilot KPIs, controls, and fairness slices stay inspectable without crowding the first viewport.
+      The public proxy boundary and five blocking pilot gates are visible before any reviewer could mistake demo evidence for bank validation.
     </td>
     <td width="50%" valign="top">
       <img src="docs/deck/assets/proof-runbook.png" width="100%" alt="Proof tab showing truth boundary, rubric scorecard, judge runbook, and backend API catalog" />
@@ -288,7 +304,7 @@ Full-resolution images remain in [docs/deck/assets](docs/deck/assets) for detail
 
 - Track fit: IDBI's public MSME Inclusion track asks for a Financial Health Card using alternate data for faster credit decisions and finance access for underserved MSMEs.
 - Public event surface: the official public event venue found during review is [IDBI Innovate 2026 on Hack2skill](https://hack2skill.com/event/idbinnovate); no official IDBI Devpost page was found.
-- Sandbox interpretation: public summaries indicate sandbox APIs, synthetic datasets, cloud resources, and mentorship are provided after shortlisting. This repo therefore ships synthetic proof data plus sandbox-ready ingestion, validation, recalibration, monitoring, and governance contracts.
+- Sandbox interpretation: the official schedule says shortlist results arrive July 21 and finalists receive sandbox access July 22-31. This repo therefore ships synthetic proof plus a ready feed contract, dated outcome schema, automatic temporal/OOT readiness analysis, and fail-closed promotion controls without claiming early access.
 - Differentiation: many PS3 demos stop at a score; UdyamPulse shows the bank decision pack around that score - rejection reversal, reasons, attribution, memo, source map, guardrails, audit, validation, pilot metrics, fairness checks, and a backend-verifiable judge proof endpoint.
 - Competitive notes: [docs/COMPETITIVE_RESEARCH.md](docs/COMPETITIVE_RESEARCH.md)
 - Submission checklist: [docs/SUBMISSION_CHECKLIST.md](docs/SUBMISSION_CHECKLIST.md)
@@ -299,5 +315,6 @@ Full-resolution images remain in [docs/deck/assets](docs/deck/assets) for detail
 - The calibrated XGBoost champion is trained on a real default label from a public consumer-credit proxy, not Indian MSME outcomes. Its 4,500-row holdout is random and cross-sectional, not OOT; dated IDBI outcomes are still required.
 - Gender and age monitoring is real on the untouched proxy holdout, but is not a production fairness certification. NTC/NTB, sector, geography and vintage outcome slices remain unavailable pending sandbox data.
 - API authentication is a real, enforced bearer-token/role scheme sized for a public demo (no login flow or per-underwriter identity), not full IDBI SSO -- see docs/SECURITY_COMPLIANCE.md.
+- Pilot mode is intentionally not ready today: `/deployment/readiness` blocks it on public-proxy model scope, absent true OOT evidence, demo credentials/HMAC, and local JSONL audit storage.
 - AWS Bedrock memo generation is optional and requires configured credentials and a model ID; deterministic memo generation remains the default fallback.
 - UdyamPulse is decision support for underwriters, not a fully automated approve/decline system without human review.

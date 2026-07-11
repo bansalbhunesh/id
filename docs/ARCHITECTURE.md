@@ -11,6 +11,9 @@ flowchart LR
   User --> Auth["Bearer role check"]
   Auth --> Write["Custom / sandbox / validation writes"]
   Write --> Consent["Purpose + scope + expiry consent"]
+  Write --> Outcomes["Dated 12-month pilot outcomes"]
+  Outcomes --> Maturity["365-day maturity + duplicate/leakage checks"]
+  Maturity --> Temporal["Chronological development / calibration / OOT"]
   Public --> Score["Five-pillar health score"]
   Consent --> Score
   Score --> PD["Calibrated XGBoost champion"]
@@ -21,6 +24,10 @@ flowchart LR
   PD --> Evidence["Holdout metrics + intervals + fairness + PSI"]
   Audit --> Governance["Governance and submission proof"]
   Evidence --> Governance
+  Temporal --> Promotion["Model + infrastructure promotion gates"]
+  Audit --> Promotion
+  Promotion -->|"all pass"| Pilot["Pilot / production runtime"]
+  Promotion -->|"any block"| Stop["Fail-closed startup"]
 ```
 
 ## Decision Contract
@@ -54,6 +61,8 @@ The cross-sectional source cannot provide OOT validation. `evaluation.json` stat
 | `main.py` | Routes, role wiring, CORS, rate limits, security headers and static mount |
 | `auth.py` | API-key role hierarchy |
 | `feed_ingestion.py` | AA/GST/UPI/EPFO/Bureau contracts and consent enforcement |
+| `pilot_readiness.py` | Dated outcome schema, maturity checks, chronological splits, segment/source gates and privacy-safe report |
+| `deployment_gate.py` | Runtime modes and fail-closed model/identity/OOT/audit promotion policy |
 | `scoring.py` | Health score, proposed limit, decision policy, reasons and guardrails |
 | `feature_bridge.py` | Explicit MSME-to-universal risk mapping |
 | `ml.py` | Champion loading, fallback, PD and explanation response |
@@ -75,11 +84,26 @@ The cross-sectional source cannot provide OOT validation. `evaluation.json` stat
 | Audit subject identity | HMAC pseudonym; no raw borrower name retained |
 | Historical event mutation | SHA256 chain verified after restart and on governance reads |
 | Model evidence | Dataset/artifact hashes and deterministic retraining command |
+| Public proxy to bank pilot | Startup block until artifact scope, true OOT, private credentials/HMAC and durable audit storage pass |
+| Pilot outcome upload | Underwriter role, in-memory analysis only, no returned identifiers, explicit 365-day maturity |
 
 ## Stage 2 Swap Points
 
 - Replace the public proxy loader with approved dated IDBI MSME outcomes while preserving the universal serving contract.
-- Add true temporal development/calibration/OOT windows and NTC/NTB, sector, geography and vintage outcome slices.
+- Supply approved dated records to the implemented outcome contract; the service now constructs true temporal development/calibration/OOT windows and blocks insufficient NTC/NTB or monitoring slices.
 - Calibrate policy thresholds to IDBI loss economics and early-NPA guardrails.
 - Replace demo API keys with IDBI SSO and JSONL with a durable WORM-capable audit store.
 - Enable Bedrock only behind approved prompts, output schema checks and the deterministic fallback.
+
+## Promotion State Machine
+
+```mermaid
+stateDiagram-v2
+  [*] --> PublicDemo
+  PublicDemo --> PilotBlocked: pilot mode requested with any blocker
+  PublicDemo --> PilotReady: IDBI artifact + true OOT + private identity/HMAC + durable audit
+  PilotBlocked --> PilotReady: all gates remediated
+  PilotReady --> ProductionReview: independent model-risk and policy approval
+```
+
+The current repository remains in `PublicDemo`. It cannot enter `PilotReady` with the committed public-proxy manifest.

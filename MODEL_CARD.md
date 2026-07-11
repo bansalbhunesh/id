@@ -93,11 +93,30 @@ The current gender AUC gap is 0.0175. Age-band recall gaps are larger and remain
 
 ## Audit And Security
 
-- Custom, sandbox, recalibration and submitted-validation routes require the `underwriter` role.
+- Custom, sandbox, recalibration, pilot-readiness and submitted-validation routes require the `underwriter` role.
 - Audit access requires the `auditor` role.
 - Sandbox consent enforces underwriting purpose, active status, expiry, maximum duration, supported scopes, and coverage of every supplied feed.
 - Audit events contain a stable HMAC pseudonym instead of borrower name, persist across restarts, and form a SHA256 chain. Mixed legacy logs are pseudonymised and re-chained during one-time migration.
 - CORS is allowlisted, write routes are rate-limited, and security headers are emitted.
+
+## Pilot Promotion Boundary
+
+The public proxy is technically incapable of being promoted by changing a UI label. `deployment_gate.py` defines explicit runtime modes:
+
+- `public_demo` keeps the synthetic review surface available and exposes every blocker.
+- `pilot` and `production` fail startup unless the active artifact declares `deployment_scope=idbi_pilot` and `temporal_validation=true_oot`.
+- Private role credentials, a private audit HMAC key, and a durable append-only audit backend must also be configured.
+
+`GET /deployment/readiness` exposes the redaction-safe gate state. The current public deployment correctly reports `pilot_ready=false`.
+
+`pilot_readiness.py` defines the future bank-data evidence contract. A record needs a dated decision, a bank-approved `bad_12m` label, a full observation endpoint at least 365 days later, and the consented sandbox payload used at decision time. The report:
+
+1. excludes immature/censored records;
+2. rejects duplicate applications and temporal leakage;
+3. creates chronological 70/15/15 development, calibration and latest-period OOT cohorts without random shuffle;
+4. requires both outcomes in every cohort;
+5. gates source coverage, NTC/NTB volume, temporal breadth and fairness-slice support;
+6. returns counts and blockers without persisting records or returning application identifiers.
 
 ## Reproduction
 
@@ -114,6 +133,7 @@ The retraining command rewrites the logistic artifact, XGBoost model, XGBoost me
 - Cross-domain transfer from Taiwan consumer credit to Indian MSMEs is unvalidated. Absolute PD must not be treated as bank calibration.
 - There is no true OOT window, NTC/NTB outcome slice, sector/geography/vintage outcome slice, or early-NPA evidence before sandbox labels arrive.
 - The public demo uses published scoped credentials and an in-process rate limiter. IDBI SSO, per-user tenancy, KMS-managed secrets, durable shared audit storage and distributed rate limiting remain pilot work.
+- The dated outcome and promotion machinery is implemented, but no IDBI records have been supplied. Current pilot blockers are intentional evidence of fail-closed behavior, not production readiness.
 - AWS Bedrock memo generation is optional; deterministic generation is the default fallback.
 
 ## Intended Use

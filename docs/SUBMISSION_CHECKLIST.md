@@ -25,7 +25,7 @@ Use this as the final IDBI Innovate / H2S submission source of truth.
 
 ## Verification Gates
 
-- Backend tests: `50 passed` (clean-venv reproducible; see `backend/requirements.txt` pinned versions).
+- Backend tests: `58 passed` (clean-venv reproducible; see `backend/requirements.txt` pinned versions).
 - Public proxy evidence: `GET /model/evaluation` reports random-holdout AUC 0.7497 (95% bootstrap 0.7314-0.7678), Gini 0.4993, KS 0.4225, Brier 0.1415, ECE 0.0122, and explicit no-OOT-yet disclosure; reproducible via `python backend/model_training/train_pd_model.py`.
 - Security: `GET /audit-log` requires the `auditor` role (bearer token); CORS restricted to an explicit origin allowlist. See `docs/SECURITY_COMPLIANCE.md`.
 - Deck export: 13 pages, not encrypted. Re-export from the refreshed `docs/deck/index.html` after changing model evidence or screenshots.
@@ -44,4 +44,4 @@ Use this as the final IDBI Innovate / H2S submission source of truth.
 
 **Differentiator:** Most competitor demos stop at an alternate-data score. UdyamPulse shows the full bank decision pack: rejected-vs-approved reversal, reason codes, Shapley attribution, memo, source map, policy guardrails, audit log, validation metrics, pilot KPIs, governance summary, portfolio impact, and backend-verifiable proof endpoint.
 
-**Stage 2 ask:** IDBI sandbox AA/GST/UPI/EPFO access, repayment outcome data for calibration, and a pilot workflow with branch/credit officers to validate the implemented NTC/NTB approval lift, decision-time reduction, portfolio diversification, and early-risk guardrails.
+**Stage 2 ask:** IDBI sandbox AA/GST/UPI/EPFO access and dated repayment outcomes. The implemented outcome contract, temporal readiness report, and fail-closed promotion gate will turn those inputs into an IDBI-scoped champion and genuine OOT evidence without weakening the public truth boundary.

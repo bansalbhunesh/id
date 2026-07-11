@@ -541,7 +541,7 @@
   .scrim {
     position: fixed;
     inset: 0;
-    z-index: 30;
+    z-index: 60;
     background: color-mix(in srgb, var(--ledger-ink) 12%, transparent);
     opacity: 0;
     pointer-events: none;
@@ -555,7 +555,7 @@
 
   .review-drawer {
     position: fixed;
-    z-index: 40;
+    z-index: 70;
     top: 154px;
     right: 24px;
     width: min(560px, calc(100vw - 48px));
@@ -1027,6 +1027,8 @@
       governance: null,
       validation: null,
       model: null,
+      deployment: null,
+      outcomeContract: null,
       submissionProof: null,
       activeId: "ntc_hero",
       activeScore: null,
@@ -1290,7 +1292,7 @@
     }
 
     function itemTitle(item) {
-      return item.control || item.stage || item.source || item.layer || item.step || item.title || item.criterion || item.common_pattern || "Review item";
+      return item.control || item.code || item.stage || item.source || item.layer || item.step || item.title || item.criterion || item.common_pattern || "Review item";
     }
 
     function itemDetail(item) {
@@ -1377,6 +1379,7 @@
       const pilot = governance?.pilot_metrics || state.portfolio?.pilot_metrics;
       const fairness = governance?.fairness || {};
       const runtime = governance?.model?.runtime || {};
+      const deployment = state.deployment || governance?.deployment || {};
       if (!governance) return `<div class="empty-state">Governance data is not loaded yet.</div>`;
 
       return `
@@ -1400,6 +1403,17 @@
             ["PSI stability", state.validation?.drift?.psi_development_vs_holdout ?? "-"],
           ]) : `<div class="empty-state">No validation report.</div>`}
           ${validationDesign ? `<p class="truth-note">${esc(validationDesign)}</p>` : ""}
+        </section>
+        <section class="detail-section">
+          <h3 class="section-title">Pilot promotion gate</h3>
+          ${miniLedger([
+            ["Runtime mode", titleize(deployment.mode)],
+            ["Current status", titleize(deployment.status)],
+            ["Pilot ready", deployment.pilot_ready ? "Yes" : "No - blocked safely"],
+            ["Blocking gates", deployment.blockers?.length ?? "-"],
+          ])}
+          <p class="truth-note">The public demo stays available. Pilot and production startup fail closed until every bank-data, OOT, identity, HMAC, and durable-audit gate passes.</p>
+          <div class="journal-list">${renderJournal(deployment.gates, "No deployment gates available.")}</div>
         </section>
         <section class="detail-section">
           <h3 class="section-title">Pilot KPI targets</h3>
@@ -1459,7 +1473,7 @@
             ["Public data", truth.public_data ? "Synthetic demo cohort" : "-"],
             ["Private IDBI data", truth.private_idbi_data === "not_claimed" ? "Not claimed" : titleize(truth.private_idbi_data)],
             ["Sandbox access", truth.sandbox_access ? "Post-shortlisting" : "-"],
-            ["Production model", truth.production_model ? "Optional Stage 2 GBM/SHAP" : "-"],
+            ["Production model", truth.production_model ? "Public proxy blocked from pilot" : "-"],
           ])}
         </section>
         <section class="detail-section">
@@ -1497,6 +1511,8 @@
     }
 
     function renderSourcesTab(score) {
+      const contract = state.outcomeContract || {};
+      const split = contract.split_policy || {};
       return `
         <section class="detail-section">
           <h3 class="section-title">Data source register</h3>
@@ -1514,6 +1530,11 @@
               <span class="journal-state">Feed contract</span>
               <strong>AA/GST/UPI/EPFO payload path</strong>
               <p class="muted">${code("POST /sandbox/score")} accepts sandbox-style payloads and maps them into this same score packet.</p>
+            </article>
+            <article class="journal-row">
+              <span class="journal-state">${esc(contract.contract_version || "Outcome contract")}</span>
+              <strong>Dated 12-month labels · ${esc(split.method || "chronological OOT split")}</strong>
+              <p class="muted">No random shuffle: ${esc(split.random_shuffle === false ? "enforced" : "pending")}. ${code("GET /sandbox/outcome-contract")} defines the schema; ${code("POST /sandbox/pilot-readiness")} checks maturity, temporal splits, source coverage, NTC volume, and fairness support without persisting records.</p>
             </article>
             <article class="journal-row">
               <span class="journal-state">Stage 2 boundary</span>
@@ -1553,6 +1574,7 @@
 
     async function refreshGovernance() {
       state.governance = await api("/governance");
+      state.deployment = state.governance?.deployment || state.deployment;
     }
 
     async function loadCase(id) {
@@ -1581,13 +1603,15 @@
 
     async function init() {
       try {
-        const [health, msmes, portfolio, governance, validation, model, submissionProof] = await Promise.all([
+        const [health, msmes, portfolio, governance, validation, model, deployment, outcomeContract, submissionProof] = await Promise.all([
           api("/health"),
           api("/msmes"),
           api("/portfolio"),
           api("/governance"),
           api("/model/evaluation"),
           api("/model/status"),
+          api("/deployment/readiness"),
+          api("/sandbox/outcome-contract"),
           api("/submission/proof"),
         ]);
 
@@ -1597,6 +1621,8 @@
         state.governance = governance;
         state.validation = validation;
         state.model = model;
+        state.deployment = deployment;
+        state.outcomeContract = outcomeContract;
         state.submissionProof = submissionProof;
 
         setApiStatus(health.status === "ok", health.status === "ok" ? "Live API" : "Check API");

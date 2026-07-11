@@ -16,6 +16,7 @@ SAMPLE_PROFILES: dict[str, MSMEProfile] = {
         gst_turnover_growth_pct=22,
         upi_txn_count_monthly=340,
         unique_counterparties=64,
+        top_counterparty_share_pct=12,
         outstanding_debt_to_inflow=0.05,
         has_bureau_history=False,
         # No credit bureau history at all -> traditional scoring rejects this business outright.
@@ -35,6 +36,7 @@ SAMPLE_PROFILES: dict[str, MSMEProfile] = {
         gst_turnover_growth_pct=8,
         upi_txn_count_monthly=120,
         unique_counterparties=38,
+        top_counterparty_share_pct=18,
         outstanding_debt_to_inflow=0.30,
     ),
     "stressed_retailer": MSMEProfile(
@@ -51,6 +53,7 @@ SAMPLE_PROFILES: dict[str, MSMEProfile] = {
         gst_turnover_growth_pct=-12,
         upi_txn_count_monthly=45,
         unique_counterparties=12,
+        top_counterparty_share_pct=48,
         outstanding_debt_to_inflow=0.68,
     ),
     "borderline_improving": MSMEProfile(
@@ -67,6 +70,7 @@ SAMPLE_PROFILES: dict[str, MSMEProfile] = {
         gst_turnover_growth_pct=15,
         upi_txn_count_monthly=95,
         unique_counterparties=22,
+        top_counterparty_share_pct=25,
         outstanding_debt_to_inflow=0.42,
         has_bureau_history=True,
         # A middling grade with a clear single lever (leverage) -- good for
@@ -87,6 +91,7 @@ SAMPLE_PROFILES: dict[str, MSMEProfile] = {
         gst_turnover_growth_pct=5,
         upi_txn_count_monthly=18,
         unique_counterparties=6,
+        top_counterparty_share_pct=45,
         outstanding_debt_to_inflow=0.15,
         has_bureau_history=False,
         # Disciplined and low-leverage, but a thin digital footprint (few

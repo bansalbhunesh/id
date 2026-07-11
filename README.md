@@ -114,7 +114,7 @@ Rubric coverage is implemented as backend data, not only README copy:
 - Deterministic underwriter memo and borrower improvement plan; optional AWS Bedrock memo generation is a Stage 2 configuration path.
 - EWS-style monitoring signals (bank-recognisable categories for the same five pillars) and a deterministic, rule-based underwriter next-best-action recommendation, both derived from the already-computed score -- not generative output.
 - Underwriter/auditor role gates, source-scoped consent, strict app CSP, request IDs, body/array bounds, quota headers, and fsync-backed genesis-anchored pseudonymised audit events.
-- Sandbox-ready ingestion via `POST /sandbox/score` for AA/GST/UPI/EPFO/Bureau-style payloads, with enforced purpose/scope/expiry consent.
+- Sandbox-ready ingestion via `POST /sandbox/score` for AA/GST/UPI/EPFO/Bureau-style payloads, with enforced purpose/scope/expiry consent. A source the caller never connects always routes to mandatory review instead of being silently scored as worst-case, and a counterparty-concentration guardrail flags heavy single-buyer dependency.
 - Recalibration and monitoring APIs for holdout AUC/Gini/KS/PR-AUC/Brier/ECE, bootstrap intervals, PSI, reason stability, pilot targets, and proxy fairness slices -- see `GET /model/evaluation`.
 - Dated `bad_12m` outcome contract with 365-day maturity checks and automatic chronological development/calibration/OOT cohorts -- see `GET /sandbox/outcome-contract` and `POST /sandbox/pilot-readiness`.
 - Explicit `public_demo`, `pilot`, and `production` modes. Pilot/production startup fails closed until private credentials, IDBI-scoped artifacts, true OOT evidence, and durable audit storage pass -- see `GET /deployment/readiness`.

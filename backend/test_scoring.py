@@ -73,3 +73,16 @@ def test_next_best_action_present_and_urgency_matches_policy_decision():
             assert action["urgency"] == "none"
         if result["policy"]["decision"] == "Review":
             assert action["urgency"] in ("medium", "high")
+
+
+def test_counterparty_concentration_guardrail_flags_high_dependency():
+    result = score_profile(SAMPLE_PROFILES["stressed_retailer"])
+    guardrail = next(g for g in result["policy_guardrails"] if g["control"] == "Counterparty concentration")
+    assert guardrail["status"] == "Watch"
+    assert "48%" in guardrail["detail"]
+
+
+def test_counterparty_concentration_guardrail_passes_when_diversified():
+    result = score_profile(SAMPLE_PROFILES["ntc_hero"])
+    guardrail = next(g for g in result["policy_guardrails"] if g["control"] == "Counterparty concentration")
+    assert guardrail["status"] == "Pass"

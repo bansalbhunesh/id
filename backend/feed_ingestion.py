@@ -51,6 +51,9 @@ class GSTFeed(BaseModel):
 class UPIFeed(BaseModel):
     monthly_transaction_count: NonNegativeInt = 0
     unique_counterparties: NonNegativeInt = 0
+    # Share of monthly digital inflow value from the single largest counterparty.
+    # 0 means not supplied, not "no concentration" -- the guardrail treats it as unknown.
+    top_counterparty_share_pct: float = Field(default=0.0, ge=0, le=100)
 
 
 class EPFOFeed(BaseModel):
@@ -195,6 +198,7 @@ def to_profile(payload: IDBISandboxPayload) -> MSMEProfile:
         gst_turnover_growth_pct=_growth_pct(payload.gst.trailing_6m_turnover),
         upi_txn_count_monthly=payload.upi.monthly_transaction_count,
         unique_counterparties=payload.upi.unique_counterparties,
+        top_counterparty_share_pct=payload.upi.top_counterparty_share_pct,
         outstanding_debt_to_inflow=round(debt_to_inflow, 4),
         has_bureau_history=payload.bureau.has_bureau_history,
         consent_status=consent_status,

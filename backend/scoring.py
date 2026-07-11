@@ -21,6 +21,7 @@ class MSMEProfile(BaseModel):
     gst_turnover_growth_pct: float  # trailing 6mo, can be negative
     upi_txn_count_monthly: int = Field(ge=0)
     unique_counterparties: int = Field(ge=0)
+    top_counterparty_share_pct: float = Field(default=0.0, ge=0, le=100)  # 0 = not supplied
     outstanding_debt_to_inflow: float = Field(ge=0)  # ratio
     has_bureau_history: bool = True  # False = New-to-Credit / New-to-Bank
     consent_status: str = "Not applicable: public synthetic demo data, no real consent required"
@@ -151,6 +152,19 @@ def policy_guardrails(
             "control": "Debt-load cap",
             "status": "Pass" if p.outstanding_debt_to_inflow <= 0.6 else "Watch",
             "detail": f"Outstanding debt is {p.outstanding_debt_to_inflow:.0%} of monthly inflow.",
+        },
+        {
+            "control": "Counterparty concentration",
+            "status": "Watch" if p.top_counterparty_share_pct >= 40 else "Pass",
+            "detail": (
+                f"{p.top_counterparty_share_pct:.0f}% of digital inflow value depends on a single "
+                "counterparty; a payment disruption from that buyer would directly hit this "
+                "borrower's cash flow."
+                if p.top_counterparty_share_pct >= 40
+                else f"No single counterparty exceeds 40% of digital inflow value ({p.top_counterparty_share_pct:.0f}% max)."
+                if p.top_counterparty_share_pct > 0
+                else "Counterparty concentration not supplied for this application."
+            ),
         },
         {
             "control": "Conduct signal",

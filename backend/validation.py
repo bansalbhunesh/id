@@ -3,20 +3,25 @@ from __future__ import annotations
 
 from collections import Counter
 from math import log
+from typing import Annotated
 
 from pydantic import BaseModel, Field
+
+
+ReasonCode = Annotated[str, Field(min_length=1, max_length=256)]
+PeriodLabel = Annotated[str, Field(min_length=1, max_length=64)]
 
 
 class ValidationRecord(BaseModel):
     score: float = Field(ge=0, le=100)
     defaulted: bool
-    period: str
-    reasons: list[str] = Field(default_factory=list)
+    period: PeriodLabel
+    reasons: list[ReasonCode] = Field(default_factory=list, max_length=20)
 
 
 class ValidationRequest(BaseModel):
-    development: list[ValidationRecord]
-    out_of_time: list[ValidationRecord]
+    development: list[ValidationRecord] = Field(max_length=20000)
+    out_of_time: list[ValidationRecord] = Field(max_length=20000)
 
 
 def _auc_for_good_label(records: list[ValidationRecord]) -> float:
@@ -27,28 +32,44 @@ def _auc_for_good_label(records: list[ValidationRecord]) -> float:
     if not positives or not negatives:
         return 0.0
 
-    wins = 0.0
-    for good in positives:
-        for bad in negatives:
-            if good.score > bad.score:
-                wins += 1
-            elif good.score == bad.score:
-                wins += 0.5
-    return round(wins / (len(positives) * len(negatives)), 4)
+    ordered = sorted((record.score, not record.defaulted) for record in records)
+    rank_sum = 0.0
+    index = 0
+    while index < len(ordered):
+        end = index + 1
+        while end < len(ordered) and ordered[end][0] == ordered[index][0]:
+            end += 1
+        average_rank = (index + 1 + end) / 2
+        rank_sum += average_rank * sum(is_good for _score, is_good in ordered[index:end])
+        index = end
+    good_count = len(positives)
+    bad_count = len(negatives)
+    mann_whitney_u = rank_sum - good_count * (good_count + 1) / 2
+    return round(mann_whitney_u / (good_count * bad_count), 4)
 
 
 def _ks_statistic(records: list[ValidationRecord]) -> float:
-    goods = sorted([record.score for record in records if not record.defaulted])
-    bads = sorted([record.score for record in records if record.defaulted])
-    if not goods or not bads:
+    good_total = sum(not record.defaulted for record in records)
+    bad_total = sum(record.defaulted for record in records)
+    if not good_total or not bad_total:
         return 0.0
 
-    thresholds = sorted(set(goods + bads))
+    ordered = sorted((record.score, record.defaulted) for record in records)
+    good_seen = 0
+    bad_seen = 0
     max_gap = 0.0
-    for threshold in thresholds:
-        good_cdf = sum(score <= threshold for score in goods) / len(goods)
-        bad_cdf = sum(score <= threshold for score in bads) / len(bads)
-        max_gap = max(max_gap, abs(good_cdf - bad_cdf))
+    index = 0
+    while index < len(ordered):
+        end = index + 1
+        while end < len(ordered) and ordered[end][0] == ordered[index][0]:
+            end += 1
+        for _score, defaulted in ordered[index:end]:
+            if defaulted:
+                bad_seen += 1
+            else:
+                good_seen += 1
+        max_gap = max(max_gap, abs(good_seen / good_total - bad_seen / bad_total))
+        index = end
     return round(max_gap, 4)
 
 

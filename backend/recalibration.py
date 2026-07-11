@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from statistics import median
+from typing import Annotated
 
 from pydantic import BaseModel, Field
 
@@ -14,17 +15,18 @@ from validation import ValidationRecord, build_validation_report
 
 MIN_GBM_DEVELOPMENT_ROWS = 1000
 MIN_GBM_OUT_OF_TIME_ROWS = 200
+PeriodLabel = Annotated[str, Field(min_length=1, max_length=64)]
 
 
 class SandboxOutcome(BaseModel):
     payload: IDBISandboxPayload
     defaulted: bool | None = None
-    period: str = "pilot"
+    period: PeriodLabel = "pilot"
 
 
 class SandboxRecalibrationRequest(BaseModel):
-    development: list[SandboxOutcome] = Field(default_factory=list)
-    out_of_time: list[SandboxOutcome] = Field(default_factory=list)
+    development: list[SandboxOutcome] = Field(default_factory=list, max_length=5000)
+    out_of_time: list[SandboxOutcome] = Field(default_factory=list, max_length=5000)
 
 
 def _percentile(values: list[float], pct: float) -> float:

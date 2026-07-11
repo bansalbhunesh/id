@@ -4,13 +4,54 @@ on:
   push:
   pull_request:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   pytest:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install -r backend/requirements.txt
-      - run: pytest backend -q
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+      - name: Install pinned runtime
+        run: pip install -r backend/requirements.txt
+      - name: Compile backend
+        run: python -m compileall -q backend
+      - name: Run backend suite
+        run: python -m pytest backend -q
+
+  container:
+    needs: pytest
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build production image
+        run: docker build -t udyampulse:ci .
+      - name: Verify public runtime and fail-closed pilot
+        run: |
+          docker run -d --name udyampulse-ci -p 8000:8000 udyampulse:ci
+          for attempt in {1..30}; do
+            curl --fail --silent http://127.0.0.1:8000/health/ready && break
+            sleep 1
+          done
+          curl --fail --silent http://127.0.0.1:8000/deployment/readiness
+          if docker run --rm -e UDYAMPULSE_MODE=pilot udyampulse:ci; then
+            echo "Pilot mode started without passing promotion gates"
+            exit 1
+          fi
+      - name: Container logs
+        if: always()
+        run: docker logs udyampulse-ci || true
+      - name: Cleanup
+        if: always()
+        run: docker rm -f udyampulse-ci || true

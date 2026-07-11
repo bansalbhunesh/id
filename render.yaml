@@ -6,12 +6,16 @@ services:
     dockerfilePath: ./Dockerfile
     dockerContext: .
     autoDeployTrigger: commit
-    healthCheckPath: /health
+    healthCheckPath: /health/ready
     envVars:
       - key: PYTHONUNBUFFERED
         value: "1"
       - key: PORT
         value: "8000"
+      - key: UDYAMPULSE_MODE
+        value: "public_demo"
+      - key: UDYAMPULSE_MAX_BODY_BYTES
+        value: "8388608"
 
 previews:
   generation: manual

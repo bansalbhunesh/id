@@ -9,12 +9,19 @@ from typing import Any
 
 from deployment_gate import build_deployment_readiness
 from ml import model_evaluation
+from operational import release_metadata
 from portfolio import build_governance_summary, build_portfolio_snapshot
 from sample_data import SAMPLE_PROFILES
 from scoring import score_profile
 
 
 API_CATALOG = [
+    {
+        "method": "GET",
+        "path": "/health/ready",
+        "layer": "Operational readiness",
+        "proves": "Release identity, serving provider and committed artifact integrity are machine-readable for deployment probes.",
+    },
     {
         "method": "GET",
         "path": "/msmes/{id}/score",
@@ -100,8 +107,8 @@ BACKEND_CAPABILITIES = [
     },
     {
         "layer": "Deployment promotion",
-        "modules": ["deployment_gate.py", "auth.py", "main.py"],
-        "implemented": "Public demo mode is explicit; pilot/production startup fails closed until private credentials, IDBI model scope, true OOT evidence, and durable audit storage pass.",
+        "modules": ["deployment_gate.py", "operational.py", "auth.py", "main.py"],
+        "implemented": "Public demo mode is explicit; requests are traced and bounded; pilot/production startup fails closed until private credentials, IDBI model scope, true OOT evidence, and durable audit storage pass.",
     },
 ]
 
@@ -114,12 +121,12 @@ RUBRIC_SCORECARD = [
     },
     {
         "criterion": "Feasibility",
-        "proof": "Runs as one FastAPI service with static UI, Dockerfile, Render Blueprint, automated tests, and no mandatory paid API dependency in public mode.",
-        "evidence": ["Dockerfile", "render.yaml", "GitHub Actions", "/health"],
+        "proof": "Runs as one non-root FastAPI service with static UI, readiness probe, two-job CI, Render Blueprint, and no mandatory paid API dependency in public mode.",
+        "evidence": ["Dockerfile", "render.yaml", "GitHub Actions", "/health/ready"],
     },
     {
         "criterion": "Scalability",
-        "proof": "Separates validation, ingestion, scoring, attribution, audit, temporal readiness and promotion gates so Stage 2 can swap data/model/storage without rewriting the cockpit.",
+        "proof": "Separates bounded ingestion, scoring, attribution, O(n log n) validation, audit, temporal readiness and promotion gates so Stage 2 can swap data/model/storage without rewriting the cockpit.",
         "evidence": ["/sandbox/score", "/sandbox/pilot-readiness", "/deployment/readiness"],
     },
     {
@@ -176,6 +183,11 @@ JUDGE_RUNBOOK = [
         "expected": "status is ok and the static cockpit is served by the same FastAPI deployable.",
     },
     {
+        "step": "1b. Verify deployment readiness",
+        "endpoint": "/health/ready",
+        "expected": "release identity, active champion and committed artifact integrity are reported as ready for public-demo mode.",
+    },
+    {
         "step": "2. Verify the NTC reversal",
         "endpoint": "/msmes/ntc_hero/score",
         "expected": "traditional underwriting is Rejected while alternate-data underwriting is Approved with Grade A.",
@@ -213,6 +225,7 @@ def build_submission_proof(audit_events: list[dict]) -> dict[str, Any]:
     return {
         "status": "submission_ready_backend_proof",
         "stage2_status": "temporal_and_deployment_gates_live",
+        "release": release_metadata(),
         "truth_boundary": {
             "public_data": "synthetic_demo_cohort",
             "private_idbi_data": "not_claimed",
@@ -240,13 +253,14 @@ def build_submission_proof(audit_events: list[dict]) -> dict[str, Any]:
             "runtime": "single_fastapi_process_serves_api_and_static_cockpit",
             "request_flow": [
                 "Borrower or sandbox payload enters FastAPI",
+                "Operational middleware assigns a request ID and enforces the declared-body ceiling",
                 "Pydantic validates profile/feed constraints",
                 "Scoring engine emits health card, verdict, limit, guardrails",
                 "Calibrated PD champion adds exact logit-space TreeSHAP attribution",
                 "Versioned policy separates score, PD estimate, and review route",
                 "Memo layer creates deterministic underwriter memo",
                 "Audit log records reconstructable decision event",
-                "Governance APIs expose validation, drift, fairness, and pilot KPIs",
+                "Governance APIs expose scalable validation, drift, fairness, and pilot KPIs",
                 "Deployment gate blocks public-proxy promotion into pilot/production mode",
             ],
             "stage2_swap_points": [

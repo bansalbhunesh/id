@@ -1,6 +1,7 @@
 """Portfolio and governance summaries for the UdyamPulse demo."""
 from collections import defaultdict
 
+from operational import APP_VERSION
 from pilot_metrics import build_pilot_metrics
 from sample_data import SAMPLE_PROFILES
 from scoring import score_profile
@@ -195,12 +196,12 @@ def build_governance_summary(audit_events: list[dict]) -> dict:
     from audit_log import verify_chain
     from deployment_gate import build_deployment_readiness
 
-    chain = verify_chain(audit_events)
+    chain = verify_chain(audit_events, require_genesis=False)
 
     return {
         "model": {
             "name": "UdyamPulse scorecard + calibrated PD champion/challenger",
-            "version": "0.6.0-stage2-gated",
+            "version": f"{APP_VERSION}-flagship",
             "training_data": "Public borrower cohort is synthetic. The PD benchmark is trained on a 30,000-row public consumer-credit proxy; neither is IDBI/MSME outcome data.",
             "explainability": "Calibrated XGBoost uses native exact TreeSHAP in logit space; calibrated logistic remains the deterministic fallback.",
             "runtime": model_status(),

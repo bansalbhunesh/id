@@ -1,9 +1,11 @@
 """UdyamPulse API - MSME Financial Health Card."""
 import os
 from pathlib import Path
+from time import perf_counter
 
-from fastapi import Depends, FastAPI, HTTPException, Query
+from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
 
 import audit_log
@@ -16,6 +18,14 @@ from pilot_readiness import (
     outcome_contract,
 )
 from pilot_metrics import build_pilot_metrics
+from operational import (
+    APP_VERSION,
+    MAX_BODY_BYTES,
+    SecurityHeaderContext,
+    release_metadata,
+    request_id,
+    security_headers as build_security_headers,
+)
 from portfolio import build_governance_summary, build_portfolio_snapshot
 from rate_limit import rate_limit
 from recalibration import SandboxRecalibrationRequest, build_recalibration_report
@@ -28,7 +38,15 @@ FRONTEND_DIR = Path(__file__).parent.parent / "frontend"
 
 assert_deployment_allowed()
 
-app = FastAPI(title="UdyamPulse", version="0.6.0")
+app = FastAPI(
+    title="UdyamPulse",
+    version=APP_VERSION,
+    description=(
+        "Explainable MSME credit-review and governance API for the IDBI Innovate "
+        "public prototype. Public model evidence is explicitly not IDBI calibration."
+    ),
+    contact={"name": "Team Looper", "url": "https://github.com/bansalbhunesh/id"},
+)
 
 # The frontend is served from this same FastAPI process (StaticFiles mount
 # below) so the live demo never needs CORS at all -- it's same-origin. This
@@ -51,13 +69,37 @@ app.add_middleware(
 
 @app.middleware("http")
 async def security_headers(request, call_next):
-    response = await call_next(request)
+    started = perf_counter()
+    trace_id = request_id(request.headers.get("X-Request-ID"))
+    request.state.request_id = trace_id
+    declared_size = request.headers.get("Content-Length")
+    try:
+        body_too_large = declared_size is not None and int(declared_size) > MAX_BODY_BYTES
+    except ValueError:
+        body_too_large = False
+    if body_too_large:
+        response = JSONResponse(
+            status_code=413,
+            content={
+                "detail": f"Request body exceeds the {MAX_BODY_BYTES}-byte service limit.",
+                "request_id": trace_id,
+            },
+        )
+    else:
+        response = await call_next(request)
+    duration_ms = (perf_counter() - started) * 1000
+    content_type = response.headers.get("content-type", "")
+    forwarded_proto = request.headers.get("X-Forwarded-Proto", "")
+    context = SecurityHeaderContext(
+        request_id=trace_id,
+        duration_ms=duration_ms,
+        is_https=request.url.scheme == "https" or forwarded_proto == "https",
+        is_json=content_type.startswith("application/json"),
+        path=request.url.path,
+    )
+    for name, value in build_security_headers(context).items():
+        response.headers[name] = value
     response.headers["X-UdyamPulse-Mode"] = os.getenv("UDYAMPULSE_MODE", "public_demo")
-    response.headers["X-Content-Type-Options"] = "nosniff"
-    response.headers["X-Frame-Options"] = "DENY"
-    response.headers["Referrer-Policy"] = "no-referrer"
-    response.headers["Permissions-Policy"] = "camera=(), microphone=(), geolocation=()"
-    response.headers["Cache-Control"] = "no-store" if request.url.path.startswith("/audit") else "no-cache"
     return response
 
 
@@ -66,8 +108,31 @@ def health():
     deployment = build_deployment_readiness()
     return {
         "status": "ok",
+        "release": release_metadata(),
         "mode": deployment["mode"],
         "pilot_ready": deployment["pilot_ready"],
+    }
+
+
+@app.get("/health/live")
+def health_live():
+    return {"status": "live", "release": release_metadata()}
+
+
+@app.get("/health/ready")
+def health_ready():
+    from ml import model_status
+
+    deployment = build_deployment_readiness()
+    artifact_gate = next(
+        gate for gate in deployment["gates"] if gate["code"] == "artifact_integrity"
+    )
+    return {
+        "status": "ready" if deployment["runtime_allowed"] else "blocked",
+        "release": release_metadata(),
+        "runtime_allowed": deployment["runtime_allowed"],
+        "model_provider": model_status()["active_provider"],
+        "artifact_integrity": artifact_gate,
     }
 
 

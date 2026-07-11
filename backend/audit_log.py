@@ -7,6 +7,7 @@ import json
 import os
 import threading
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 
 LOG_PATH = Path(__file__).parent / "audit_log.jsonl"
@@ -44,7 +45,7 @@ def _subject_ref(name: str) -> str:
     return f"subject_{digest[:20]}"
 
 
-def verify_chain(entries: list[dict]) -> dict:
+def verify_chain(entries: list[dict], *, require_genesis: bool = True) -> dict:
     for index, entry in enumerate(entries):
         claimed_hash = entry.get("entry_hash")
         claimed_prev = entry.get("prev_hash")
@@ -64,6 +65,12 @@ def verify_chain(entries: list[dict]) -> dict:
                 "valid": False,
                 "break_index": index,
                 "reason": "entry_hash does not match recomputed hash",
+            }
+        if index == 0 and require_genesis and claimed_prev != GENESIS_HASH:
+            return {
+                "valid": False,
+                "break_index": 0,
+                "reason": "first entry does not link to the audit genesis hash",
             }
         if index > 0 and claimed_prev != entries[index - 1].get("entry_hash"):
             return {
@@ -149,8 +156,10 @@ def record(score_result: dict) -> None:
         _ensure_initialized()
         policy = score_result.get("policy", {})
         entry = {
+            "audit_schema_version": "decision-audit-v2",
             "event_id": f"decision_{time.time_ns()}",
             "timestamp": time.time(),
+            "occurred_at": datetime.now(timezone.utc).isoformat(),
             "subject_ref": _subject_ref(score_result["name"]),
             "data_classification": "pseudonymised_decision_metadata",
             "score": score_result["score"],
@@ -162,6 +171,7 @@ def record(score_result: dict) -> None:
             "alternate_data_decision": score_result["alternate_data_decision"],
             "policy_version": policy.get("version"),
             "policy_route": policy.get("route"),
+            "model_provider": score_result.get("ml", {}).get("provider"),
             "reasons": score_result["reasons"],
         }
         entry_hash = _compute_entry_hash(entry, _last_hash)
@@ -172,6 +182,7 @@ def record(score_result: dict) -> None:
         with LOG_PATH.open("a", encoding="utf-8") as handle:
             handle.write(json.dumps(entry, separators=(",", ":")) + "\n")
             handle.flush()
+            os.fsync(handle.fileno())
 
         _memory_log.append(entry)
         _last_hash = entry_hash

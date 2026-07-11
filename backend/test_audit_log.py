@@ -55,6 +55,24 @@ def test_verify_chain_detects_tampering(tmp_path, monkeypatch):
     assert result["break_index"] == 0
 
 
+def test_verify_chain_requires_genesis_for_a_complete_log(tmp_path, monkeypatch):
+    monkeypatch.setattr(audit_log, "LOG_PATH", tmp_path / "audit_log.jsonl")
+    monkeypatch.setattr(audit_log, "_memory_log", [])
+    monkeypatch.setattr(audit_log, "_last_hash", audit_log.GENESIS_HASH)
+    monkeypatch.setattr(audit_log, "_loaded_path", None)
+
+    score_profile(SAMPLE_PROFILES["ntc_hero"])
+    entries = audit_log.read_recent()
+    forged = [dict(entries[0])]
+    forged[0]["prev_hash"] = "f" * 64
+    body = {key: value for key, value in forged[0].items() if key not in ("prev_hash", "entry_hash")}
+    forged[0]["entry_hash"] = audit_log._compute_entry_hash(body, forged[0]["prev_hash"])
+
+    result = audit_log.verify_chain(forged)
+    assert result["valid"] is False
+    assert "genesis" in result["reason"]
+
+
 def test_restart_reloads_last_hash_and_continues_chain(tmp_path, monkeypatch):
     monkeypatch.setattr(audit_log, "LOG_PATH", tmp_path / "audit_log.jsonl")
     monkeypatch.setattr(audit_log, "_memory_log", [])

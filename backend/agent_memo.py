@@ -9,6 +9,7 @@ from __future__ import annotations
 
 import json
 import os
+import re
 
 
 def _deterministic_memo(score_result: dict) -> str:
@@ -133,8 +134,43 @@ def _bedrock_memo(score_result: dict) -> str | None:
         return None
 
 
+def _memo_matches_known_facts(memo: str, score_result: dict) -> bool:
+    """Reject a generative memo that states a limit, score, or grade
+    inconsistent with what was actually computed.
+
+    A generative memo is drafted from real facts, but the model can still
+    round, mis-restate, or invent a number in prose. This is a lightweight
+    guard against exactly that, not a full fact-checker: it only rejects a
+    clear numeric contradiction on the figures a memo is most likely to
+    restate, and lets everything else through. A false negative here just
+    means the deterministic fallback is served instead of a good memo, never
+    the reverse.
+    """
+    expected_limit = float(score_result["eligible_limit"])
+    expected_score = int(score_result["score"])
+    expected_grade = score_result["grade"]
+
+    for raw in re.findall(r"(?:Rs\.?|₹)\s?([\d,]+(?:\.\d+)?)", memo):
+        value = float(raw.replace(",", ""))
+        if value > 1000 and abs(value - expected_limit) > max(1.0, expected_limit * 0.01):
+            return False
+
+    for raw in re.findall(r"\b(\d{1,3})\s*/\s*100\b", memo):
+        if int(raw) != expected_score:
+            return False
+
+    grade_match = re.search(r"\bgrade\s+([A-E])\b", memo, re.IGNORECASE)
+    if grade_match and grade_match.group(1).upper() != expected_grade:
+        return False
+
+    return True
+
+
 def generate_memo(score_result: dict) -> str:
     fallback = _deterministic_memo(score_result)
     if os.getenv("UDYAMPULSE_MEMO_PROVIDER", "").lower() != "bedrock":
         return fallback
-    return _bedrock_memo(score_result) or fallback
+    generated = _bedrock_memo(score_result)
+    if generated and _memo_matches_known_facts(generated, score_result):
+        return generated
+    return fallback

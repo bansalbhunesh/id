@@ -1,71 +1,134 @@
-# 3-Minute Demo Script
+# 3-Minute Video Script
 
-Voiceover script + exact click path. Also usable as the shot list for a
-screen recording or GIF. Live URL: https://id-ysm9.onrender.com
+Voiceover + exact screen path for the demo video. Speak calmly (~140 words/min);
+confidence is quiet. `[SHOW]` = what is on screen. Live URL:
+https://id-ysm9.onrender.com
 
-## 0:00-0:15 — Hook
-*Shot: landing view, Shree Ganesh Textiles active.*
+**Prep — keep five tabs ready to switch instantly:**
 
-"This is UdyamPulse, built for IDBI Innovate PS3. It solves the thin-file MSME
-problem: a viable New-to-Credit business gets rejected by bureau-first
-underwriting even when its real cash-flow signals are healthy."
+1. Live app — https://id-ysm9.onrender.com (Shree Ganesh Textiles selected)
+2. Terminal with this typed, ready to press Enter: `curl https://id-ysm9.onrender.com/submission/proof`
+3. GitHub repo README — green tests badge visible
+4. GitHub — `backend/model_training/experiments/` folder
+5. Browser — https://id-ysm9.onrender.com/deployment/readiness
 
-## 0:15-0:40 — Portfolio impact
-*Shot: top impact strip.*
+## 0:00–0:15 — Cold open: two facts and a promise
 
-"Five public cases. Alternate data rescues 2 New-to-Credit firms and unlocks
-Rs 30,23,000 of viable credit a bureau-only process would miss — and every
-number on this screen is served by the same API a judge can curl."
+*[SHOW: live app, Shree Ganesh Textiles. No introduction — just start.]*
 
-## 0:40-1:15 — The reversal (money shot)
-*Shot: decision stamp — Traditional: Rejected vs UdyamPulse: Approved.*
+"Two facts. This textile shop in Surat makes money **every single day**.
+And no bank will lend it a **single rupee**.
+In the next three minutes, we're going to fix that — **live** —
+and prove every number we say."
 
-"The core case: Shree Ganesh Textiles, no bureau file, so the traditional
-screen rejects it outright. Consented GST, UPI, bank-statement and EPFO-style
-signals tell the truth: grade A, 86 out of 100, approved. The Rs 27,00,000
-figure is an *indicative* limit — sized from spare EMI capacity at documented
-policy inputs, with the grade multiple only as a cap. The full sizing
-breakdown ships in the response."
+## 0:15–0:35 — Name the villain: the loop
 
-## 1:15-1:45 — Explainability, in layers
-*Shot: open the decision drawer; pillar ledger + reason codes + attribution.*
+*[SHOW: the "Traditional: Rejected" stamp. Hold on it.]*
 
-"No black box. The five-pillar card is descriptive. A separately calibrated
-monotonic XGBoost estimates proxy PD with native exact TreeSHAP — the
-attribution reconstructs the score to machine precision. Strong GST momentum
-and UPI footprint earn a capped, fully disclosed *favorable-only* prior on
-that PD: observed positive conduct can help a borrower, but thin digital
-visibility never hurts one. And every reason code ships in English and Hindi
-— this is an inclusion track."
+"Here's why the bank says no. To get a loan, you need credit history.
+To get credit history… you need a loan.
+Millions of Indian MSMEs are trapped in this loop —
+invisible to banks, no matter how healthy they are.
+Nobody breaks the loop. So we did."
 
-## 1:45-2:15 — The other direction: catching the looks-fine case
-*Shot: switch to City Corner Retail; point at the reconciliation guardrail.*
+## 0:35–1:05 — Break it, live
 
-"Inclusion isn't just approving more — it's not being fooled. This retailer
-declares 38% more turnover than its bank account actually sees. The
-GST-vs-bank reconciliation guardrail flags it for review in both directions,
-and it becomes the underwriter's top next action. Approve the invisible-but-
-healthy, catch the looks-fine-but-failing."
+*[SHOW: the reversal — Rejected → Approved — then the score card, slowly.]*
 
-## 2:15-2:45 — Evidence a bank can audit
-*Shot: Governance tab, then Proof tab.*
+"UdyamPulse reads the proof this business creates every day —
+GST bills, UPI payments, bank inflows — with the owner's permission —
+and turns it into a **Financial Health Card**.
+Same shop. New answer: **86 out of 100. Grade A. Approved.**
+A limit of **27 lakh rupees**, sized from the EMI it can actually repay.
+The old process took **seven days**. This took **three minutes**."
 
-"Governance is live data, not a slide: hash-chained pseudonymised audit,
-fairness slices, fail-closed pilot gates. And the model evidence is real:
-beyond the consumer-proxy holdout, the v2 benchmark is validated across
-418,000 real SBA small-business loans, including a genuinely later-in-time
-window — AUC 0.96 out-of-time, 0.93 through a recession stress cohort — with
-the whole experiment registry committed. Real outcomes, real time axis,
-honestly labelled as a proxy domain."
+## 1:05–1:25 — The dare
 
-## 2:45-3:00 — Close
-*Shot: Proof tab runbook / README badges.*
+*[SHOW: zoom on the browser URL bar: id-ysm9.onrender.com]*
 
-"UdyamPulse deploys today as one non-root FastAPI service, 115 automated
-tests, container-smoked CI. Pilot mode refuses to start until IDBI data, true
-OOT evidence, private credentials and durable audit storage exist — the
-system is honest about what it is, and ready for what it becomes with sandbox
-access. Thank you."
+"Now — don't trust a video. Videos can fake anything.
+**Pause right here.** Open this address on your phone.
+Everything you just saw is running there, right now, for anyone.
+Go ahead. We'll wait."
+
+*(beat — one full second of silence)*
+
+"That's proof one: **it's live.**"
+
+## 1:25–1:45 — It explains itself, in your language
+
+*[SHOW: decision drawer — pillars, reason codes, Hindi toggle.]*
+
+"And it's not a black box.
+Every decision comes with reasons — what's strong, what's weak,
+what to improve — in **English and in Hindi**.
+The banker gets evidence. The owner gets a roadmap."
+
+## 1:45–2:00 — It catches liars too
+
+*[SHOW: City Corner Retail — the GST-vs-bank mismatch flag.]*
+
+"It works in both directions.
+This shop claims high sales on paper — its bank account disagrees.
+UdyamPulse catches the gap and flags it for review.
+Approve the invisible-but-honest. Catch the impressive-but-fake."
+
+## 2:00–2:35 — The proof gauntlet
+
+*[SHOW: Tab 2 — press Enter; the JSON fills the screen.]*
+
+"Proof two: **ask our backend, not our slides.**
+One command, and the running system returns every claim in this video."
+
+*[SHOW: Tab 3 — GitHub README, zoom on the green tests badge.]*
+
+"Proof three: **the code is public.**
+**115 automated tests** run on every change — the green tick is
+machine-checked, not self-declared."
+
+*[SHOW: Tab 4 — the experiments folder, scroll slowly.]*
+
+"Proof four: **real data.**
+Validated against **more than 4 lakh real small-business loans** —
+including recession years — every experiment committed for inspection."
+
+## 2:35–2:55 — The twist: it refuses to lie
+
+*[SHOW: Tab 5 — deployment-readiness JSON, the blocking gates.]*
+
+"And proof five is the one no other team will show you:
+**our system telling *us* no.**
+We don't have IDBI's data yet. So UdyamPulse **refuses to start**
+in pilot mode until real data and every safety check exists.
+We built it so it cannot exaggerate.
+Not to you. Not for us. **Not even to win.**"
+
+*(pause — this is the emotional peak)*
+
+## 2:55–3:10 — Close
+
+*[SHOW: back to the approved card. Hold it.]*
+
+"Millions of good businesses aren't risky.
+They're just **invisible**.
+UdyamPulse makes them visible.
+**A credit score for those who never got one.**
+It's live. Judge it yourself — it's waiting for you."
+
+---
+
+## Delivery notes
+
+- The dare is the heart of the video: say "Pause right here" like you mean it,
+  then actually hold a full second of silence. The silence says *nothing to hide*.
+- No spoken introduction — the team name is on the deck and the repo.
+- Switch tabs exactly on the word "Proof" — say it, then show it.
+- Pause after "Not even to win"; slow down on the final line, then stop.
+- ≈ 470 spoken words → about 3:10 at a calm pace. If trimming is needed, cut
+  the liar case (1:45–2:00) first; never cut the dare or the twist.
+- Say "twenty-seven lakh rupees". Say "**validated against** 4 lakh loans" —
+  never "trained on" (the training split is 197,716 loans; the programme
+  universe is 418,947).
 
 ---
 

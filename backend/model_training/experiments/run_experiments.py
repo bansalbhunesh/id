@@ -262,7 +262,7 @@ def main() -> None:
         results = {n: metric_bundle(data[n]["y"], bag_pd[n]) for n in ("holdout", "oot", "stress")}
         results["delong_vs_single_oot"] = delong_test(
             data["oot"]["y"], bag_pd["oot"], predictions["tuned_monotone"]["oot"])
-        results["anti_shroff_gate"] = (
+        results["complexity_materiality_gate"] = (
             "accept ensemble only if significantly better than the single tuned model")
         record(registry, {"id": "E6", "family": "E6", "name": "5-seed bagged monotone XGB",
                           "seed": SEED, "config": {"bag": 5}, "data": common_data, "results": results})

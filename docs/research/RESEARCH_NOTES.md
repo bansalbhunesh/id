@@ -13,7 +13,7 @@ follows from them. This file records *why* the experiments in
 We reproduce useful *techniques* with our own implementations and design
 experiments that go beyond them. No competitor code, data, or branding is used.
 
-### Shroff (Track 3 front-runner)
+### Rival A — segment-ensemble scorecard (a Track-3 front-runner)
 **What they do:** ~45 engineered features; four segment LightGBM sub-models
 (cash-flow / growth / stability / compliance) + logistic meta-combiner;
 isotonic calibration; 300–900 score; committed `metrics.json`.
@@ -29,9 +29,9 @@ isotonic calibration; 300–900 score; committed `metrics.json`.
 **What we take (our own implementation) and exceed:** the sub-score/meta idea is
 worth testing — but gated: we only accept added complexity if it beats the
 simple baseline **with statistical significance (DeLong)**, the exact gate
-Shroff's own artifact fails.
+Rival A's own artifact fails.
 
-### Sedahoo / msme-health-card
+### Rival B — reject-inference prototype
 **What they do:** LightGBM; *fuzzy-parcelling reject inference* (Feelders 2000,
 Hand & Henley 1997 — correctly described, iterated 3×); conformal intervals;
 PSI audit.
@@ -45,7 +45,7 @@ on **real loans with a real simulated approval policy**, and evaluate the
 corrected model on the *full* population (they never do), with **genuinely
 dated temporal splits** from `ApprovalDate`.
 
-### PARAKH (IHRM-AI)
+### Rival C — statistical-tooling entry
 **What they do:** real statistical tooling — **DeLong AUC-difference test**
 (midrank implementation, verified against sklearn), **source-ablation ladder
 with bootstrap CIs**, stability and fairness test modules.
@@ -58,7 +58,7 @@ prior audit.
 on **real charge-off outcomes** and committed as artifacts, not just test
 scaffolding.
 
-### SehatAI
+### Rival D — deterministic engine
 **What they do:** deterministic engine; honest small-print; **band bad-rate
 monotonicity** check; gains/lift tables; "Credit-Invisible Lift" operating
 metric; challenger file.
@@ -151,7 +151,7 @@ Planned families (E-numbers referenced by the registry):
 - **E4 capacity sweep:** depth/eta/rounds/min_child_weight (small seeded grid).
 - **E5 calibration:** none vs Platt vs isotonic (PAVA, ours) on ECE/Brier.
 - **E6 ensembles:** seed-bagged XGBoost; XGB+logistic stack — accepted only if
-  DeLong-significant over the simpler option (the anti-Shroff gate).
+  DeLong-significant over the simpler option (the complexity-materiality gate).
 - **E7 adversarial validation:** train-vs-OOT classifier AUC as shift meter;
   top shift drivers reported.
 - **E8 domain adaptation:** importance weighting from E7 propensities.

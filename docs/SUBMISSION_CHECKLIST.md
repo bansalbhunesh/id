@@ -8,7 +8,6 @@ Use this as the final IDBI Innovate / H2S submission source of truth.
 - Live product: https://id-ysm9.onrender.com
 - Submission deck PDF: `docs/deck/UdyamPulse-IDBI-Submission-Deck.pdf`
 - Animated walkthrough: `docs/demo.gif` (browser-automation capture of the live app; narration in `docs/DEMO_SCRIPT.md`)
-- Lightweight walkthrough fallback: `docs/demo.gif`
 - Demo script for voiceover/video: `docs/DEMO_SCRIPT.md`
 
 ## Required Proof
@@ -17,7 +16,7 @@ Use this as the final IDBI Innovate / H2S submission source of truth.
 - Source code: public GitHub repository with backend, frontend, tests, Dockerfile, and Render Blueprint.
 - Backend proof API: `/submission/proof` exposes the truth boundary, rubric scorecard, competitor gap map, API catalog, and judge runbook.
 - Pitch deck: 13-slide deck mapped to the IDBI template sections.
-- Demo video: captioned WebM walkthrough recorded from the live Render app.
+- Demo video: animated GIF walkthrough committed at `docs/demo.gif`; the narrated video is recorded from the live app following `docs/DEMO_SCRIPT.md`.
 - Screenshots: live cockpit, decision pack, governance/evidence rail, proof tab, and mobile flow.
 - Model governance: `MODEL_CARD.md`, audit log endpoint, source map, policy guardrails, validation metrics, pilot KPIs, fairness summary.
 - Architecture and security posture: `docs/ARCHITECTURE.md`, `docs/SECURITY_COMPLIANCE.md`, `docs/THREAT_MODEL.md`.
@@ -26,7 +25,7 @@ Use this as the final IDBI Innovate / H2S submission source of truth.
 
 ## Verification Gates
 
-- Backend tests: `83 passed` (clean-venv reproducible; see `backend/requirements.txt` pinned versions).
+- Backend tests: `115 passed` (clean-venv reproducible; see pinned `backend/requirements.txt` + `backend/requirements-dev.txt`).
 - Public proxy evidence: `GET /model/evaluation` reports random-holdout AUC 0.7497 (95% bootstrap 0.7314-0.7678), Gini 0.4993, KS 0.4225, Brier 0.1415, ECE 0.0122, and explicit no-OOT-yet disclosure; reproducible via `python backend/model_training/train_pd_model.py`.
 - Security: `GET /audit-log` requires the `auditor` role; CORS is allowlisted; JSON is no-store; app CSP, request tracing, body/array bounds and fail-closed promotion are tested. See `docs/SECURITY_COMPLIANCE.md`.
 - Deck export: 13 pages, not encrypted. Re-export from the refreshed `docs/deck/index.html` after changing model evidence or screenshots.

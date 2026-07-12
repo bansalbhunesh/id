@@ -52,8 +52,8 @@ healthy, catch the looks-fine-but-failing."
 
 "Governance is live data, not a slide: hash-chained pseudonymised audit,
 fairness slices, fail-closed pilot gates. And the model evidence is real:
-beyond the consumer-proxy holdout, the v2 benchmark is trained on 418,000
-real SBA small-business loans and validated on a genuinely later-in-time
+beyond the consumer-proxy holdout, the v2 benchmark is validated across
+418,000 real SBA small-business loans, including a genuinely later-in-time
 window — AUC 0.96 out-of-time, 0.93 through a recession stress cohort — with
 the whole experiment registry committed. Real outcomes, real time axis,
 honestly labelled as a proxy domain."

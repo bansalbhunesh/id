@@ -1418,7 +1418,7 @@
     "p_value": 0.0461,
     "significant_5pct": true
    },
-   "anti_shroff_gate": "accept ensemble only if significantly better than the single tuned model"
+   "complexity_materiality_gate": "accept ensemble only if significantly better than the single tuned model"
   },
   "timestamp": "2026-07-12T07:57:38.270033+00:00",
   "git": "07d67c3"

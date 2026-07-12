@@ -18,4 +18,3 @@ The current exported PDF is already available at `docs/deck/UdyamPulse-IDBI-Subm
 
 - This deck was built independently, but follows the official section order so the content can be pasted into the IDBI template if needed.
 - `docs/PITCH_OUTLINE.md` has the same pitch in plain text.
-- `index-Express-export.html` is a fixed-size Adobe Express import variant. The original Express account required Premium to export imported HTML as PDF, so the free Chrome print route on `index.html` remains the practical export path.

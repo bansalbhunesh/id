@@ -46,8 +46,8 @@ flags are committed). Served TreeSHAP reconstructs the logit exactly
 2. **Significance is not materiality (E6).** The 5-seed bag was
    "statistically better" (p = 0.046) by **0.0001 AUC** — a textbook large-n
    trap. The pre-registered gate (p < 0.05 **and** Δ ≥ 0.003) rejected it.
-   Shroff's own artifact shows the opposite failure: an ensemble that *loses*
-   to its logistic baseline yet leads their README.
+   A rival entry's own committed artifact shows the opposite failure: an
+   ensemble that *loses* to its logistic baseline yet leads their README.
 3. **Calibration (E5):** large-sample hist-XGBoost was already tied-best
    calibrated in-distribution (ECE 0.0019); Platt *hurt* (0.0263); isotonic
    matched but breaks exact-SHAP linearity. OOT ECE (~0.03) is **base-rate
@@ -87,9 +87,9 @@ flags are committed). Served TreeSHAP reconstructs the logit exactly
 
 | Axis | Best visible competitor practice | This work |
 |---|---|---|
-| Labels | Synthetic personas (Shroff 8k, PARAKH, SehatAI 1k) | **418k real charge-offs, natural rates** |
-| Temporal validity | Row-index "OOT" (Sedahoo), random splits | **True dated OOT + recession stress** |
-| Model selection | Ensemble shipped despite losing to own baseline (Shroff artifact) | **Pre-registered DeLong + materiality gate; bag correctly rejected** |
+| Labels | Synthetic personas (1k-8k rows across visible rivals) | **418k real charge-offs, natural rates** |
+| Temporal validity | Row-index "OOT" proxies, random splits | **True dated OOT + recession stress** |
+| Model selection | Ensemble shipped despite losing to own baseline (a rival's committed artifact) | **Pre-registered DeLong + materiality gate; bag correctly rejected** |
 | Constraints | Blanket monotone or none | **Selective monotonicity, empirically defended per feature** |
 | Reject inference | Implemented, never measured | **Measured; honest negative result with theory-consistent explanation** |
 | Uncertainty/stability | Rare | Bootstrap CIs, seed σ, perturbation probe, shift meters |

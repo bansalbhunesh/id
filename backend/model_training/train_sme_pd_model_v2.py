@@ -10,7 +10,7 @@ Everything here is the product of the registry-tracked experiment programme
   (E5: large-sample hist-XGBoost with logistic loss was already the tied-best
   calibrated option in-distribution, and identity preserves exact TreeSHAP
   additivity through the runtime wrapper)
-- complexity gate (anti-Shroff): the 5-seed bag (E6) replaces the single model
+- complexity gate (pre-registered): the 5-seed bag (E6) replaces the single model
   only if DeLong p < 0.05 AND delta AUC >= 0.003 on OOT -- pre-registered
   before results were known
 - the served artifact IS the protocol-trained model, so committed metrics are

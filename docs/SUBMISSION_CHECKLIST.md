@@ -33,13 +33,13 @@ Use this as the final IDBI Innovate / H2S submission source of truth.
 - Browser smoke test: desktop/tablet/mobile render with no console errors, no horizontal overflow, WCAG AA Axe violations, keyboard trap, or undersized visible controls.
 - Live app proof: 5 cases, 4 impact cards, 5 source signals, 5 governance controls, validation metrics, pilot KPIs, and expanded fairness slices.
 - Proof tab: Decision, Evidence, Governance, Proof, and Sources views render from live API state and can be deep-linked with `?case=...&view=...`.
-- Core demo moment: Shree Ganesh Textiles is traditional `Rejected` but UdyamPulse alternate-data `Approved`, grade A, score 86/100, Rs 27,00,000 eligible limit.
+- Core demo moment: Shree Ganesh Textiles is traditional `Rejected` but UdyamPulse alternate-data `Approved`, grade A, score 86/100, Rs 27,00,000 indicative limit.
 
 ## Form Copy
 
 **Project title:** UdyamPulse
 
-**One-line description:** Banker-grade MSME Financial Health Card that converts consented alternate data into explainable credit decisions, eligible limits, audit trails, and borrower improvement plans.
+**One-line description:** Banker-grade MSME Financial Health Card that converts consented alternate data into explainable credit decisions, indicative limits, audit trails, and borrower improvement plans.
 
 **Problem statement:** IDBI Innovate 2026 PS3 - MSME Financial Health Score.
 

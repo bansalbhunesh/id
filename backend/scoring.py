@@ -260,7 +260,7 @@ def policy_guardrails(
             "detail": (
                 f"{p.top_counterparty_share_pct:.0f}% of digital inflow value depends on a single "
                 "counterparty; a payment disruption from that buyer would directly hit this "
-                f"borrower's cash flow, so the eligible limit is reduced {(1 - CONCENTRATION_LIMIT_HAIRCUT):.0%} "
+                f"borrower's cash flow, so the indicative limit is reduced {(1 - CONCENTRATION_LIMIT_HAIRCUT):.0%} "
                 "below the grade-only amount."
                 if p.top_counterparty_share_pct >= CONCENTRATION_WATCH_THRESHOLD_PCT
                 else f"No single counterparty exceeds {CONCENTRATION_WATCH_THRESHOLD_PCT}% of digital inflow "
@@ -358,7 +358,7 @@ def decision_path(
         {
             "stage": "Credit-line recommendation",
             "decision": "Limit generated" if eligible_limit(total, p) > 0 else "No limit",
-            "evidence": f"Eligible working-capital limit Rs {eligible_limit(total, p):,.0f}.",
+            "evidence": f"Indicative working-capital limit Rs {eligible_limit(total, p):,.0f}.",
         },
     ]
 

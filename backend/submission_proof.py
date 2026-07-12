@@ -90,7 +90,7 @@ BACKEND_CAPABILITIES = [
     {
         "layer": "Scoring engine",
         "modules": ["scoring.py", "sample_data.py"],
-        "implemented": "Five-pillar scorecard, risk band, eligible limit, traditional-vs-alternate verdict, policy guardrails.",
+        "implemented": "Five-pillar scorecard, risk band, EMI-capacity indicative limit, traditional-vs-alternate verdict, policy guardrails.",
     },
     {
         "layer": "Explainability",
@@ -207,7 +207,7 @@ JUDGE_RUNBOOK = [
     {
         "step": "3. Inspect the bank decision pack",
         "endpoint": "/msmes/ntc_hero/score",
-        "expected": "score, eligible limit, pillars, reason codes, Shapley attribution, memo, guardrails, and source map are present.",
+        "expected": "score, indicative limit, pillars, reason codes, Shapley attribution, memo, guardrails, and source map are present.",
     },
     {
         "step": "4. Validate model-risk controls",

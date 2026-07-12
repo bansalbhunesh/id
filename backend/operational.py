@@ -6,6 +6,8 @@ import re
 import uuid
 from dataclasses import dataclass
 
+from starlette.responses import JSONResponse
+
 APP_VERSION = "0.7.0"
 SERVICE_NAME = "udyampulse"
 DEFAULT_MAX_BODY_BYTES = 8 * 1024 * 1024
@@ -26,6 +28,67 @@ MAX_BODY_BYTES = _bounded_int(
     minimum=64 * 1024,
     maximum=64 * 1024 * 1024,
 )
+
+
+class BodySizeLimitMiddleware:
+    """Pure-ASGI enforcement of the request-body ceiling.
+
+    The HTTP-layer ``Content-Length`` check is only a fast-path: a chunked
+    request declares no length and slips past it. This middleware buffers the
+    incoming body while counting bytes and short-circuits with ``413`` the
+    moment the cap is exceeded -- so the limit holds whether or not a length is
+    declared. Bodies within the cap are replayed intact to the handler.
+    """
+
+    def __init__(self, app, *, max_bytes: int) -> None:
+        self.app = app
+        self.max_bytes = max_bytes
+
+    async def __call__(self, scope, receive, send):
+        if scope.get("type") != "http":
+            await self.app(scope, receive, send)
+            return
+
+        chunks: list[bytes] = []
+        total = 0
+        while True:
+            message = await receive()
+            message_type = message.get("type")
+            if message_type == "http.disconnect":
+                return
+            if message_type != "http.request":
+                # Unexpected message; hand control back without buffering.
+                async def _passthrough(_message=message):
+                    return _message
+
+                await self.app(scope, _passthrough, send)
+                return
+            body = message.get("body", b"")
+            total += len(body)
+            if total > self.max_bytes:
+                response = JSONResponse(
+                    status_code=413,
+                    content={
+                        "detail": f"Request body exceeds the {self.max_bytes}-byte service limit."
+                    },
+                )
+                await response(scope, receive, send)
+                return
+            chunks.append(body)
+            if not message.get("more_body", False):
+                break
+
+        buffered = b"".join(chunks)
+        replayed = False
+
+        async def replay_receive():
+            nonlocal replayed
+            if not replayed:
+                replayed = True
+                return {"type": "http.request", "body": buffered, "more_body": False}
+            return await receive()
+
+        await self.app(scope, replay_receive, send)
 
 
 def request_id(incoming: str | None) -> str:

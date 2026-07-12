@@ -73,6 +73,48 @@ Review threshold: PD 0.258, selected on calibration only
 
 The null Brier benchmark, log loss, decile calibration, confusion matrix, 200-replicate intervals, candidate comparison, artifact hashes and group slices are committed in `backend/model_training/artifacts/evaluation.json` and served by `GET /model/evaluation`.
 
+## Real Small-Business Outcome Benchmark
+
+The consumer-credit proxy above validates the pillar-PD *conduct* concepts on real
+default outcomes, but its domain is consumer, not small business. A second,
+independent benchmark closes the domain gap: it trains the identical
+methodology (monotone-constrained XGBoost, Platt calibration, native exact
+TreeSHAP, logistic challenger) on **real U.S. SBA 7(a) small-business loans with
+a real charge-off label**, and validates it **out of distribution**.
+
+Model: `sba_sme_pd_v1`. Nine leakage-free origination features
+(`term_months`, `employees_log`, `jobs_supported_log`, `gross_approved_log`,
+`guarantee_portion`, `new_business`, `real_estate_backed`, `urban`,
+`recession_origination`), each with an economically-signed monotone constraint.
+Post-outcome columns (`ChgOffPrinGr`, which matches the label 99.2% of the time)
+and the causal-study `Selected` flag are excluded.
+
+| Metric | Holdout (943 real SBA loans) | Out-of-distribution (1,159 real SBA loans) |
+|---|---:|---:|
+| ROC-AUC | 0.9066 | 0.9401 |
+| KS | 0.7115 | 0.7946 |
+| PR-AUC | 0.8973 | — |
+| Brier score | 0.1157 | 0.1482 |
+| Holdout-vs-shift PSI | — | 0.631 |
+| TreeSHAP max reconstruction error (logit) | 2.15e-06 | — |
+
+The out-of-distribution set is a differently-distributed real SBA sample (16% vs
+53% default base rate, PSI 0.63): a model that only memorised the training
+distribution would collapse; ranking power that survives is genuine
+generalisation evidence, not a re-scored random holdout. To our knowledge no
+other public submission in this track validates on real small-business default
+outcomes out of distribution.
+
+**Honesty caveats (committed in `sme_evaluation.json`).** This is a *curated,
+class-balanced research sample* (~53% default vs the ~18% SBA population rate),
+which inflates apparent separation versus a natural-rate book; loan *term*
+dominates by gain importance, so it is a loan-*structure* benchmark that is
+complementary to — not a replacement for — the GST/UPI/EPFO alternate-data
+*conduct* pillars in the served score; and US SBA is a proxy domain for Indian
+MSME. It is real-outcome methodology proof, not an IDBI production calibration.
+Reproduce with `python backend/model_training/train_sme_pd_model.py`; served by
+`GET /model/sme-benchmark`.
+
 ## Explainability
 
 XGBoost explanations use native `pred_contribs`, which is exact TreeSHAP in margin/logit space. Platt calibration is linear in that space, so applying the calibration slope to feature contributions and the calibration intercept to the bias preserves exact reconstruction. Every response exposes `shap_sum_check_logit`; tests require absolute error below `1e-5`.

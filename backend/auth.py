@@ -43,27 +43,41 @@ def authentication_status() -> dict:
     }
 
 
-_ROLE_RANK = {"underwriter": 1, "auditor": 2, "admin": 3}
+# Capability-based access, not a seniority ladder. Underwriting (making a
+# lending decision) and auditing (reading the decision trail) are separate
+# duties under maker-checker/model-risk separation: an auditor must NOT be able
+# to submit scores, and an underwriter must NOT be able to read the audit log.
+# Only an explicit admin holds both. The previous rank ladder let `auditor`
+# inherit underwriter write access, collapsing that separation.
+_ROLE_CAPABILITIES = {
+    "underwriter": frozenset({"underwriter"}),
+    "auditor": frozenset({"auditor"}),
+    "admin": frozenset({"underwriter", "auditor"}),
+}
 
 
-def require_role(minimum_role: str):
-    minimum_rank = _ROLE_RANK[minimum_role]
+def require_role(capability: str):
+    if capability not in {"underwriter", "auditor"}:
+        raise ValueError(f"Unknown capability {capability!r}")
 
     def _dependency(authorization: str | None = Header(default=None)) -> str:
         if not authorization or not authorization.lower().startswith("bearer "):
             raise HTTPException(
                 status_code=401,
-                detail=f"Missing bearer token. This endpoint requires role >= '{minimum_role}'.",
+                detail=f"Missing bearer token. This endpoint requires the '{capability}' capability.",
             )
         token = authorization.split(" ", 1)[1].strip()
         keys = _load_keys()
         role = keys.get(token)
-        if role is None or role not in _ROLE_RANK:
+        if role is None or role not in _ROLE_CAPABILITIES:
             raise HTTPException(status_code=401, detail="Invalid API key.")
-        if _ROLE_RANK[role] < minimum_rank:
+        if capability not in _ROLE_CAPABILITIES[role]:
             raise HTTPException(
                 status_code=403,
-                detail=f"Role '{role}' cannot access an endpoint requiring '{minimum_role}' or higher.",
+                detail=(
+                    f"Role '{role}' lacks the '{capability}' capability required by this "
+                    "endpoint (underwriting and auditing are separated duties)."
+                ),
             )
         return role
 

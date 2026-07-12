@@ -4,27 +4,38 @@ Five pillars, each 0-20, summed to a 0-100 score with an A-E grade.
 The descriptive score stays separate from the calibrated XGBoost PD model
 and the versioned lending policy so each layer can be audited independently.
 """
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, ConfigDict, Field
 
 
 class MSMEProfile(BaseModel):
-    name: str
-    sector: str = "General Trade"
-    district: str = "Mumbai"
-    gender: str | None = None
+    # allow_inf_nan=False rejects non-finite floats (JSON `1e309` -> inf, NaN) at
+    # the validation boundary. Without it, `inf` passes `ge=0` (inf >= 0 is True),
+    # propagates into limit maths, and either crashes JSON serialisation (500)
+    # or emits non-standard `Infinity` into the audit log. Every numeric field
+    # is also range-bounded so an underwriting input cannot be absurd, and every
+    # free-text field is length-capped to bound request size and log growth.
+    model_config = ConfigDict(allow_inf_nan=False, str_max_length=500)
+
+    name: str = Field(min_length=1, max_length=200)
+    sector: str = Field(default="General Trade", max_length=100)
+    district: str = Field(default="Mumbai", max_length=100)
+    gender: str | None = Field(default=None, max_length=40)
     vintage_months: int = Field(default=24, ge=0, le=600)
-    employees: int = Field(default=12, ge=0)
-    avg_monthly_inflow: float = Field(ge=0)
-    inflow_volatility: float = Field(ge=0)  # coefficient of variation, 0-1+
+    employees: int = Field(default=12, ge=0, le=1_000_000)
+    avg_monthly_inflow: float = Field(ge=0, le=1e12)
+    inflow_volatility: float = Field(ge=0, le=100)  # coefficient of variation, 0-1+
     cheque_bounce_rate: float = Field(ge=0, le=1)  # 0-1
     gst_filing_streak_months: int = Field(ge=0, le=120)
-    gst_turnover_growth_pct: float  # trailing 6mo, can be negative
-    upi_txn_count_monthly: int = Field(ge=0)
-    unique_counterparties: int = Field(ge=0)
+    gst_turnover_growth_pct: float = Field(ge=-100, le=100_000)  # trailing 6mo, can be negative
+    upi_txn_count_monthly: int = Field(ge=0, le=10_000_000)
+    unique_counterparties: int = Field(ge=0, le=10_000_000)
     top_counterparty_share_pct: float = Field(default=0.0, ge=0, le=100)  # 0 = not supplied
-    outstanding_debt_to_inflow: float = Field(ge=0)  # ratio
+    outstanding_debt_to_inflow: float = Field(ge=0, le=1_000_000)  # ratio
     has_bureau_history: bool = True  # False = New-to-Credit / New-to-Bank
-    consent_status: str = "Not applicable: public synthetic demo data, no real consent required"
+    consent_status: str = Field(
+        default="Not applicable: public synthetic demo data, no real consent required",
+        max_length=500,
+    )
 
 
 PILLAR_MAX = 20
@@ -169,7 +180,16 @@ def policy_guardrails(
         },
         {
             "control": "Counterparty concentration",
-            "status": "Watch" if p.top_counterparty_share_pct >= CONCENTRATION_WATCH_THRESHOLD_PCT else "Pass",
+            # Unknown is not a pass. If the share was never supplied (0), the
+            # single-buyer dependency risk is unverified and routes to review
+            # rather than being silently treated as a measured low value.
+            "status": (
+                "Watch"
+                if p.top_counterparty_share_pct >= CONCENTRATION_WATCH_THRESHOLD_PCT
+                else "Pass"
+                if p.top_counterparty_share_pct > 0
+                else "Review"
+            ),
             "detail": (
                 f"{p.top_counterparty_share_pct:.0f}% of digital inflow value depends on a single "
                 "counterparty; a payment disruption from that buyer would directly hit this "

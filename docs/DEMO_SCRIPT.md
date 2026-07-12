@@ -12,7 +12,7 @@ Open: https://id-ysm9.onrender.com
 
 Point to the top impact strip:
 
-"The public cohort has 5 MSME cases. In this synthetic portfolio, alternate data rescues 2 New-to-Credit firms and unlocks Rs 30,80,000 in viable credit that a bureau-only process would miss. The decision time target drops from a 7-day manual baseline to around 3 minutes."
+"The public cohort has 5 MSME cases. In this synthetic portfolio, alternate data rescues 2 New-to-Credit firms and unlocks Rs 30,23,000 in viable credit that a bureau-only process would miss. The decision time target drops from a 7-day manual baseline to around 3 minutes."
 
 ## 0:50-1:30 - The Money-Shot Case
 

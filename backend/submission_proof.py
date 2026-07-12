@@ -13,6 +13,7 @@ from operational import release_metadata
 from portfolio import build_governance_summary, build_portfolio_snapshot
 from sample_data import SAMPLE_PROFILES
 from scoring import score_profile
+from sme_benchmark import sme_benchmark_summary
 
 
 API_CATALOG = [
@@ -63,6 +64,12 @@ API_CATALOG = [
         "path": "/validation/report",
         "layer": "Model monitoring",
         "proves": "Out-of-time AUC, Gini, KS, PSI drift, and reason-code stability are computed from supplied records.",
+    },
+    {
+        "method": "GET",
+        "path": "/model/sme-benchmark",
+        "layer": "Real-outcome benchmark",
+        "proves": "The production methodology is validated on REAL SBA small-business charge-offs and out of distribution on a differently-distributed real sample -- real outcomes, not synthetic labels.",
     },
     {
         "method": "GET",
@@ -173,6 +180,11 @@ COMPETITOR_GAP_MAP = [
         "udyampulse_advantage": "Governance exposes model evidence and a machine-enforced promotion gate; public-proxy artifacts cannot start in pilot mode.",
         "proof": "/deployment/readiness",
     },
+    {
+        "common_pattern": "Model evidence on synthetic labels or a single random holdout",
+        "udyampulse_advantage": "A real small-business default benchmark trained on genuine SBA charge-offs and validated OUT OF DISTRIBUTION on a differently-distributed real sample -- real outcomes plus generalisation evidence, which a synthetic-label score or a re-scored random holdout cannot provide.",
+        "proof": "/model/sme-benchmark",
+    },
 ]
 
 
@@ -273,6 +285,7 @@ def build_submission_proof(audit_events: list[dict]) -> dict[str, Any]:
             ],
         },
         "governance_controls": governance["controls"],
+        "real_outcome_benchmark": sme_benchmark_summary(),
         "deployment_readiness": deployment,
         "validation_metrics": (
             {

@@ -693,8 +693,15 @@ async function refreshGovernance() {
   state.deployment = state.governance?.deployment || state.deployment;
 }
 
+let activeLoadToken = 0;
+
 async function loadCase(id, { updateHistory = true } = {}) {
   if (!state.msmes.some((item) => item.id === id)) id = state.msmes[0]?.id || "ntc_hero";
+  // Sequence guard: if the underwriter switches borrowers quickly, an earlier
+  // in-flight request can resolve after a later one. Stamp each load and only
+  // render if this is still the newest request, so case A's decision can never
+  // be painted under case B's identity.
+  const loadToken = ++activeLoadToken;
   state.activeId = id;
   els.msme.value = id;
   renderCases();
@@ -703,12 +710,14 @@ async function loadCase(id, { updateHistory = true } = {}) {
   els.tabContent.innerHTML = `<div class="skeleton">Preparing review packet...</div>`;
   try {
     const score = await api(`/msmes/${encodeURIComponent(id)}/score`);
+    if (loadToken !== activeLoadToken) return; // superseded by a newer selection
     state.activeScore = score;
     try {
       await refreshGovernance();
     } catch (_error) {
       state.governance = state.governance || null;
     }
+    if (loadToken !== activeLoadToken) return; // superseded while awaiting governance
     renderCaseSummary(score);
     renderDecisionStamp(score);
     renderTabContent();
@@ -716,6 +725,7 @@ async function loadCase(id, { updateHistory = true } = {}) {
     updateStatusLine();
     if (updateHistory) writeUrlState({ replace: true });
   } catch (error) {
+    if (loadToken !== activeLoadToken) return; // a newer load owns the screen now
     setApiStatus(false, "Offline");
     els.caseSummary.innerHTML = errorState("Borrower decision unavailable", error.message);
     els.decisionStamp.innerHTML = `<div class="empty-state">Decision summary unavailable while the API is offline.</div>`;

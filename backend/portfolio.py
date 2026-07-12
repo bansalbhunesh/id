@@ -235,6 +235,11 @@ def build_governance_summary(audit_events: list[dict]) -> dict:
                 "status": "Holdout live / OOT pending sandbox",
             },
             {
+                "control": "Real small-business outcome benchmark",
+                "evidence": "Beyond the proxy holdout, the exact methodology is validated on REAL SBA small-business charge-offs and out of distribution on a differently-distributed real sample (see /model/sme-benchmark) -- real outcomes plus generalisation evidence, not synthetic labels.",
+                "status": "Live",
+            },
+            {
                 "control": "Pilot promotion gate",
                 "evidence": "Pilot and production startup fail closed until private identity/HMAC credentials, an IDBI-scoped model, true OOT evidence, and durable audit storage are present.",
                 "status": "Enforced",

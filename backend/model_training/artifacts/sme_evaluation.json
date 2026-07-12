@@ -1,0 +1,406 @@
+{
+  "model_type": "sba_sme_pd_v1",
+  "champion_provider": "sba_sme_pd_v1",
+  "evidence_type": "real_small_business_outcome_benchmark",
+  "features": [
+    "term_months",
+    "employees_log",
+    "jobs_supported_log",
+    "gross_approved_log",
+    "guarantee_portion",
+    "new_business",
+    "real_estate_backed",
+    "urban",
+    "recession_origination"
+  ],
+  "monotone_constraints": {
+    "term_months": -1,
+    "employees_log": -1,
+    "jobs_supported_log": -1,
+    "gross_approved_log": 0,
+    "guarantee_portion": 0,
+    "new_business": 1,
+    "real_estate_backed": -1,
+    "urban": 0,
+    "recession_origination": 1
+  },
+  "seed": 42,
+  "split_ratios": {
+    "development": 0.6,
+    "calibration": 0.2,
+    "holdout": 0.2
+  },
+  "dataset": {
+    "name": "SBA 7(a) small-business loans (real charge-off outcomes)",
+    "domain": "US SBA small-business lending; real default label; public proxy, not Indian MSME/IDBI data",
+    "train_file_sha256": "0dc0146e9b8efdf3aeadce970f70673bb8bd3a08e8a84bee6b4a9500ca8157e2",
+    "shift_file_sha256": "cb247a05595f6c826e0c00ab8e2bdfe136404eb235630ac79e81b16a2f24850d",
+    "train_rows": 943,
+    "shift_rows": 1159
+  },
+  "validation_design": "Stratified development/calibration/holdout on 943 real SBA loans, plus an OUT-OF-DISTRIBUTION generalisation test on 1,159 differently-distributed real SBA loans (16% vs 53% default base rate). The holdout is untouched during fitting, calibration and threshold selection; the shift set is never seen in training.",
+  "model_selection": {
+    "selected_on": "holdout AUC (xgboost vs logistic challenger)",
+    "candidates": {
+      "sba_sme_pd_v1": {
+        "holdout": {
+          "n": 189,
+          "default_rate": 0.5291,
+          "auc": 0.9066,
+          "gini": 0.8131,
+          "ks": 0.7115,
+          "pr_auc": 0.8973,
+          "brier_score": 0.1157,
+          "log_loss": 0.3885,
+          "expected_calibration_error": 0.067,
+          "confusion_matrix": {
+            "threshold": 0.926,
+            "true_positive": 60,
+            "false_positive": 9,
+            "true_negative": 80,
+            "false_negative": 40,
+            "precision": 0.8696,
+            "recall_capture_rate": 0.6,
+            "false_positive_rate": 0.1011,
+            "specificity": 0.8989
+          },
+          "calibration_bins": [
+            {
+              "n": 18,
+              "avg_predicted_pd": 0.0423,
+              "actual_default_rate": 0.0
+            },
+            {
+              "n": 18,
+              "avg_predicted_pd": 0.053,
+              "actual_default_rate": 0.0
+            },
+            {
+              "n": 18,
+              "avg_predicted_pd": 0.065,
+              "actual_default_rate": 0.0556
+            },
+            {
+              "n": 18,
+              "avg_predicted_pd": 0.2522,
+              "actual_default_rate": 0.2778
+            },
+            {
+              "n": 18,
+              "avg_predicted_pd": 0.5654,
+              "actual_default_rate": 0.5
+            },
+            {
+              "n": 18,
+              "avg_predicted_pd": 0.8623,
+              "actual_default_rate": 0.8889
+            },
+            {
+              "n": 18,
+              "avg_predicted_pd": 0.9196,
+              "actual_default_rate": 0.7778
+            },
+            {
+              "n": 18,
+              "avg_predicted_pd": 0.9486,
+              "actual_default_rate": 0.8333
+            },
+            {
+              "n": 18,
+              "avg_predicted_pd": 0.9607,
+              "actual_default_rate": 0.7778
+            },
+            {
+              "n": 18,
+              "avg_predicted_pd": 0.9765,
+              "actual_default_rate": 0.9444
+            },
+            {
+              "n": 9,
+              "avg_predicted_pd": 0.9823,
+              "actual_default_rate": 1.0
+            }
+          ]
+        }
+      },
+      "logistic_sme_pd_v1": {
+        "holdout": {
+          "n": 189,
+          "default_rate": 0.5291,
+          "auc": 0.8088,
+          "gini": 0.6175,
+          "ks": 0.7015,
+          "pr_auc": 0.7645,
+          "brier_score": 0.1846,
+          "log_loss": 0.5954,
+          "expected_calibration_error": 0.2299,
+          "confusion_matrix": {
+            "threshold": 0.926,
+            "true_positive": 5,
+            "false_positive": 5,
+            "true_negative": 84,
+            "false_negative": 95,
+            "precision": 0.5,
+            "recall_capture_rate": 0.05,
+            "false_positive_rate": 0.0562,
+            "specificity": 0.9438
+          },
+          "calibration_bins": [
+            {
+              "n": 18,
+              "avg_predicted_pd": 0.0745,
+              "actual_default_rate": 0.3889
+            },
+            {
+              "n": 18,
+              "avg_predicted_pd": 0.2049,
+              "actual_default_rate": 0.0
+            },
+            {
+              "n": 18,
+              "avg_predicted_pd": 0.3883,
+              "actual_default_rate": 0.2222
+            },
+            {
+              "n": 18,
+              "avg_predicted_pd": 0.4843,
+              "actual_default_rate": 0.0
+            },
+            {
+              "n": 18,
+              "avg_predicted_pd": 0.5165,
+              "actual_default_rate": 0.2778
+            },
+            {
+              "n": 18,
+              "avg_predicted_pd": 0.6519,
+              "actual_default_rate": 0.9444
+            },
+            {
+              "n": 18,
+              "avg_predicted_pd": 0.6997,
+              "actual_default_rate": 0.7778
+            },
+            {
+              "n": 18,
+              "avg_predicted_pd": 0.7401,
+              "actual_default_rate": 0.9444
+            },
+            {
+              "n": 18,
+              "avg_predicted_pd": 0.8059,
+              "actual_default_rate": 0.9444
+            },
+            {
+              "n": 18,
+              "avg_predicted_pd": 0.8762,
+              "actual_default_rate": 0.7778
+            },
+            {
+              "n": 9,
+              "avg_predicted_pd": 0.9438,
+              "actual_default_rate": 0.5556
+            }
+          ]
+        }
+      }
+    }
+  },
+  "policy_threshold": {
+    "pd_review_threshold": 0.926,
+    "selected_on": "calibration split",
+    "objective": "Highest threshold retaining >= 60% bad capture."
+  },
+  "holdout": {
+    "n": 189,
+    "default_rate": 0.5291,
+    "auc": 0.9066,
+    "gini": 0.8131,
+    "ks": 0.7115,
+    "pr_auc": 0.8973,
+    "brier_score": 0.1157,
+    "log_loss": 0.3885,
+    "expected_calibration_error": 0.067,
+    "confusion_matrix": {
+      "threshold": 0.926,
+      "true_positive": 60,
+      "false_positive": 9,
+      "true_negative": 80,
+      "false_negative": 40,
+      "precision": 0.8696,
+      "recall_capture_rate": 0.6,
+      "false_positive_rate": 0.1011,
+      "specificity": 0.8989
+    },
+    "calibration_bins": [
+      {
+        "n": 18,
+        "avg_predicted_pd": 0.0423,
+        "actual_default_rate": 0.0
+      },
+      {
+        "n": 18,
+        "avg_predicted_pd": 0.053,
+        "actual_default_rate": 0.0
+      },
+      {
+        "n": 18,
+        "avg_predicted_pd": 0.065,
+        "actual_default_rate": 0.0556
+      },
+      {
+        "n": 18,
+        "avg_predicted_pd": 0.2522,
+        "actual_default_rate": 0.2778
+      },
+      {
+        "n": 18,
+        "avg_predicted_pd": 0.5654,
+        "actual_default_rate": 0.5
+      },
+      {
+        "n": 18,
+        "avg_predicted_pd": 0.8623,
+        "actual_default_rate": 0.8889
+      },
+      {
+        "n": 18,
+        "avg_predicted_pd": 0.9196,
+        "actual_default_rate": 0.7778
+      },
+      {
+        "n": 18,
+        "avg_predicted_pd": 0.9486,
+        "actual_default_rate": 0.8333
+      },
+      {
+        "n": 18,
+        "avg_predicted_pd": 0.9607,
+        "actual_default_rate": 0.7778
+      },
+      {
+        "n": 18,
+        "avg_predicted_pd": 0.9765,
+        "actual_default_rate": 0.9444
+      },
+      {
+        "n": 9,
+        "avg_predicted_pd": 0.9823,
+        "actual_default_rate": 1.0
+      }
+    ]
+  },
+  "holdout_auc_confidence_interval": {
+    "lower_95": 0.8524,
+    "upper_95": 0.9383,
+    "replicates": 200
+  },
+  "out_of_distribution": {
+    "n": 1159,
+    "default_rate": 0.1605,
+    "auc": 0.9401,
+    "gini": 0.8802,
+    "ks": 0.7946,
+    "pr_auc": 0.7087,
+    "brier_score": 0.1482,
+    "log_loss": 0.4868,
+    "expected_calibration_error": 0.2413,
+    "confusion_matrix": {
+      "threshold": 0.926,
+      "true_positive": 136,
+      "false_positive": 50,
+      "true_negative": 923,
+      "false_negative": 50,
+      "precision": 0.7312,
+      "recall_capture_rate": 0.7312,
+      "false_positive_rate": 0.0514,
+      "specificity": 0.9486
+    },
+    "calibration_bins": [
+      {
+        "n": 115,
+        "avg_predicted_pd": 0.0409,
+        "actual_default_rate": 0.0
+      },
+      {
+        "n": 115,
+        "avg_predicted_pd": 0.0488,
+        "actual_default_rate": 0.0
+      },
+      {
+        "n": 115,
+        "avg_predicted_pd": 0.061,
+        "actual_default_rate": 0.0
+      },
+      {
+        "n": 115,
+        "avg_predicted_pd": 0.1682,
+        "actual_default_rate": 0.0087
+      },
+      {
+        "n": 115,
+        "avg_predicted_pd": 0.3272,
+        "actual_default_rate": 0.0087
+      },
+      {
+        "n": 115,
+        "avg_predicted_pd": 0.3665,
+        "actual_default_rate": 0.0609
+      },
+      {
+        "n": 115,
+        "avg_predicted_pd": 0.4318,
+        "actual_default_rate": 0.0522
+      },
+      {
+        "n": 115,
+        "avg_predicted_pd": 0.6328,
+        "actual_default_rate": 0.087
+      },
+      {
+        "n": 115,
+        "avg_predicted_pd": 0.9266,
+        "actual_default_rate": 0.5913
+      },
+      {
+        "n": 115,
+        "avg_predicted_pd": 0.9685,
+        "actual_default_rate": 0.7391
+      },
+      {
+        "n": 9,
+        "avg_predicted_pd": 0.9828,
+        "actual_default_rate": 0.8889
+      }
+    ],
+    "psi_holdout_vs_shift": 0.631,
+    "note": "Real covariate/label shift (different SBA sample). A model that only memorised the training distribution would collapse here; ranking power that survives is genuine generalisation evidence, not a re-scored random holdout."
+  },
+  "explainability": {
+    "method": "native exact TreeSHAP in calibrated logit space",
+    "max_reconstruction_error_logit": 2.15e-06,
+    "gain_importance": {
+      "term_months": 23.5061,
+      "employees_log": 1.01,
+      "jobs_supported_log": 0.7977,
+      "gross_approved_log": 1.2609,
+      "guarantee_portion": 3.7347
+    }
+  },
+  "trained_at_utc": "2026-07-12T07:04:25.963109+00:00",
+  "artifacts": {
+    "sba_xgboost_model_sha256": "3f6ce05cc31cb0a0c57826a7b167e85a2a0f77714c290d478078610ca8f2c0dc",
+    "sba_xgboost_metadata_sha256": "9142240944762ff87e8c1bd9e548679983d31291b21993e3df0caaf67e40636a"
+  },
+  "honesty_boundary": {
+    "real_outcomes": "Yes -- real SBA small-business charge-offs, not synthetic labels.",
+    "domain": "US small business, not Indian MSME. Closest public real-outcome proxy.",
+    "alternate_data": "This benchmark uses loan-structure features; the served decision keeps the GST/UPI/EPFO alternate-data pillars separate.",
+    "production": "Not an IDBI calibration. Retraining on dated IDBI sandbox outcomes remains required."
+  },
+  "caveats": [
+    "This is a curated, class-balanced research sample (~53% default) of SBA loans, not the ~18% population base rate; balanced sampling inflates apparent separation versus a natural-rate book. Read the AUC as pipeline/methodology evidence, not a population estimate.",
+    "Loan term dominates the model by gain importance, consistent with known SBA default economics. This is a loan-STRUCTURE benchmark and is complementary to -- not a replacement for -- the GST/UPI/EPFO alternate-data CONDUCT pillars in the served score.",
+    "US SBA small business is a proxy domain for Indian MSME. The value here is a real small-business default outcome plus genuine out-of-distribution validation, which no synthetic-label approach can claim."
+  ]
+}

@@ -94,7 +94,7 @@ Use the committed screenshots from `docs/deck/assets/`:
 - 83 automated tests passing, plus a non-root container build/runtime/fail-closed CI job.
 - Public proxy holdout evidence: ROC-AUC 0.7497 (bootstrap 95% interval 0.7314-0.7678), Gini 0.4993, KS 0.4225, Brier 0.1415, ECE 0.0122 on 4,500 untouched rows. Cross-sectional random holdout, not OOT; reproducible with `python backend/model_training/train_pd_model.py`.
 - Coverage includes scoring, input validation, grade boundaries, NTC reversal, improvement plan, hash-chained audit logging and tamper detection, consent enforcement, auth/RBAC, ML Shapley invariants, sandbox feed mapping, recalibration reports, validation metrics, portfolio impact, governance summary, and API endpoints.
-- Public cohort impact (pilot targets, not measured lift): 5 synthetic MSME files, 4 alternate-data approvals, 2 NTC rescues, Rs 30,80,000 credit unlocked.
+- Public cohort impact (pilot targets, not measured lift): 5 synthetic MSME files, 3 alternate-data approvals, 2 NTC rescues, Rs 30,23,000 credit unlocked.
 - Runtime browser verification: no console errors and no horizontal overflow at desktop or mobile widths.
 - Stage 2 validation APIs: KS, AUC, Gini, PSI drift, reason-code stability, dated-outcome maturity, chronological OOT, source coverage, NTC volume, and fairness-slice support.
 

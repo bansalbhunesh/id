@@ -4,6 +4,7 @@ from pathlib import Path
 from time import perf_counter
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Request
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from fastapi.staticfiles import StaticFiles
@@ -21,6 +22,7 @@ from pilot_metrics import build_pilot_metrics
 from operational import (
     APP_VERSION,
     MAX_BODY_BYTES,
+    BodySizeLimitMiddleware,
     SecurityHeaderContext,
     release_metadata,
     request_id,
@@ -65,6 +67,30 @@ app.add_middleware(
     allow_methods=["GET", "POST"],
     allow_headers=["Authorization", "Content-Type"],
 )
+
+# Real body-ceiling enforcement (holds for chunked requests that declare no
+# Content-Length); the header check in the security middleware is a fast-path.
+app.add_middleware(BodySizeLimitMiddleware, max_bytes=MAX_BODY_BYTES)
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    # Report which fields failed and why, but never echo the raw invalid input
+    # back. This avoids reflecting attacker-controlled payloads and guarantees
+    # the 422 body is always JSON-serialisable -- FastAPI's default handler
+    # includes the offending `input`, which for a non-finite number (inf/NaN)
+    # is not JSON compliant and would otherwise crash error serialisation.
+    safe_errors = [
+        {"loc": list(err.get("loc", [])), "msg": err.get("msg"), "type": err.get("type")}
+        for err in exc.errors()
+    ]
+    return JSONResponse(
+        status_code=422,
+        content={
+            "detail": safe_errors,
+            "request_id": getattr(request.state, "request_id", None),
+        },
+    )
 
 
 @app.middleware("http")
@@ -161,7 +187,12 @@ def get_score(msme_id: str):
     profile = SAMPLE_PROFILES.get(msme_id)
     if profile is None:
         raise HTTPException(status_code=404, detail="MSME not found")
-    return score_profile(profile)
+    # A public, unauthenticated GET is a *view*, not a lending decision. It must
+    # be safe/idempotent: browsing the demo or switching borrowers must never
+    # append audit events or inflate governance counts. Real audit records come
+    # only from the authenticated POST decision routes (and the one-time demo
+    # seed below), so the audit trail reflects decisions, not page loads.
+    return score_profile(profile, record_audit=False)
 
 
 @app.post("/score", dependencies=[Depends(rate_limit(max_requests=60))])
@@ -268,6 +299,19 @@ def get_model_evaluation():
     return evaluation
 
 
+@app.get("/model/sme-benchmark")
+def get_sme_benchmark():
+    from sme_benchmark import sme_benchmark
+
+    evaluation = sme_benchmark()
+    if evaluation is None:
+        raise HTTPException(
+            status_code=404,
+            detail="No SME benchmark artifact found. Run backend/model_training/train_sme_pd_model.py.",
+        )
+    return evaluation
+
+
 @app.get("/submission/proof")
 def get_submission_proof():
     return build_submission_proof(audit_log.read_recent())
@@ -318,6 +362,23 @@ def get_audit_log(
 ):
     return audit_log.read_recent(limit)
 
+
+def seed_demo_audit_trail() -> int:
+    """Populate the audit trail once with the demo cohort so `/governance` is
+    meaningful on a fresh deploy -- without letting unauthenticated browsing
+    fabricate decisions. Idempotent: only seeds when the trail is empty, so it
+    runs once per cold start and never grows from page loads.
+    """
+    if audit_log.read_recent(1):
+        return 0
+    seeded = 0
+    for profile in SAMPLE_PROFILES.values():
+        score_profile(profile, record_audit=True)
+        seeded += 1
+    return seeded
+
+
+seed_demo_audit_trail()
 
 # Mounted last so it doesn't shadow the API routes above -- serves the
 # static frontend at "/", making this one process a single deployable unit.

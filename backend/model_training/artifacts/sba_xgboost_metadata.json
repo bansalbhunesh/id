@@ -1,0 +1,36 @@
+{
+  "model_type": "sba_sme_pd_v1",
+  "feature_names": [
+    "term_months",
+    "employees_log",
+    "jobs_supported_log",
+    "gross_approved_log",
+    "guarantee_portion",
+    "new_business",
+    "real_estate_backed",
+    "urban",
+    "recession_origination"
+  ],
+  "calibration_slope": 1.1158234770772197,
+  "calibration_intercept": 0.2318267914030678,
+  "tree_count": 160,
+  "monotone_constraints": {
+    "term_months": -1,
+    "employees_log": -1,
+    "jobs_supported_log": -1,
+    "gross_approved_log": 0,
+    "guarantee_portion": 0,
+    "new_business": 1,
+    "real_estate_backed": -1,
+    "urban": 0,
+    "recession_origination": 1
+  },
+  "gain_importance": {
+    "term_months": 23.5061,
+    "employees_log": 1.01,
+    "jobs_supported_log": 0.7977,
+    "gross_approved_log": 1.2609,
+    "guarantee_portion": 3.7347
+  },
+  "tree_shap": "native pred_contribs, exact in calibrated logit space"
+}

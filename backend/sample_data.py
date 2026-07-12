@@ -18,6 +18,8 @@ SAMPLE_PROFILES: dict[str, MSMEProfile] = {
         unique_counterparties=64,
         top_counterparty_share_pct=12,
         outstanding_debt_to_inflow=0.05,
+        gst_bank_divergence_pct=-4,
+        # Declared turnover within 4% of bank-observed inflow: clean reconciliation.
         has_bureau_history=False,
         # No credit bureau history at all -> traditional scoring rejects this business outright.
         # Alternate data (GST streak, UPI velocity, low bounce rate) tells a different story.
@@ -55,6 +57,9 @@ SAMPLE_PROFILES: dict[str, MSMEProfile] = {
         unique_counterparties=12,
         top_counterparty_share_pct=48,
         outstanding_debt_to_inflow=0.68,
+        gst_bank_divergence_pct=38,
+        # Declares 38% more turnover than the bank account sees: the classic
+        # looks-fine-on-paper red flag the reconciliation guardrail catches.
     ),
     "borderline_improving": MSMEProfile(
         name="Sunrise Auto Parts",

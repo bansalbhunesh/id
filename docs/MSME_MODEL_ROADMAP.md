@@ -80,16 +80,21 @@ itself explainable. No LLM ever touches the decision path.
 ## 4. Phased plan
 
 ### Phase A — Now → shortlist (public, no IDBI data)
-- **A1 (done):** real SBA small-business + OOD benchmark (`/model/sme-benchmark`).
-- **A2:** promote GST momentum and digital-footprint into the *conduct* PD (they
-  were excluded only because the UCI bridge had no analog; the conduct tower does).
-- **A3:** add the **GST-vs-bank inflow divergence** feature (declared turnover vs
-  observed bank inflow) — the single most cited real MSME fraud/health signal, and
-  a bidirectional "looks-fine-but-failing" detector, not just NTC approval.
-- **A4:** replace the grade-multiplier limit with **economic sizing** — debt-
-  service capacity, requested tenor, proposed EMI, existing obligations, expected
-  loss and a policy cap. Rename "eligible limit" → "indicative limit".
-- **A5:** vernacular (Hindi + English) reason codes for the inclusion track.
+- **A1 (done):** real SBA benchmarks — v1 case-sample + OOD, superseded by the
+  **v2 champion** on 418k loan-level records with true temporal OOT and
+  recession stress (`/model/sme-benchmark`, `docs/research/BENCHMARK_REPORT.md`).
+- **A2 (done):** momentum and digital-footprint now enter the risk path as a
+  **capped, favorable-only, fully disclosed expert prior** on the trained PD
+  (`conduct_prior` in every `ml` block); coefficients become fittable the
+  moment dated sandbox outcomes arrive. Weak signals never inflate PD.
+- **A3 (done):** **GST-vs-bank divergence** is computed from the sandbox feeds
+  (and demoed on the public cohort), guarded at +/-25%, routed to review, and
+  promoted to the underwriter's top next-best-action in both directions.
+- **A4 (done):** the limit is now **EMI-capacity based** (existing-debt service
+  estimate, policy rate/tenor annuity) with the grade multiple as a cap and a
+  full `limit_basis` breakdown per decision; UI copy says "Indicative limit".
+- **A5 (done):** bilingual (English + Hindi) reason codes, improvement actions,
+  and next-best-action strings.
 
 ### Phase B — Sandbox (22–31 July, if shortlisted; real IDBI feeds)
 - **B1:** run `/sandbox/recalibration/report` on real feature distributions.

@@ -31,6 +31,10 @@ class MSMEProfile(BaseModel):
     unique_counterparties: int = Field(ge=0, le=10_000_000)
     top_counterparty_share_pct: float = Field(default=0.0, ge=0, le=100)  # 0 = not supplied
     outstanding_debt_to_inflow: float = Field(ge=0, le=1_000_000)  # ratio
+    # GST-declared turnover vs bank-observed inflow divergence, in percent of
+    # bank inflow (+38 = declared 38% above observed). None = not computable
+    # (single-source application); the guardrail then simply does not assert.
+    gst_bank_divergence_pct: float | None = Field(default=None, ge=-100, le=10_000)
     has_bureau_history: bool = True  # False = New-to-Credit / New-to-Bank
     consent_status: str = Field(
         default="Not applicable: public synthetic demo data, no real consent required",
@@ -85,20 +89,83 @@ def grade_for(total: int) -> str:
 CONCENTRATION_WATCH_THRESHOLD_PCT = 40  # shared with the "Counterparty concentration" guardrail
 CONCENTRATION_LIMIT_HAIRCUT = 0.85  # 15% reduction: exposure to one counterparty's own payment risk
 
+# GST-declared turnover vs bank-observed inflow: a business declaring far more
+# than the bank sees is a classic inflation/diversion red flag; declaring far
+# less suggests undisclosed accounts. Either direction warrants reconciliation.
+DIVERGENCE_WATCH_THRESHOLD_PCT = 25
+
+# Indicative-limit economics (demo policy inputs, documented and versioned --
+# an IDBI deployment replaces these with product policy, not code changes).
+POLICY_ANNUAL_RATE = 0.11          # working-capital reference rate
+POLICY_TENOR_MONTHS = 36           # working-capital tenor used for sizing
+EMI_CAPACITY_SHARE = 0.25          # at most 25% of avg monthly inflow services new debt
+EXISTING_DEBT_TENOR_MONTHS = 60    # assumed amortisation of the existing debt stock
+GRADE_CAP_MULTIPLIER = {"A": 6, "B": 4, "C": 2.5, "D": 1, "E": 0}
+
 
 def concentration_multiplier(p: MSMEProfile) -> float:
     """A single counterparty accounting for 40%+ of digital inflow value is a
     direct exposure to that counterparty's own payment behaviour, not just a
-    disclosure point -- the eligible limit is sized down accordingly rather
+    disclosure point -- the indicative limit is sized down accordingly rather
     than purely off the grade."""
     if p.top_counterparty_share_pct >= CONCENTRATION_WATCH_THRESHOLD_PCT:
         return CONCENTRATION_LIMIT_HAIRCUT
     return 1.0
 
 
+def _annuity_factor(annual_rate: float, months: int) -> float:
+    monthly = annual_rate / 12
+    return (1 - (1 + monthly) ** -months) / monthly
+
+
+def limit_basis(total: int, p: MSMEProfile) -> dict:
+    """Debt-service-based indicative limit, capped by grade policy.
+
+    The limit is no longer a bare grade multiple: it is the amount whose EMI
+    (at the policy rate/tenor) fits inside the borrower's spare debt-service
+    capacity, after estimating the service on the existing debt stock. The old
+    grade multiple survives as a policy *ceiling*, and the counterparty
+    concentration haircut still applies last.
+    """
+    grade = grade_for(total)
+    existing_debt_stock = p.outstanding_debt_to_inflow * p.avg_monthly_inflow
+    existing_service = (
+        existing_debt_stock / _annuity_factor(POLICY_ANNUAL_RATE, EXISTING_DEBT_TENOR_MONTHS)
+        if existing_debt_stock > 0
+        else 0.0
+    )
+    affordable_emi = max(0.0, EMI_CAPACITY_SHARE * p.avg_monthly_inflow - existing_service)
+    annuity_capacity = affordable_emi * _annuity_factor(POLICY_ANNUAL_RATE, POLICY_TENOR_MONTHS)
+    grade_cap = GRADE_CAP_MULTIPLIER[grade] * p.avg_monthly_inflow
+    pre_haircut = min(annuity_capacity, grade_cap)
+    multiplier = concentration_multiplier(p)
+    return {
+        "method": "emi_capacity_annuity_with_grade_cap",
+        "policy_inputs": {
+            "annual_rate": POLICY_ANNUAL_RATE,
+            "tenor_months": POLICY_TENOR_MONTHS,
+            "emi_capacity_share_of_inflow": EMI_CAPACITY_SHARE,
+            "existing_debt_amortisation_months": EXISTING_DEBT_TENOR_MONTHS,
+        },
+        "estimated_existing_monthly_service": round(existing_service, 2),
+        "affordable_new_emi": round(affordable_emi, 2),
+        "debt_service_capacity_limit": round(annuity_capacity, 2),
+        "grade_policy_cap": round(grade_cap, 2),
+        "binding_constraint": (
+            "grade_policy_cap" if grade_cap <= annuity_capacity else "debt_service_capacity"
+        ),
+        "concentration_multiplier": multiplier,
+        "indicative_limit": round(pre_haircut * multiplier, 2),
+        "note": (
+            "Indicative working-capital sizing from spare EMI capacity at documented policy "
+            "inputs; not a sanctioned amount and not an IDBI-calibrated policy."
+        ),
+    }
+
+
 def eligible_limit(total: int, p: MSMEProfile) -> float:
-    grade_multiplier = {"A": 6, "B": 4, "C": 2.5, "D": 1, "E": 0}[grade_for(total)]
-    return round(p.avg_monthly_inflow * grade_multiplier * concentration_multiplier(p), 2)
+    """Indicative limit (key name kept for API compatibility)."""
+    return limit_basis(total, p)["indicative_limit"]
 
 
 def risk_band_for(grade: str) -> str:
@@ -202,6 +269,35 @@ def policy_guardrails(
                 else "Counterparty concentration not supplied for this application; no limit reduction applied."
             ),
         },
+        *(
+            [
+                {
+                    "control": "GST-vs-bank turnover reconciliation",
+                    "status": (
+                        "Review"
+                        if abs(p.gst_bank_divergence_pct) >= DIVERGENCE_WATCH_THRESHOLD_PCT
+                        else "Pass"
+                    ),
+                    "detail": (
+                        f"GST-declared turnover runs {p.gst_bank_divergence_pct:+.0f}% versus "
+                        "bank-observed inflow. "
+                        + (
+                            "Declared turnover materially exceeds what the bank account "
+                            "sees -- reconcile before relying on GST momentum (possible "
+                            "inflation or receipts outside the monitored account)."
+                            if p.gst_bank_divergence_pct >= DIVERGENCE_WATCH_THRESHOLD_PCT
+                            else "Bank inflows materially exceed declared turnover -- "
+                            "reconcile for undisclosed activity."
+                            if p.gst_bank_divergence_pct <= -DIVERGENCE_WATCH_THRESHOLD_PCT
+                            else "Within the +/-"
+                            f"{DIVERGENCE_WATCH_THRESHOLD_PCT}% reconciliation band."
+                        )
+                    ),
+                }
+            ]
+            if p.gst_bank_divergence_pct is not None
+            else []
+        ),
         {
             "control": "Conduct signal",
             "status": "Pass" if p.cheque_bounce_rate <= 0.08 else "Watch",
@@ -326,6 +422,57 @@ def apply_decision_policy(
     }
 
 
+# ---------------------------------------------------------------------------
+# Conduct-prior adjustment (Phase A2).
+#
+# The trained cross-domain PD sees only discipline/leverage/liquidity because
+# the public proxy has no honest analog for GST momentum or UPI footprint.
+# Until dated IDBI sandbox outcomes let those coefficients be *fitted*, they
+# enter the risk path as capped, disclosed expert priors: a business growing
+# its declared turnover and transacting broadly is treated as somewhat lower
+# risk than its conduct pillars alone imply, and vice versa. The adjustment is
+# a bounded logit offset -- it can route to review, it can never auto-decline
+# (policy invariant), and both the raw and adjusted PDs ship in the payload so
+# the effect is always visible and reversible.
+PRIOR_BETA_MOMENTUM = 0.15        # logits per full pillar deviation from neutral
+PRIOR_BETA_FOOTPRINT = 0.15
+PRIOR_TOTAL_CAP_LOGIT = 0.30      # |total offset| never exceeds this
+PRIOR_NEUTRAL_PILLAR = 10         # pillar midpoint treated as "no information"
+
+
+def conduct_prior_adjustment(pillars: dict[str, int], pd_estimate: float | None) -> dict | None:
+    """Bounded expert-prior PD adjustment from the two unfitted pillars."""
+    if pd_estimate is None:
+        return None
+    import math
+
+    momentum_dev = (pillars["momentum"] - PRIOR_NEUTRAL_PILLAR) / PRIOR_NEUTRAL_PILLAR
+    footprint_dev = (pillars["digital_footprint"] - PRIOR_NEUTRAL_PILLAR) / PRIOR_NEUTRAL_PILLAR
+    raw_offset = -(PRIOR_BETA_MOMENTUM * momentum_dev + PRIOR_BETA_FOOTPRINT * footprint_dev)
+    # Favorable-only by design: observed strong momentum/footprint may reduce
+    # the PD, but a weak or thin signal never inflates it -- absence of digital
+    # visibility is a missing/weak signal, not confirmed risk (the same
+    # doctrine as missing-source review routing), and the descriptive pillars,
+    # EWS flags and grade policy already carry the downside.
+    offset = max(-PRIOR_TOTAL_CAP_LOGIT, min(0.0, raw_offset))
+    bounded = min(max(float(pd_estimate), 1e-6), 1 - 1e-6)
+    adjusted = 1.0 / (1.0 + math.exp(-(math.log(bounded / (1 - bounded)) + offset)))
+    return {
+        "basis": (
+            "Capped, favorable-only expert prior for the momentum/digital-footprint pillars, "
+            "which the cross-domain training data cannot fit; coefficients become trainable "
+            "the moment dated IDBI sandbox outcomes arrive."
+        ),
+        "betas_logit": {"momentum": PRIOR_BETA_MOMENTUM, "digital_footprint": PRIOR_BETA_FOOTPRINT},
+        "total_cap_logit": PRIOR_TOTAL_CAP_LOGIT,
+        "asymmetry": "favorable_only; weak alternate-data signals never increase PD",
+        "offset_logit": round(offset, 4),
+        "pd_model": round(float(pd_estimate), 4),
+        "pd_adjusted": round(adjusted, 4),
+        "policy_note": "The adjusted PD can route to human review; it can never auto-decline.",
+    }
+
+
 IMPROVEMENT_ACTIONS = {
     "liquidity": "Smooth out month-to-month cash inflow swings (e.g. staggered receivables) to lower volatility.",
     "discipline": "Reduce cheque bounces and keep GST filings continuous, month after month.",
@@ -333,6 +480,28 @@ IMPROVEMENT_ACTIONS = {
     "leverage": "Pay down outstanding debt relative to monthly inflow.",
     "digital_footprint": "Route more transactions through UPI and widen the base of counterparties paid/received from.",
 }
+
+# Borrower-facing vernacular (Phase A5): the health card is for the MSME owner
+# as much as the underwriter, and PS3 is a financial-inclusion track. Hindi
+# renderings of every fixed borrower-facing string ship alongside English.
+PILLAR_LABELS_HI = {
+    "liquidity": "तरलता",
+    "discipline": "अनुशासन",
+    "momentum": "कारोबार वृद्धि",
+    "leverage": "ऋण-भार",
+    "digital_footprint": "डिजिटल उपस्थिति",
+}
+
+IMPROVEMENT_ACTIONS_HI = {
+    "liquidity": "मासिक नक़दी-प्रवाह के उतार-चढ़ाव कम करें (जैसे प्राप्तियाँ किश्तों में लें) ताकि अस्थिरता घटे।",
+    "discipline": "चेक बाउंस कम करें और जीएसटी फ़ाइलिंग हर महीने लगातार बनाए रखें।",
+    "momentum": "अगले कुछ फ़ाइलिंग चक्रों में जीएसटी-घोषित कारोबार लगातार बढ़ाएँ।",
+    "leverage": "मासिक आमदनी की तुलना में बकाया ऋण घटाएँ।",
+    "digital_footprint": "अधिक लेनदेन यूपीआई से करें और लेनदेन करने वाले पक्षों का दायरा बढ़ाएँ।",
+}
+
+STRENGTH_WORD = {"en": "Strong", "hi": "मज़बूत"}
+WATCH_WORD = {"en": "Watch", "hi": "निगरानी"}
 
 IMPROVEMENT_STEP = 5  # assumed achievable pillar-point gain from acting on the suggestion
 
@@ -354,6 +523,7 @@ def improvement_plan(pillars: dict[str, int], p: MSMEProfile) -> dict | None:
     return {
         "focus_pillar": weakest_pillar,
         "action": IMPROVEMENT_ACTIONS[weakest_pillar],
+        "action_hi": IMPROVEMENT_ACTIONS_HI[weakest_pillar],
         "potential_grade": potential_grade,
         "potential_eligible_limit": potential_limit,
         "limit_increase": round(potential_limit - current_limit, 2),
@@ -368,6 +538,22 @@ def reason_codes(pillars: dict[str, int]) -> list[str]:
             reasons.append(f"Strong: {label} ({value}/20)")
         elif value <= 8:
             reasons.append(f"Watch: {label} ({value}/20)")
+    return reasons
+
+
+def reason_codes_vernacular(pillars: dict[str, int]) -> list[dict]:
+    """Bilingual borrower-facing reason codes (English + Hindi)."""
+    reasons = []
+    for name, value in pillars.items():
+        if 8 < value < 16:
+            continue
+        kind = STRENGTH_WORD if value >= 16 else WATCH_WORD
+        label_en = name.replace("_", " ").title()
+        reasons.append({
+            "pillar": name,
+            "en": f"{kind['en']}: {label_en} ({value}/20)",
+            "hi": f"{kind['hi']}: {PILLAR_LABELS_HI[name]} ({value}/20)",
+        })
     return reasons
 
 
@@ -411,28 +597,69 @@ _NEXT_ACTION_BY_PILLAR = {
     "digital_footprint": "Confirm counterparty concentration is not a single-buyer dependency risk.",
 }
 
+_NEXT_ACTION_BY_PILLAR_HI = {
+    "discipline": "पिछले 3 महीनों का बैंक स्टेटमेंट लें और चेक बाउंस के कारण सीधे उधारकर्ता से पुष्ट करें।",
+    "liquidity": "ताज़ा नक़दी-प्रवाह अनुमान लें और मौसमी आमदनी के पैटर्न की पुष्टि करें।",
+    "leverage": "वर्तमान देनदारियों की सूची लें और आमदनी की तुलना में बकाया ऋण सत्यापित करें।",
+    "momentum": "ताज़ा जीएसटी रिटर्न लेकर पुष्टि करें कि कारोबार की वृद्धि जारी है।",
+    "digital_footprint": "पुष्टि करें कि किसी एक ख़रीदार पर निर्भरता का जोखिम नहीं है।",
+}
 
-def next_best_action(pillars: dict[str, int], policy: dict, traditional: dict) -> dict:
+
+def next_best_action(
+    pillars: dict[str, int],
+    policy: dict,
+    traditional: dict,
+    p: MSMEProfile | None = None,
+) -> dict:
     """Deterministic, rule-based recommendation for the reviewing underwriter.
 
     Derived entirely from already-computed pillar and policy signals -- not a
     generative or LLM suggestion, so it is reproducible and auditable the same
-    way the rest of the decision path is.
+    way the rest of the decision path is. Ships English + Hindi.
     """
     weakest_pillar = min(pillars, key=pillars.get)
     weakest_label = weakest_pillar.replace("_", " ")
 
     if policy.get("route") == "insufficient_data_review":
+        missing = ", ".join(policy["missing_data_sources"])
         return {
             "action": (
-                f"Connect or manually verify: {', '.join(policy['missing_data_sources'])}. "
+                f"Connect or manually verify: {missing}. "
                 "Do not approve or decline until the missing source is confirmed."
+            ),
+            "action_hi": (
+                f"पहले यह स्रोत जोड़ें या स्वयं सत्यापित करें: {missing}। "
+                "स्रोत की पुष्टि से पहले न स्वीकृत करें, न अस्वीकृत।"
             ),
             "urgency": "high",
         }
 
     if policy["decision"] == "Rejected":
-        return {"action": "Decline per policy; no further underwriter action required.", "urgency": "none"}
+        return {
+            "action": "Decline per policy; no further underwriter action required.",
+            "action_hi": "नीति के अनुसार अस्वीकृत; आगे किसी कार्रवाई की आवश्यकता नहीं।",
+            "urgency": "none",
+        }
+
+    # A material GST-vs-bank divergence outranks routine review actions: it is
+    # the classic looks-fine-but-failing red flag and must be reconciled first.
+    if (
+        p is not None
+        and p.gst_bank_divergence_pct is not None
+        and abs(p.gst_bank_divergence_pct) >= DIVERGENCE_WATCH_THRESHOLD_PCT
+    ):
+        return {
+            "action": (
+                f"Reconcile GST-declared turnover with bank inflows ({p.gst_bank_divergence_pct:+.0f}% "
+                "divergence) against invoices and the full account list before any sanction."
+            ),
+            "action_hi": (
+                f"जीएसटी-घोषित कारोबार और बैंक आमदनी का मिलान करें ({p.gst_bank_divergence_pct:+.0f}% "
+                "अंतर) -- मंज़ूरी से पहले चालान और सभी खातों से पुष्टि करें।"
+            ),
+            "urgency": "high",
+        }
 
     if policy["decision"] == "Review" and policy.get("route") == "model_disagreement_review":
         return {
@@ -440,20 +667,33 @@ def next_best_action(pillars: dict[str, int], policy: dict, traditional: dict) -
                 f"Resolve the scorecard/model disagreement: re-verify the {weakest_label} "
                 "inputs against source documents before sign-off."
             ),
+            "action_hi": (
+                f"स्कोरकार्ड और मॉडल के मतभेद को सुलझाएँ: {PILLAR_LABELS_HI[weakest_pillar]} "
+                "से जुड़े आँकड़े मूल दस्तावेज़ों से दोबारा जाँचें।"
+            ),
             "urgency": "high",
         }
 
     if policy["decision"] == "Review":
-        return {"action": _NEXT_ACTION_BY_PILLAR[weakest_pillar], "urgency": "medium"}
+        return {
+            "action": _NEXT_ACTION_BY_PILLAR[weakest_pillar],
+            "action_hi": _NEXT_ACTION_BY_PILLAR_HI[weakest_pillar],
+            "urgency": "medium",
+        }
 
     if traditional["decision"] == "Rejected":
         return {
             "action": "Document the bureau-rejection reversal rationale in the credit file for the audit trail.",
+            "action_hi": "ब्यूरो-अस्वीकृति को पलटने का आधार ऑडिट हेतु क्रेडिट फ़ाइल में दर्ज करें।",
             "urgency": "low",
         }
 
     return {
         "action": f"Approve per policy; monitor {weakest_label} at the next quarterly review.",
+        "action_hi": (
+            f"नीति के अनुसार स्वीकृत; अगली तिमाही समीक्षा में {PILLAR_LABELS_HI[weakest_pillar]} "
+            "पर नज़र रखें।"
+        ),
         "urgency": "low",
     }
 
@@ -478,9 +718,16 @@ def score_profile(
     from ml import explain, pd_policy_threshold  # local import avoids circular import at module load
 
     model_explanation = explain(p, pillars)
+    # Phase A2: momentum/footprint enter the risk path as a capped, disclosed
+    # expert prior on the trained PD (fitted coefficients await sandbox
+    # outcomes). Policy routing uses the adjusted PD; both values ship.
+    prior = conduct_prior_adjustment(pillars, model_explanation.get("pd_estimate"))
+    if prior is not None:
+        model_explanation["conduct_prior"] = prior
+    policy_pd = prior["pd_adjusted"] if prior is not None else model_explanation.get("pd_estimate")
     policy = apply_decision_policy(
         grade,
-        model_explanation.get("pd_estimate"),
+        policy_pd,
         pd_policy_threshold(),
         missing_data_sources=missing_data_sources,
     )
@@ -500,7 +747,9 @@ def score_profile(
         "risk_band": risk_band_for(grade),
         "pillars": pillars,
         "eligible_limit": eligible_limit(total, p),
+        "limit_basis": limit_basis(total, p),
         "reasons": reason_codes(pillars),
+        "reasons_vernacular": reason_codes_vernacular(pillars),
         "traditional": traditional,
         "alternate_data_decision": alternate_data_decision,
         "policy": policy,
@@ -509,7 +758,7 @@ def score_profile(
         "policy_guardrails": policy_guardrails(p, pillars, total, policy),
         "decision_path": decision_path(p, total, grade, traditional, policy),
         "ews_signals": ews_style_signals(pillars),
-        "next_best_action": next_best_action(pillars, policy, traditional),
+        "next_best_action": next_best_action(pillars, policy, traditional, p),
     }
 
     from agent_memo import generate_memo

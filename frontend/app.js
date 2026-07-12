@@ -299,8 +299,9 @@ function renderCaseSummary(score) {
           <strong>${esc(score.score)}/100</strong>
         </div>
         <div>
-          <p class="muted">Eligible limit</p>
+          <p class="muted">Indicative limit</p>
           <div class="limit-number">${formatCurrency(score.eligible_limit)}</div>
+          <p class="muted">${esc(score.limit_basis?.binding_constraint === "debt_service_capacity" ? "Sized by spare EMI capacity" : "Sized by grade policy cap")}</p>
         </div>
         <div class="decision-line">
           <div><span>Traditional bureau screen</span><strong class="decision-word ${traditionalClass}">${esc(score.traditional.decision)}</strong></div>

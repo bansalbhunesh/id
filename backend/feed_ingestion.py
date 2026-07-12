@@ -173,6 +173,19 @@ def readiness(payload: IDBISandboxPayload) -> dict:
     }
 
 
+def _gst_bank_divergence_pct(payload: IDBISandboxPayload, avg_inflow: float) -> float | None:
+    """GST-declared monthly turnover vs bank-observed inflow, as % of bank.
+
+    Computable only when both feeds carry observations; None otherwise (the
+    guardrail then does not assert, and data-sufficiency covers the gap).
+    """
+    turnover = [value for value in payload.gst.trailing_6m_turnover if value > 0]
+    if not turnover or avg_inflow <= 0:
+        return None
+    gst_monthly_avg = mean(turnover)
+    return round((gst_monthly_avg - avg_inflow) / avg_inflow * 100, 2)
+
+
 def to_profile(payload: IDBISandboxPayload) -> MSMEProfile:
     inflows = [value for value in payload.account_aggregator.monthly_inflows if value > 0]
     avg_inflow = mean(inflows) if inflows else 0
@@ -200,6 +213,7 @@ def to_profile(payload: IDBISandboxPayload) -> MSMEProfile:
         unique_counterparties=payload.upi.unique_counterparties,
         top_counterparty_share_pct=payload.upi.top_counterparty_share_pct,
         outstanding_debt_to_inflow=round(debt_to_inflow, 4),
+        gst_bank_divergence_pct=_gst_bank_divergence_pct(payload, avg_inflow),
         has_bureau_history=payload.bureau.has_bureau_history,
         consent_status=consent_status,
     )

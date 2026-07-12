@@ -6,7 +6,7 @@
 
 [Live demo](https://id-ysm9.onrender.com) |
 [Submission deck](docs/deck/UdyamPulse-IDBI-Submission-Deck.pdf) |
-[Walkthrough video](docs/demo.webm) |
+[Animated walkthrough](docs/demo.gif) |
 [Model card](MODEL_CARD.md) |
 [Pilot runbook](docs/PILOT_RUNBOOK.md)
 
@@ -46,7 +46,7 @@ The core demo moment is a New-to-Credit case traditional underwriting rejects be
 | Case | Traditional bureau-only | UdyamPulse alternate data |
 |---|:---:|:---:|
 | Shree Ganesh Textiles, no bureau file | Rejected | Approved - Grade A, Score 86/100 |
-| Eligible credit limit | Rs 0 | Rs 27,00,000 |
+| Indicative credit limit | Rs 0 | Rs 27,00,000 |
 | Explanation | No credit bureau history | Ranked reason codes, Shapley attribution, policy guardrails |
 
 ## Demo
@@ -55,8 +55,8 @@ The core demo moment is a New-to-Credit case traditional underwriting rejects be
 - Live API proof: [https://id-ysm9.onrender.com/submission/proof](https://id-ysm9.onrender.com/submission/proof)
 - OpenAPI docs: [https://id-ysm9.onrender.com/docs](https://id-ysm9.onrender.com/docs)
 - Runtime readiness: [https://id-ysm9.onrender.com/health/ready](https://id-ysm9.onrender.com/health/ready)
-- Walkthrough video: [docs/demo.webm](docs/demo.webm)
-- Lightweight fallback: [docs/demo.gif](docs/demo.gif)
+- Animated walkthrough (browser-automation capture of the live app, current build): [docs/demo.gif](docs/demo.gif)
+- Narration + click path + backend verification companion: [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md)
 - Submission deck: [docs/deck/UdyamPulse-IDBI-Submission-Deck.pdf](docs/deck/UdyamPulse-IDBI-Submission-Deck.pdf)
 - First-round rules check: [docs/FIRST_ROUND_RULES_CHECK.md](docs/FIRST_ROUND_RULES_CHECK.md)
 - Pilot promotion runbook: [docs/PILOT_RUNBOOK.md](docs/PILOT_RUNBOOK.md)

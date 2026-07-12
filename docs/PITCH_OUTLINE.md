@@ -112,4 +112,4 @@ Use the committed screenshots from `docs/deck/assets/`:
 
 - GitHub repository: https://github.com/bansalbhunesh/id
 - Live product link: https://id-ysm9.onrender.com
-- Recorded walkthrough: https://github.com/bansalbhunesh/id/blob/main/docs/demo.webm
+- Animated walkthrough: https://github.com/bansalbhunesh/id/blob/main/docs/demo.gif

@@ -7,7 +7,7 @@ Use this as the final IDBI Innovate / H2S submission source of truth.
 - GitHub repository: https://github.com/bansalbhunesh/id
 - Live product: https://id-ysm9.onrender.com
 - Submission deck PDF: `docs/deck/UdyamPulse-IDBI-Submission-Deck.pdf`
-- Recorded walkthrough video: `docs/demo.webm`
+- Animated walkthrough: `docs/demo.gif` (browser-automation capture of the live app; narration in `docs/DEMO_SCRIPT.md`)
 - Lightweight walkthrough fallback: `docs/demo.gif`
 - Demo script for voiceover/video: `docs/DEMO_SCRIPT.md`
 

@@ -53,14 +53,20 @@ def test_governance_endpoint_includes_audit_count():
     assert body["controls"][0]["status"] == "Live"
 
 
-def test_authenticated_decision_records_one_audit_event():
+def test_authenticated_decision_records_one_audit_event(tmp_path, monkeypatch):
     # Only an authenticated decision writes to the audit trail, and it writes
-    # exactly one event per decision.
-    before = len(audit_log.read_recent(500))
+    # exactly one event per decision. Runs against a fresh log so a long-lived
+    # local audit file (beyond the read_recent cap) cannot mask the append.
+    monkeypatch.setattr(audit_log, "LOG_PATH", tmp_path / "audit_log.jsonl")
+    monkeypatch.setattr(audit_log, "_memory_log", [])
+    monkeypatch.setattr(audit_log, "_last_hash", audit_log.GENESIS_HASH)
+    monkeypatch.setattr(audit_log, "_loaded_path", None)
+
     response = client.post("/score", json=CUSTOM_PROFILE, headers=UNDERWRITER_HEADERS)
     assert response.status_code == 200
-    after = len(audit_log.read_recent(500))
-    assert after == before + 1
+    events = audit_log.read_recent(500)
+    assert len(events) == 1
+    assert events[0]["subject_ref"].startswith("subject_")
 
 
 def test_auditor_cannot_submit_scores():

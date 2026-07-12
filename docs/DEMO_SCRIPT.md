@@ -4,13 +4,15 @@ Voiceover + exact screen path for the demo video. Speak calmly (~140 words/min);
 confidence is quiet. `[SHOW]` = what is on screen. Live URL:
 https://id-ysm9.onrender.com
 
-**Prep — keep five tabs ready to switch instantly:**
+**Prep — keep six tabs ready to switch instantly:**
 
-1. Live app — https://id-ysm9.onrender.com (Shree Ganesh Textiles selected)
+1. Live app — https://id-ysm9.onrender.com (Shree Ganesh Textiles is the default case)
 2. Terminal with this typed, ready to press Enter: `curl https://id-ysm9.onrender.com/submission/proof`
 3. GitHub repo README — green tests badge visible
 4. GitHub — `backend/model_training/experiments/` folder
 5. Browser — https://id-ysm9.onrender.com/deployment/readiness
+6. Browser — https://id-ysm9.onrender.com/msmes/ntc_hero/score (the JSON where the
+   Hindi reason codes `reasons_vernacular` are visible on screen)
 
 ## 0:00–0:15 — Cold open: two facts and a promise
 
@@ -35,6 +37,9 @@ Nobody breaks the loop. So we did."
 
 *[SHOW: the reversal — Rejected → Approved — then the score card, slowly.]*
 
+*[Optionally flash the **Sources** tab here — the consented GST/UPI/AA/EPFO
+source map — then return to Decision.]*
+
 "UdyamPulse reads the proof this business creates every day —
 GST bills, UPI payments, bank inflows — with the owner's permission —
 and turns it into a **Financial Health Card**.
@@ -57,7 +62,9 @@ Go ahead. We'll wait."
 
 ## 1:25–1:45 — It explains itself, in your language
 
-*[SHOW: decision drawer — pillars, reason codes, Hindi toggle.]*
+*[SHOW: click the "Review packet" button — the decision drawer opens with the
+five-pillar ledger and reason codes. On "in English and in Hindi", flash Tab 6 —
+the score JSON with the Devanagari `reasons_vernacular` strings clearly visible.]*
 
 "And it's not a black box.
 Every decision comes with reasons — what's strong, what's weak,
@@ -66,7 +73,10 @@ The banker gets evidence. The owner gets a roadmap."
 
 ## 1:45–2:00 — It catches liars too
 
-*[SHOW: City Corner Retail — the GST-vs-bank mismatch flag.]*
+*[SHOW: pick "City Corner Retail" from the borrower list, open the **Evidence**
+tab — under "Policy guardrails", the row "GST-vs-bank turnover reconciliation"
+reads **Review** — "GST-declared turnover runs +38% versus bank-observed
+inflow". Point the cursor at it.]*
 
 "It works in both directions.
 This shop claims high sales on paper — its bank account disagrees.

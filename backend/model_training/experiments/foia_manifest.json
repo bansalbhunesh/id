@@ -1,0 +1,34 @@
+{
+  "description": "SBA 7(a) FOIA loan-level files (as-of 2025-09-30 vintage), official U.S. SBA public-domain records, retrieved from the Internet Archive January 2026 capture of data.sba.gov.",
+  "license": "US Government public domain",
+  "retrieved": "2026-07-12",
+  "files": [
+    {
+      "filename": "foia-7a-fy2000-fy2009.csv",
+      "archive_url": "https://web.archive.org/web/20260107120348id_/https://data.sba.gov/dataset/0ff8e8e9-b967-4f4e-987c-6ac78c575087/resource/186eb176-b53e-4cbe-ab93-e5c4fb50197d/download/foia-7a-fy2000-fy2009-asof-250930.csv",
+      "sha256": "ad465e30fd4c1c2151a10e925aa242c5b96998b3c1ea3571f0571afb26f7059a",
+      "bytes": 312523754,
+      "rows": 690333,
+      "loan_status_counts": {"PIF": 459312, "CHGOFF": 144747, "CANCLD": 82172, "EXEMPT": 4102}
+    },
+    {
+      "filename": "foia-7a-fy2010-fy2019.csv",
+      "archive_url": "https://web.archive.org/web/20260107011609id_/https://data.sba.gov/dataset/0ff8e8e9-b967-4f4e-987c-6ac78c575087/resource/3f838176-6060-44db-9c91-b4acafbcb28c/download/foia-7a-fy2010-fy2019-asof-250930.csv",
+      "sha256": "309a689734d590b62a4eb3210a84fd11faf9203e680cbff8a339cbd4e8d77903",
+      "bytes": 256087556,
+      "rows": 545751,
+      "loan_status_counts": {"PIF": 385796, "CANCLD": 66403, "EXEMPT": 60332, "CHGOFF": 33151, "COMMIT": 67}
+    },
+    {
+      "filename": "foia-7a-fy2020-present.csv",
+      "archive_url": "https://web.archive.org/web/20260107012730id_/https://data.sba.gov/dataset/0ff8e8e9-b967-4f4e-987c-6ac78c575087/resource/d67d3ccb-2002-4134-a288-481b51cd3479/download/foia-7a-fy2020-present-asof-250930.csv",
+      "sha256": "e8d5077c84d8431fc76dd82611f98deadb2304b308594d0f508c75d8dc38482a",
+      "bytes": 169118562,
+      "rows": 347514,
+      "loan_status_counts": {"EXEMPT": 226083, "PIF": 51791, "CANCLD": 40344, "COMMIT": 25132, "CHGOFF": 4163}
+    }
+  ],
+  "label_policy": "Resolved outcomes only: PIF -> 0, CHGOFF -> 1. CANCLD/COMMIT (never disbursed) and EXEMPT (active/undisclosed) are excluded from labelled sets. Resolved-only sampling still right-censors slow outcomes in late vintages; the survival experiment (E16) addresses this explicitly.",
+  "leakage_register": ["AsOfDate", "LoanStatus", "PaidinFullDate", "ChargeoffDate", "GrossChargeoffAmount", "SoldSecondMarketInd"],
+  "sensitivity_only": ["InitialInterestRate"]
+}

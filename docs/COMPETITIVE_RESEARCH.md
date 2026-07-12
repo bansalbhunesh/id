@@ -21,9 +21,9 @@ The current public event surface is Hack2skill, not Devpost. The first-round fit
 UdyamPulse should not compete as "another credit score." It should compete as a banker-grade decision cockpit:
 
 - Shows the exact rejected-by-bureau and approved-by-alternate-data contrast for a New-to-Credit MSME.
-- Produces a health grade, eligible credit limit, reason codes, Shapley-style attribution, memo, improvement plan, source map, and policy guardrails in one screen.
+- Produces a health grade, indicative credit limit, reason codes, Shapley-style attribution, memo, improvement plan, source map, and policy guardrails in one screen.
 - Ships audit, governance, validation, sandbox, and submission-proof endpoints (`/audit-log`, `/portfolio`, `/governance`, `/validation/report`, `/sandbox/score`, `/submission/proof`) rather than only a UI mock.
-- Includes a model card, deterministic fallback logic, 83 passing tests, a calibrated monotonic XGBoost PD champion with a logistic challenger, untouched holdout evidence, production-scale validation metrics, a dated-outcome temporal contract, fail-closed pilot promotion, request/resource controls, genesis-anchored audit access, two-job CI, Render deployment, and `render.yaml` Blueprint.
+- Includes a model card, deterministic fallback logic, 115 passing tests, a calibrated monotonic XGBoost PD champion with a logistic challenger, untouched holdout evidence, production-scale validation metrics, a dated-outcome temporal contract, fail-closed pilot promotion, request/resource controls, genesis-anchored audit access, two-job CI, Render deployment, and `render.yaml` Blueprint.
 - Encodes the judging rubric, competitor gap map, and live verification runbook in `/submission/proof`, so reviewers can inspect the proof from the backend itself.
 - Keeps the prototype resilient: single FastAPI service, static frontend, Dockerfile, no separate frontend build pipeline, no paid API dependency for the public build.
 

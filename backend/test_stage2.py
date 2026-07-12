@@ -273,7 +273,7 @@ def test_bedrock_memo_provider_falls_back_without_model_id(monkeypatch):
     memo = generate_memo(score)
 
     assert score["name"] in memo
-    assert "eligible limit" in memo
+    assert "indicative limit" in memo
 
 
 AUDITOR_HEADERS = {"Authorization": "Bearer udyampulse-demo-auditor-key"}

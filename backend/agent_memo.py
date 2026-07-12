@@ -24,7 +24,7 @@ def _deterministic_memo(score_result: dict) -> str:
 
     lines = [
         f"{name} scores grade {grade} ({score_result['score']}/100) on alternate-data underwriting, "
-        f"suggesting an eligible limit of Rs {limit:,.0f}."
+        f"suggesting an indicative limit of Rs {limit:,.0f}."
     ]
 
     if trad["decision"] == "Rejected" and score_result["alternate_data_decision"] == "Approved":
@@ -62,7 +62,7 @@ def _memo_prompt(score_result: dict) -> str:
         f"Traditional decision: {score_result['traditional']['decision']} "
         f"({score_result['traditional']['reason']})\n"
         f"Alternate-data decision: {score_result['alternate_data_decision']}; "
-        f"Eligible limit INR: {score_result['eligible_limit']}\n"
+        f"Indicative limit INR: {score_result['eligible_limit']}\n"
         f"Reason codes: {reasons}\n"
         f"Model attribution: {attribution}\n"
         f"Guardrails: {guardrails}\n"

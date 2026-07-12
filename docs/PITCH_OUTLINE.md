@@ -7,11 +7,11 @@ This maps onto the IDBI Innovate prototype submission template. Keep the officia
 - Team name: Looper
 - Project: UdyamPulse
 - Problem Statement: PS3 - Financial Health Score
-- One-liner: Consented alternate data in; explainable financial health card, eligible credit line, and improvement plan out.
+- One-liner: Consented alternate data in; explainable financial health card, indicative credit line, and improvement plan out.
 
 ## Slide 2 - Brief About The Idea
 
-UdyamPulse is a banker-grade MSME Financial Health Card. It turns consented alternate data - GST, UPI, Account Aggregator-style bank statements, EPFO, sector, geography, vintage, and bureau status - into an explainable 0-100 score, A-E grade, risk band, eligible credit limit, underwriter memo, and borrower improvement plan.
+UdyamPulse is a banker-grade MSME Financial Health Card. It turns consented alternate data - GST, UPI, Account Aggregator-style bank statements, EPFO, sector, geography, vintage, and bureau status - into an explainable 0-100 score, A-E grade, risk band, indicative credit limit, underwriter memo, and borrower improvement plan.
 
 It is built for New-to-Credit and New-to-Bank MSMEs that traditional bureau-first underwriting rejects even when their real operating data is healthy.
 
@@ -25,12 +25,12 @@ It is built for New-to-Credit and New-to-Bank MSMEs that traditional bureau-firs
 
 - Five-pillar score: Liquidity, Discipline, Momentum, Leverage, Digital Footprint.
 - Traditional bureau-only verdict vs alternate-data verdict.
-- Eligible working-capital limit.
+- Indicative working-capital limit sized from spare EMI capacity at documented policy inputs, with the grade multiple as a cap and a full `limit_basis` breakdown per decision.
 - Native exact TreeSHAP from a calibrated monotonic XGBoost champion, with a calibrated dependency-free logistic fallback.
-- Plain-language reason codes.
+- Plain-language reason codes in English and Hindi.
 - Underwriter memo.
 - Borrower improvement plan.
-- Policy guardrails and source map, including EWS-style monitoring signals, a counterparty-concentration limit guardrail, and a deterministic underwriter next-best-action.
+- Policy guardrails and source map, including EWS-style monitoring signals, a counterparty-concentration limit guardrail, a GST-vs-bank turnover reconciliation guardrail (the looks-fine-on-paper red flag, both directions), and a deterministic bilingual underwriter next-best-action.
 - Audit log.
 - IDBI sandbox-style AA/GST/UPI/EPFO feed endpoint.
 - Portfolio impact, pilot metrics, validation report, and governance endpoints.
@@ -91,8 +91,9 @@ Use the committed screenshots from `docs/deck/assets/`:
 
 ## Slide 11 - Prototype Performance Report / Benchmarking
 
-- 83 automated tests passing, plus a non-root container build/runtime/fail-closed CI job.
+- 115 automated tests passing, plus a non-root container build/runtime/fail-closed CI job.
 - Public proxy holdout evidence: ROC-AUC 0.7497 (bootstrap 95% interval 0.7314-0.7678), Gini 0.4993, KS 0.4225, Brier 0.1415, ECE 0.0122 on 4,500 untouched rows. Cross-sectional random holdout, not OOT; reproducible with `python backend/model_training/train_pd_model.py`.
+- Real small-business benchmark (`GET /model/sme-benchmark`): the v2 champion is trained on 418,947 resolved real SBA 7(a) loans at natural base rates and validated on a true later-in-time window (FY2017-19: ROC-AUC 0.9623, KS 0.82) plus a 257k-loan recession stress cohort (ROC-AUC 0.9255), with a registry-tracked experiment programme behind it (docs/research/BENCHMARK_REPORT.md). US proxy domain, disclosed; not an IDBI calibration.
 - Coverage includes scoring, input validation, grade boundaries, NTC reversal, improvement plan, hash-chained audit logging and tamper detection, consent enforcement, auth/RBAC, ML Shapley invariants, sandbox feed mapping, recalibration reports, validation metrics, portfolio impact, governance summary, and API endpoints.
 - Public cohort impact (pilot targets, not measured lift): 5 synthetic MSME files, 3 alternate-data approvals, 2 NTC rescues, Rs 30,23,000 credit unlocked.
 - Runtime browser verification: no console errors and no horizontal overflow at desktop or mobile widths.

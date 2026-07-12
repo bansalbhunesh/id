@@ -1,0 +1,1911 @@
+[
+ {
+  "id": "E1a",
+  "family": "E1",
+  "name": "logistic baseline (Platt)",
+  "seed": 42,
+  "config": {
+   "features": [
+    "term_months",
+    "gross_approval_log",
+    "guarantee_portion",
+    "jobs_supported_log",
+    "is_new_business",
+    "is_change_of_ownership",
+    "is_individual",
+    "is_partnership",
+    "revolver",
+    "collateral",
+    "fixed_rate",
+    "has_franchise",
+    "sector_accom_food",
+    "sector_retail",
+    "sector_construction",
+    "sector_professional",
+    "sector_health",
+    "sector_manufacturing",
+    "sector_wholesale",
+    "sector_transport",
+    "sector_other_services"
+   ]
+  },
+  "data": {
+   "train_file": "309a689734d5",
+   "stress_file": "ad465e30fd4c",
+   "protocol": "FY2010-16 train/cal/holdout, FY2017-19 OOT, FY2005-07 stress",
+   "quick": false
+  },
+  "results": {
+   "holdout": {
+    "n": 45626,
+    "default_rate": 0.0734,
+    "auc": 0.8281,
+    "gini": 0.6563,
+    "ks": 0.5534,
+    "pr_auc": 0.3226,
+    "brier": 0.0602,
+    "ece": 0.0389,
+    "operating_points": {
+     "approve_20pct": {
+      "bad_rate_in_approved_book": 0.0226,
+      "vs_population_bad_rate": 0.0734,
+      "book_cleanliness_multiple": 3.25,
+      "defaults_kept_out_pct": 93.85
+     },
+     "approve_30pct": {
+      "bad_rate_in_approved_book": 0.0175,
+      "vs_population_bad_rate": 0.0734,
+      "book_cleanliness_multiple": 4.21,
+      "defaults_kept_out_pct": 92.87
+     },
+     "approve_40pct": {
+      "bad_rate_in_approved_book": 0.0155,
+      "vs_population_bad_rate": 0.0734,
+      "book_cleanliness_multiple": 4.75,
+      "defaults_kept_out_pct": 91.58
+     },
+     "approve_50pct": {
+      "bad_rate_in_approved_book": 0.0151,
+      "vs_population_bad_rate": 0.0734,
+      "book_cleanliness_multiple": 4.87,
+      "defaults_kept_out_pct": 89.73
+     }
+    },
+    "risk_bands": {
+     "bands": {
+      "A": 0.0226,
+      "B": 0.0083,
+      "C": 0.0187,
+      "D": 0.0674,
+      "E": 0.2502
+     },
+     "monotone": false
+    }
+   },
+   "oot": {
+    "n": 114770,
+    "default_rate": 0.0942,
+    "auc": 0.8571,
+    "gini": 0.7143,
+    "ks": 0.5954,
+    "pr_auc": 0.395,
+    "brier": 0.0756,
+    "ece": 0.0569,
+    "operating_points": {
+     "approve_20pct": {
+      "bad_rate_in_approved_book": 0.0107,
+      "vs_population_bad_rate": 0.0942,
+      "book_cleanliness_multiple": 8.79,
+      "defaults_kept_out_pct": 97.72
+     },
+     "approve_30pct": {
+      "bad_rate_in_approved_book": 0.0116,
+      "vs_population_bad_rate": 0.0942,
+      "book_cleanliness_multiple": 8.09,
+      "defaults_kept_out_pct": 96.29
+     },
+     "approve_40pct": {
+      "bad_rate_in_approved_book": 0.0149,
+      "vs_population_bad_rate": 0.0942,
+      "book_cleanliness_multiple": 6.3,
+      "defaults_kept_out_pct": 93.65
+     },
+     "approve_50pct": {
+      "bad_rate_in_approved_book": 0.0177,
+      "vs_population_bad_rate": 0.0942,
+      "book_cleanliness_multiple": 5.34,
+      "defaults_kept_out_pct": 90.63
+     }
+    },
+    "risk_bands": {
+     "bands": {
+      "A": 0.0107,
+      "B": 0.0192,
+      "C": 0.03,
+      "D": 0.0652,
+      "E": 0.3459
+     },
+     "monotone": true
+    }
+   },
+   "stress": {
+    "n": 257465,
+    "default_rate": 0.3154,
+    "auc": 0.7711,
+    "gini": 0.5422,
+    "ks": 0.4405,
+    "pr_auc": 0.5716,
+    "brier": 0.227,
+    "ece": 0.1867,
+    "operating_points": {
+     "approve_20pct": {
+      "bad_rate_in_approved_book": 0.0879,
+      "vs_population_bad_rate": 0.3154,
+      "book_cleanliness_multiple": 3.59,
+      "defaults_kept_out_pct": 94.42
+     },
+     "approve_30pct": {
+      "bad_rate_in_approved_book": 0.0784,
+      "vs_population_bad_rate": 0.3154,
+      "book_cleanliness_multiple": 4.02,
+      "defaults_kept_out_pct": 92.54
+     },
+     "approve_40pct": {
+      "bad_rate_in_approved_book": 0.0934,
+      "vs_population_bad_rate": 0.3154,
+      "book_cleanliness_multiple": 3.38,
+      "defaults_kept_out_pct": 88.15
+     },
+     "approve_50pct": {
+      "bad_rate_in_approved_book": 0.1255,
+      "vs_population_bad_rate": 0.3154,
+      "book_cleanliness_multiple": 2.51,
+      "defaults_kept_out_pct": 80.1
+     }
+    },
+    "risk_bands": {
+     "bands": {
+      "A": 0.0879,
+      "B": 0.099,
+      "C": 0.3037,
+      "D": 0.4771,
+      "E": 0.6092
+     },
+     "monotone": true
+    }
+   }
+  },
+  "timestamp": "2026-07-12T07:51:02.971222+00:00",
+  "git": "5a98d90"
+ },
+ {
+  "id": "E1b",
+  "family": "E1",
+  "name": "v1-recipe monotone XGB (Platt)",
+  "seed": 42,
+  "config": {
+   "params": {
+    "max_depth": 3,
+    "eta": 0.05,
+    "min_child_weight": 10,
+    "subsample": 0.9,
+    "lambda": 2.0,
+    "alpha": 0.1,
+    "seed": 42
+   },
+   "rounds": 220,
+   "monotone": {
+    "term_months": -1,
+    "gross_approval_log": 0,
+    "guarantee_portion": 0,
+    "jobs_supported_log": -1,
+    "is_new_business": 1,
+    "is_change_of_ownership": 0,
+    "is_individual": 1,
+    "is_partnership": 0,
+    "revolver": 1,
+    "collateral": -1,
+    "fixed_rate": 0,
+    "has_franchise": 0,
+    "sector_accom_food": 1,
+    "sector_retail": 1,
+    "sector_construction": 1,
+    "sector_professional": 0,
+    "sector_health": -1,
+    "sector_manufacturing": 0,
+    "sector_wholesale": 0,
+    "sector_transport": 1,
+    "sector_other_services": 0
+   }
+  },
+  "data": {
+   "train_file": "309a689734d5",
+   "stress_file": "ad465e30fd4c",
+   "protocol": "FY2010-16 train/cal/holdout, FY2017-19 OOT, FY2005-07 stress",
+   "quick": false
+  },
+  "results": {
+   "holdout": {
+    "n": 45626,
+    "default_rate": 0.0734,
+    "auc": 0.9145,
+    "gini": 0.829,
+    "ks": 0.6869,
+    "pr_auc": 0.488,
+    "brier": 0.0491,
+    "ece": 0.0233,
+    "operating_points": {
+     "approve_20pct": {
+      "bad_rate_in_approved_book": 0.0022,
+      "vs_population_bad_rate": 0.0734,
+      "book_cleanliness_multiple": 33.51,
+      "defaults_kept_out_pct": 99.4
+     },
+     "approve_30pct": {
+      "bad_rate_in_approved_book": 0.0021,
+      "vs_population_bad_rate": 0.0734,
+      "book_cleanliness_multiple": 34.67,
+      "defaults_kept_out_pct": 99.13
+     },
+     "approve_40pct": {
+      "bad_rate_in_approved_book": 0.0023,
+      "vs_population_bad_rate": 0.0734,
+      "book_cleanliness_multiple": 31.91,
+      "defaults_kept_out_pct": 98.75
+     },
+     "approve_50pct": {
+      "bad_rate_in_approved_book": 0.0032,
+      "vs_population_bad_rate": 0.0734,
+      "book_cleanliness_multiple": 23.27,
+      "defaults_kept_out_pct": 97.85
+     }
+    },
+    "risk_bands": {
+     "bands": {
+      "A": 0.0022,
+      "B": 0.0024,
+      "C": 0.0107,
+      "D": 0.0472,
+      "E": 0.3047
+     },
+     "monotone": true
+    }
+   },
+   "oot": {
+    "n": 114770,
+    "default_rate": 0.0942,
+    "auc": 0.9097,
+    "gini": 0.8194,
+    "ks": 0.7339,
+    "pr_auc": 0.5557,
+    "brier": 0.0605,
+    "ece": 0.0412,
+    "operating_points": {
+     "approve_20pct": {
+      "bad_rate_in_approved_book": 0.0015,
+      "vs_population_bad_rate": 0.0942,
+      "book_cleanliness_multiple": 61.78,
+      "defaults_kept_out_pct": 99.68
+     },
+     "approve_30pct": {
+      "bad_rate_in_approved_book": 0.0038,
+      "vs_population_bad_rate": 0.0942,
+      "book_cleanliness_multiple": 24.76,
+      "defaults_kept_out_pct": 98.79
+     },
+     "approve_40pct": {
+      "bad_rate_in_approved_book": 0.0099,
+      "vs_population_bad_rate": 0.0942,
+      "book_cleanliness_multiple": 9.5,
+      "defaults_kept_out_pct": 95.79
+     },
+     "approve_50pct": {
+      "bad_rate_in_approved_book": 0.0126,
+      "vs_population_bad_rate": 0.0942,
+      "book_cleanliness_multiple": 7.48,
+      "defaults_kept_out_pct": 93.31
+     }
+    },
+    "risk_bands": {
+     "bands": {
+      "A": 0.0015,
+      "B": 0.0183,
+      "C": 0.0157,
+      "D": 0.0291,
+      "E": 0.4063
+     },
+     "monotone": false
+    }
+   },
+   "stress": {
+    "n": 257465,
+    "default_rate": 0.3154,
+    "auc": 0.8699,
+    "gini": 0.7398,
+    "ks": 0.6,
+    "pr_auc": 0.6843,
+    "brier": 0.1653,
+    "ece": 0.1307,
+    "operating_points": {
+     "approve_20pct": {
+      "bad_rate_in_approved_book": 0.0133,
+      "vs_population_bad_rate": 0.3154,
+      "book_cleanliness_multiple": 23.78,
+      "defaults_kept_out_pct": 99.16
+     },
+     "approve_30pct": {
+      "bad_rate_in_approved_book": 0.0125,
+      "vs_population_bad_rate": 0.3154,
+      "book_cleanliness_multiple": 25.32,
+      "defaults_kept_out_pct": 98.82
+     },
+     "approve_40pct": {
+      "bad_rate_in_approved_book": 0.0235,
+      "vs_population_bad_rate": 0.3154,
+      "book_cleanliness_multiple": 13.41,
+      "defaults_kept_out_pct": 97.02
+     },
+     "approve_50pct": {
+      "bad_rate_in_approved_book": 0.0613,
+      "vs_population_bad_rate": 0.3154,
+      "book_cleanliness_multiple": 5.14,
+      "defaults_kept_out_pct": 90.28
+     }
+    },
+    "risk_bands": {
+     "bands": {
+      "A": 0.0133,
+      "B": 0.0338,
+      "C": 0.2559,
+      "D": 0.549,
+      "E": 0.7249
+     },
+     "monotone": true
+    }
+   }
+  },
+  "timestamp": "2026-07-12T07:51:09.873763+00:00",
+  "git": "5a98d90"
+ },
+ {
+  "id": "E4",
+  "family": "E4",
+  "name": "capacity sweep (calibration-split selection)",
+  "seed": 42,
+  "config": {
+   "subsample": 120000
+  },
+  "data": {
+   "train_file": "309a689734d5",
+   "stress_file": "ad465e30fd4c",
+   "protocol": "FY2010-16 train/cal/holdout, FY2017-19 OOT, FY2005-07 stress",
+   "quick": false
+  },
+  "results": {
+   "grid": [
+    {
+     "depth": 3,
+     "eta": 0.05,
+     "rounds": 400,
+     "calibration_auc": 0.9206
+    },
+    {
+     "depth": 3,
+     "eta": 0.1,
+     "rounds": 250,
+     "calibration_auc": 0.9213
+    },
+    {
+     "depth": 5,
+     "eta": 0.05,
+     "rounds": 400,
+     "calibration_auc": 0.9251
+    },
+    {
+     "depth": 5,
+     "eta": 0.1,
+     "rounds": 250,
+     "calibration_auc": 0.9251
+    },
+    {
+     "depth": 7,
+     "eta": 0.05,
+     "rounds": 400,
+     "calibration_auc": 0.9262
+    },
+    {
+     "depth": 7,
+     "eta": 0.1,
+     "rounds": 250,
+     "calibration_auc": 0.9257
+    }
+   ],
+   "selected": {
+    "max_depth": 7,
+    "eta": 0.05,
+    "min_child_weight": 20,
+    "subsample": 0.9,
+    "colsample_bytree": 0.9,
+    "lambda": 2.0,
+    "alpha": 0.1,
+    "seed": 42,
+    "rounds": 400
+   },
+   "note": "selected on calibration split only; holdout/OOT untouched"
+  },
+  "timestamp": "2026-07-12T07:51:27.232228+00:00",
+  "git": "5a98d90"
+ },
+ {
+  "id": "E4b",
+  "family": "E4",
+  "name": "tuned monotone XGB (full train, Platt)",
+  "seed": 42,
+  "config": {
+   "params": {
+    "max_depth": 7,
+    "eta": 0.05,
+    "min_child_weight": 20,
+    "subsample": 0.9,
+    "colsample_bytree": 0.9,
+    "lambda": 2.0,
+    "alpha": 0.1,
+    "seed": 42
+   },
+   "rounds": 400
+  },
+  "data": {
+   "train_file": "309a689734d5",
+   "stress_file": "ad465e30fd4c",
+   "protocol": "FY2010-16 train/cal/holdout, FY2017-19 OOT, FY2005-07 stress",
+   "quick": false
+  },
+  "results": {
+   "holdout": {
+    "n": 45626,
+    "default_rate": 0.0734,
+    "auc": 0.9239,
+    "gini": 0.8479,
+    "ks": 0.705,
+    "pr_auc": 0.5356,
+    "brier": 0.0467,
+    "ece": 0.0263,
+    "operating_points": {
+     "approve_20pct": {
+      "bad_rate_in_approved_book": 0.0009,
+      "vs_population_bad_rate": 0.0734,
+      "book_cleanliness_multiple": 83.77,
+      "defaults_kept_out_pct": 99.76
+     },
+     "approve_30pct": {
+      "bad_rate_in_approved_book": 0.0011,
+      "vs_population_bad_rate": 0.0734,
+      "book_cleanliness_multiple": 67.02,
+      "defaults_kept_out_pct": 99.55
+     },
+     "approve_40pct": {
+      "bad_rate_in_approved_book": 0.0016,
+      "vs_population_bad_rate": 0.0734,
+      "book_cleanliness_multiple": 46.22,
+      "defaults_kept_out_pct": 99.13
+     },
+     "approve_50pct": {
+      "bad_rate_in_approved_book": 0.0026,
+      "vs_population_bad_rate": 0.0734,
+      "book_cleanliness_multiple": 27.93,
+      "defaults_kept_out_pct": 98.21
+     }
+    },
+    "risk_bands": {
+     "bands": {
+      "A": 0.0009,
+      "B": 0.0023,
+      "C": 0.0117,
+      "D": 0.0408,
+      "E": 0.3116
+     },
+     "monotone": true
+    }
+   },
+   "oot": {
+    "n": 114770,
+    "default_rate": 0.0942,
+    "auc": 0.9105,
+    "gini": 0.821,
+    "ks": 0.7248,
+    "pr_auc": 0.6073,
+    "brier": 0.0568,
+    "ece": 0.0346,
+    "operating_points": {
+     "approve_20pct": {
+      "bad_rate_in_approved_book": 0.0048,
+      "vs_population_bad_rate": 0.0942,
+      "book_cleanliness_multiple": 19.48,
+      "defaults_kept_out_pct": 98.97
+     },
+     "approve_30pct": {
+      "bad_rate_in_approved_book": 0.0092,
+      "vs_population_bad_rate": 0.0942,
+      "book_cleanliness_multiple": 10.26,
+      "defaults_kept_out_pct": 97.08
+     },
+     "approve_40pct": {
+      "bad_rate_in_approved_book": 0.0127,
+      "vs_population_bad_rate": 0.0942,
+      "book_cleanliness_multiple": 7.43,
+      "defaults_kept_out_pct": 94.62
+     },
+     "approve_50pct": {
+      "bad_rate_in_approved_book": 0.0124,
+      "vs_population_bad_rate": 0.0942,
+      "book_cleanliness_multiple": 7.6,
+      "defaults_kept_out_pct": 93.42
+     }
+    },
+    "risk_bands": {
+     "bands": {
+      "A": 0.0048,
+      "B": 0.0205,
+      "C": 0.009,
+      "D": 0.034,
+      "E": 0.4026
+     },
+     "monotone": false
+    }
+   },
+   "stress": {
+    "n": 257465,
+    "default_rate": 0.3154,
+    "auc": 0.8731,
+    "gini": 0.7462,
+    "ks": 0.5955,
+    "pr_auc": 0.6963,
+    "brier": 0.162,
+    "ece": 0.1261,
+    "operating_points": {
+     "approve_20pct": {
+      "bad_rate_in_approved_book": 0.0064,
+      "vs_population_bad_rate": 0.3154,
+      "book_cleanliness_multiple": 49.36,
+      "defaults_kept_out_pct": 99.59
+     },
+     "approve_30pct": {
+      "bad_rate_in_approved_book": 0.0083,
+      "vs_population_bad_rate": 0.3154,
+      "book_cleanliness_multiple": 37.82,
+      "defaults_kept_out_pct": 99.21
+     },
+     "approve_40pct": {
+      "bad_rate_in_approved_book": 0.0222,
+      "vs_population_bad_rate": 0.3154,
+      "book_cleanliness_multiple": 14.19,
+      "defaults_kept_out_pct": 97.18
+     },
+     "approve_50pct": {
+      "bad_rate_in_approved_book": 0.0588,
+      "vs_population_bad_rate": 0.3154,
+      "book_cleanliness_multiple": 5.36,
+      "defaults_kept_out_pct": 90.67
+     }
+    },
+    "risk_bands": {
+     "bands": {
+      "A": 0.0064,
+      "B": 0.038,
+      "C": 0.2691,
+      "D": 0.5262,
+      "E": 0.7371
+     },
+     "monotone": true
+    }
+   }
+  },
+  "timestamp": "2026-07-12T07:51:38.682315+00:00",
+  "git": "5a98d90"
+ },
+ {
+  "id": "E3",
+  "family": "E3",
+  "name": "unconstrained vs monotone (DeLong-gated)",
+  "seed": 42,
+  "config": {
+   "params": {
+    "max_depth": 7,
+    "eta": 0.05,
+    "min_child_weight": 20,
+    "subsample": 0.9,
+    "colsample_bytree": 0.9,
+    "lambda": 2.0,
+    "alpha": 0.1,
+    "seed": 42
+   }
+  },
+  "data": {
+   "train_file": "309a689734d5",
+   "stress_file": "ad465e30fd4c",
+   "protocol": "FY2010-16 train/cal/holdout, FY2017-19 OOT, FY2005-07 stress",
+   "quick": false
+  },
+  "results": {
+   "holdout": {
+    "n": 45626,
+    "default_rate": 0.0734,
+    "auc": 0.9653,
+    "gini": 0.9305,
+    "ks": 0.8175,
+    "pr_auc": 0.6943,
+    "brier": 0.0365,
+    "ece": 0.0335,
+    "operating_points": {
+     "approve_20pct": {
+      "bad_rate_in_approved_book": 0.0002,
+      "vs_population_bad_rate": 0.0734,
+      "book_cleanliness_multiple": 335.09,
+      "defaults_kept_out_pct": 99.94
+     },
+     "approve_30pct": {
+      "bad_rate_in_approved_book": 0.0002,
+      "vs_population_bad_rate": 0.0734,
+      "book_cleanliness_multiple": 335.1,
+      "defaults_kept_out_pct": 99.91
+     },
+     "approve_40pct": {
+      "bad_rate_in_approved_book": 0.0004,
+      "vs_population_bad_rate": 0.0734,
+      "book_cleanliness_multiple": 191.48,
+      "defaults_kept_out_pct": 99.79
+     },
+     "approve_50pct": {
+      "bad_rate_in_approved_book": 0.0006,
+      "vs_population_bad_rate": 0.0734,
+      "book_cleanliness_multiple": 128.88,
+      "defaults_kept_out_pct": 99.61
+     }
+    },
+    "risk_bands": {
+     "bands": {
+      "A": 0.0002,
+      "B": 0.0005,
+      "C": 0.0021,
+      "D": 0.0151,
+      "E": 0.3493
+     },
+     "monotone": true
+    }
+   },
+   "oot": {
+    "n": 114770,
+    "default_rate": 0.0942,
+    "auc": 0.9603,
+    "gini": 0.9207,
+    "ks": 0.7957,
+    "pr_auc": 0.7423,
+    "brier": 0.043,
+    "ece": 0.0283,
+    "operating_points": {
+     "approve_20pct": {
+      "bad_rate_in_approved_book": 0.0016,
+      "vs_population_bad_rate": 0.0942,
+      "book_cleanliness_multiple": 58.44,
+      "defaults_kept_out_pct": 99.66
+     },
+     "approve_30pct": {
+      "bad_rate_in_approved_book": 0.0017,
+      "vs_population_bad_rate": 0.0942,
+      "book_cleanliness_multiple": 56.9,
+      "defaults_kept_out_pct": 99.47
+     },
+     "approve_40pct": {
+      "bad_rate_in_approved_book": 0.0019,
+      "vs_population_bad_rate": 0.0942,
+      "book_cleanliness_multiple": 49.71,
+      "defaults_kept_out_pct": 99.2
+     },
+     "approve_50pct": {
+      "bad_rate_in_approved_book": 0.0021,
+      "vs_population_bad_rate": 0.0942,
+      "book_cleanliness_multiple": 45.81,
+      "defaults_kept_out_pct": 98.91
+     }
+    },
+    "risk_bands": {
+     "bands": {
+      "A": 0.0016,
+      "B": 0.0022,
+      "C": 0.0022,
+      "D": 0.0322,
+      "E": 0.4328
+     },
+     "monotone": true
+    }
+   },
+   "stress": {
+    "n": 257465,
+    "default_rate": 0.3154,
+    "auc": 0.9261,
+    "gini": 0.8523,
+    "ks": 0.7418,
+    "pr_auc": 0.7994,
+    "brier": 0.1194,
+    "ece": 0.0977,
+    "operating_points": {
+     "approve_20pct": {
+      "bad_rate_in_approved_book": 0.004,
+      "vs_population_bad_rate": 0.3154,
+      "book_cleanliness_multiple": 78.07,
+      "defaults_kept_out_pct": 99.74
+     },
+     "approve_30pct": {
+      "bad_rate_in_approved_book": 0.0045,
+      "vs_population_bad_rate": 0.3154,
+      "book_cleanliness_multiple": 70.6,
+      "defaults_kept_out_pct": 99.58
+     },
+     "approve_40pct": {
+      "bad_rate_in_approved_book": 0.0087,
+      "vs_population_bad_rate": 0.3154,
+      "book_cleanliness_multiple": 36.37,
+      "defaults_kept_out_pct": 98.9
+     },
+     "approve_50pct": {
+      "bad_rate_in_approved_book": 0.0229,
+      "vs_population_bad_rate": 0.3154,
+      "book_cleanliness_multiple": 13.77,
+      "defaults_kept_out_pct": 96.37
+     }
+    },
+    "risk_bands": {
+     "bands": {
+      "A": 0.004,
+      "B": 0.0133,
+      "C": 0.1292,
+      "D": 0.6045,
+      "E": 0.8257
+     },
+     "monotone": true
+    }
+   },
+   "delong_vs_monotone": {
+    "holdout": {
+     "auc_a": 0.9653,
+     "auc_b": 0.9239,
+     "delta": 0.0413,
+     "z": 25.098,
+     "p_value": 0.0,
+     "significant_5pct": true
+    },
+    "oot": {
+     "auc_a": 0.9603,
+     "auc_b": 0.9105,
+     "delta": 0.0498,
+     "z": 40.383,
+     "p_value": 0.0,
+     "significant_5pct": true
+    }
+   }
+  },
+  "timestamp": "2026-07-12T07:51:51.336910+00:00",
+  "git": "5a98d90"
+ },
+ {
+  "id": "E5",
+  "family": "E5",
+  "name": "calibration: none vs Platt vs isotonic",
+  "seed": 42,
+  "config": {},
+  "data": {
+   "train_file": "309a689734d5",
+   "stress_file": "ad465e30fd4c",
+   "protocol": "FY2010-16 train/cal/holdout, FY2017-19 OOT, FY2005-07 stress",
+   "quick": false
+  },
+  "results": {
+   "uncalibrated": {
+    "holdout": {
+     "brier": 0.0456,
+     "ece": 0.0019,
+     "auc": 0.9239
+    },
+    "oot": {
+     "brier": 0.0557,
+     "ece": 0.0309,
+     "auc": 0.9105
+    }
+   },
+   "platt": {
+    "holdout": {
+     "brier": 0.0467,
+     "ece": 0.0263,
+     "auc": 0.9239
+    },
+    "oot": {
+     "brier": 0.0568,
+     "ece": 0.0346,
+     "auc": 0.9105
+    }
+   },
+   "isotonic": {
+    "holdout": {
+     "brier": 0.0456,
+     "ece": 0.0019,
+     "auc": 0.9236
+    },
+    "oot": {
+     "brier": 0.0555,
+     "ece": 0.0309,
+     "auc": 0.9103
+    }
+   }
+  },
+  "timestamp": "2026-07-12T07:51:53.928405+00:00",
+  "git": "5a98d90"
+ },
+ {
+  "id": "E3b",
+  "family": "E3",
+  "name": "selective monotonicity (term freed; term+jobs freed)",
+  "seed": 42,
+  "config": {
+   "params": {
+    "max_depth": 7,
+    "eta": 0.05,
+    "min_child_weight": 20,
+    "subsample": 0.9,
+    "colsample_bytree": 0.9,
+    "lambda": 2.0,
+    "alpha": 0.1,
+    "seed": 42
+   },
+   "rounds": 400,
+   "variants": [
+    "full_monotone",
+    "selective_term_free",
+    "selective_term_jobs_free",
+    "unconstrained"
+   ]
+  },
+  "data": {
+   "protocol": "FY2010-16 train, FY2017-19 OOT, FY2005-07 stress"
+  },
+  "results": {
+   "auc_by_variant": {
+    "full_monotone": {
+     "holdout": 0.9239,
+     "oot": 0.9105,
+     "stress": 0.8731
+    },
+    "selective_term_free": {
+     "holdout": 0.9634,
+     "oot": 0.9623,
+     "stress": 0.9255
+    },
+    "selective_term_jobs_free": {
+     "holdout": 0.9635,
+     "oot": 0.9617,
+     "stress": 0.9261
+    },
+    "unconstrained": {
+     "holdout": 0.9653,
+     "oot": 0.9603,
+     "stress": 0.9261
+    }
+   },
+   "delong": {
+    "selective_vs_unconstrained_oot": {
+     "auc_a": 0.9603,
+     "auc_b": 0.9623,
+     "delta": -0.0019,
+     "z": -8.57,
+     "p_value": 0.0,
+     "significant_5pct": true
+    },
+    "selective_vs_fullmono_oot": {
+     "auc_a": 0.9623,
+     "auc_b": 0.9105,
+     "delta": 0.0518,
+     "z": 39.368,
+     "p_value": 0.0,
+     "significant_5pct": true
+    },
+    "selective2_vs_unconstrained_oot": {
+     "auc_a": 0.9603,
+     "auc_b": 0.9617,
+     "delta": -0.0014,
+     "z": -6.979,
+     "p_value": 2.98e-12,
+     "significant_5pct": true
+    }
+   },
+   "selective_oot_bundle": {
+    "n": 114770,
+    "default_rate": 0.0942,
+    "auc": 0.9623,
+    "gini": 0.9246,
+    "ks": 0.8191,
+    "pr_auc": 0.7452,
+    "brier": 0.0431,
+    "ece": 0.0297,
+    "operating_points": {
+     "approve_20pct": {
+      "bad_rate_in_approved_book": 0.0013,
+      "vs_population_bad_rate": 0.0942,
+      "book_cleanliness_multiple": 72.07,
+      "defaults_kept_out_pct": 99.72
+     },
+     "approve_30pct": {
+      "bad_rate_in_approved_book": 0.0019,
+      "vs_population_bad_rate": 0.0942,
+      "book_cleanliness_multiple": 50.68,
+      "defaults_kept_out_pct": 99.41
+     },
+     "approve_40pct": {
+      "bad_rate_in_approved_book": 0.002,
+      "vs_population_bad_rate": 0.0942,
+      "book_cleanliness_multiple": 48.05,
+      "defaults_kept_out_pct": 99.17
+     },
+     "approve_50pct": {
+      "bad_rate_in_approved_book": 0.002,
+      "vs_population_bad_rate": 0.0942,
+      "book_cleanliness_multiple": 48.26,
+      "defaults_kept_out_pct": 98.96
+     }
+    },
+    "risk_bands": {
+     "bands": {
+      "A": 0.0013,
+      "B": 0.0026,
+      "C": 0.0024,
+      "D": 0.0222,
+      "E": 0.4425
+     },
+     "monotone": false
+    }
+   },
+   "finding": "term-risk is non-monotone at the short end in real SBA data; freeing term recovers most of the constraint cost while keeping the economically-defensible constraints."
+  },
+  "timestamp": "2026-07-12T07:54:27.305472+00:00",
+  "git": "5a98d90"
+ },
+ {
+  "id": "E4",
+  "family": "E4",
+  "name": "capacity sweep (calibration-split selection)",
+  "seed": 42,
+  "config": {
+   "subsample": 120000
+  },
+  "data": {
+   "train_file": "309a689734d5",
+   "stress_file": "ad465e30fd4c",
+   "protocol": "FY2010-16 train/cal/holdout, FY2017-19 OOT, FY2005-07 stress",
+   "quick": false
+  },
+  "results": {
+   "grid": [
+    {
+     "depth": 3,
+     "eta": 0.05,
+     "rounds": 400,
+     "calibration_auc": 0.9206
+    },
+    {
+     "depth": 3,
+     "eta": 0.1,
+     "rounds": 250,
+     "calibration_auc": 0.9213
+    },
+    {
+     "depth": 5,
+     "eta": 0.05,
+     "rounds": 400,
+     "calibration_auc": 0.9251
+    },
+    {
+     "depth": 5,
+     "eta": 0.1,
+     "rounds": 250,
+     "calibration_auc": 0.9251
+    },
+    {
+     "depth": 7,
+     "eta": 0.05,
+     "rounds": 400,
+     "calibration_auc": 0.9262
+    },
+    {
+     "depth": 7,
+     "eta": 0.1,
+     "rounds": 250,
+     "calibration_auc": 0.9257
+    }
+   ],
+   "selected": {
+    "max_depth": 7,
+    "eta": 0.05,
+    "min_child_weight": 20,
+    "subsample": 0.9,
+    "colsample_bytree": 0.9,
+    "lambda": 2.0,
+    "alpha": 0.1,
+    "seed": 42,
+    "rounds": 400
+   },
+   "note": "selected on calibration split only; holdout/OOT untouched"
+  },
+  "timestamp": "2026-07-12T07:56:05.273429+00:00",
+  "git": "5a98d90"
+ },
+ {
+  "id": "E4b",
+  "family": "E4",
+  "name": "tuned monotone XGB (full train, Platt)",
+  "seed": 42,
+  "config": {
+   "params": {
+    "max_depth": 7,
+    "eta": 0.05,
+    "min_child_weight": 20,
+    "subsample": 0.9,
+    "colsample_bytree": 0.9,
+    "lambda": 2.0,
+    "alpha": 0.1,
+    "seed": 42
+   },
+   "rounds": 400
+  },
+  "data": {
+   "train_file": "309a689734d5",
+   "stress_file": "ad465e30fd4c",
+   "protocol": "FY2010-16 train/cal/holdout, FY2017-19 OOT, FY2005-07 stress",
+   "quick": false
+  },
+  "results": {
+   "holdout": {
+    "n": 45626,
+    "default_rate": 0.0734,
+    "auc": 0.9634,
+    "gini": 0.9268,
+    "ks": 0.8116,
+    "pr_auc": 0.6841,
+    "brier": 0.0373,
+    "ece": 0.0334,
+    "operating_points": {
+     "approve_20pct": {
+      "bad_rate_in_approved_book": 0.0004,
+      "vs_population_bad_rate": 0.0734,
+      "book_cleanliness_multiple": 167.55,
+      "defaults_kept_out_pct": 99.88
+     },
+     "approve_30pct": {
+      "bad_rate_in_approved_book": 0.0005,
+      "vs_population_bad_rate": 0.0734,
+      "book_cleanliness_multiple": 143.62,
+      "defaults_kept_out_pct": 99.79
+     },
+     "approve_40pct": {
+      "bad_rate_in_approved_book": 0.0005,
+      "vs_population_bad_rate": 0.0734,
+      "book_cleanliness_multiple": 148.93,
+      "defaults_kept_out_pct": 99.73
+     },
+     "approve_50pct": {
+      "bad_rate_in_approved_book": 0.0006,
+      "vs_population_bad_rate": 0.0734,
+      "book_cleanliness_multiple": 128.88,
+      "defaults_kept_out_pct": 99.61
+     }
+    },
+    "risk_bands": {
+     "bands": {
+      "A": 0.0004,
+      "B": 0.0005,
+      "C": 0.0022,
+      "D": 0.0171,
+      "E": 0.347
+     },
+     "monotone": true
+    }
+   },
+   "oot": {
+    "n": 114770,
+    "default_rate": 0.0942,
+    "auc": 0.9623,
+    "gini": 0.9246,
+    "ks": 0.8191,
+    "pr_auc": 0.7452,
+    "brier": 0.0431,
+    "ece": 0.0297,
+    "operating_points": {
+     "approve_20pct": {
+      "bad_rate_in_approved_book": 0.0013,
+      "vs_population_bad_rate": 0.0942,
+      "book_cleanliness_multiple": 72.07,
+      "defaults_kept_out_pct": 99.72
+     },
+     "approve_30pct": {
+      "bad_rate_in_approved_book": 0.0019,
+      "vs_population_bad_rate": 0.0942,
+      "book_cleanliness_multiple": 50.68,
+      "defaults_kept_out_pct": 99.41
+     },
+     "approve_40pct": {
+      "bad_rate_in_approved_book": 0.002,
+      "vs_population_bad_rate": 0.0942,
+      "book_cleanliness_multiple": 48.05,
+      "defaults_kept_out_pct": 99.17
+     },
+     "approve_50pct": {
+      "bad_rate_in_approved_book": 0.002,
+      "vs_population_bad_rate": 0.0942,
+      "book_cleanliness_multiple": 48.26,
+      "defaults_kept_out_pct": 98.96
+     }
+    },
+    "risk_bands": {
+     "bands": {
+      "A": 0.0013,
+      "B": 0.0026,
+      "C": 0.0024,
+      "D": 0.0222,
+      "E": 0.4425
+     },
+     "monotone": false
+    }
+   },
+   "stress": {
+    "n": 257465,
+    "default_rate": 0.3154,
+    "auc": 0.9255,
+    "gini": 0.851,
+    "ks": 0.742,
+    "pr_auc": 0.7976,
+    "brier": 0.1203,
+    "ece": 0.0969,
+    "operating_points": {
+     "approve_20pct": {
+      "bad_rate_in_approved_book": 0.0045,
+      "vs_population_bad_rate": 0.3154,
+      "book_cleanliness_multiple": 70.0,
+      "defaults_kept_out_pct": 99.71
+     },
+     "approve_30pct": {
+      "bad_rate_in_approved_book": 0.0044,
+      "vs_population_bad_rate": 0.3154,
+      "book_cleanliness_multiple": 71.02,
+      "defaults_kept_out_pct": 99.58
+     },
+     "approve_40pct": {
+      "bad_rate_in_approved_book": 0.0095,
+      "vs_population_bad_rate": 0.3154,
+      "book_cleanliness_multiple": 33.34,
+      "defaults_kept_out_pct": 98.8
+     },
+     "approve_50pct": {
+      "bad_rate_in_approved_book": 0.0246,
+      "vs_population_bad_rate": 0.3154,
+      "book_cleanliness_multiple": 12.81,
+      "defaults_kept_out_pct": 96.1
+     }
+    },
+    "risk_bands": {
+     "bands": {
+      "A": 0.0045,
+      "B": 0.0144,
+      "C": 0.1272,
+      "D": 0.6072,
+      "E": 0.8235
+     },
+     "monotone": true
+    }
+   }
+  },
+  "timestamp": "2026-07-12T07:56:18.752113+00:00",
+  "git": "07d67c3"
+ },
+ {
+  "id": "E2",
+  "family": "E2",
+  "name": "feature ablation ladder",
+  "seed": 42,
+  "config": {},
+  "data": {
+   "train_file": "309a689734d5",
+   "stress_file": "ad465e30fd4c",
+   "protocol": "FY2010-16 train/cal/holdout, FY2017-19 OOT, FY2005-07 stress",
+   "quick": false
+  },
+  "results": {
+   "ladder": {
+    "structure_only": {
+     "n_features": 7,
+     "holdout_auc": 0.9206,
+     "oot_auc": 0.9063,
+     "delong_vs_full_oot": {
+      "auc_a": 0.9623,
+      "auc_b": 0.9063,
+      "delta": 0.056,
+      "z": 39.772,
+      "p_value": 0.0,
+      "significant_5pct": true
+     }
+    },
+    "no_sector": {
+     "n_features": 12,
+     "holdout_auc": 0.9211,
+     "oot_auc": 0.9084,
+     "delong_vs_full_oot": {
+      "auc_a": 0.9623,
+      "auc_b": 0.9084,
+      "delta": 0.0539,
+      "z": 39.221,
+      "p_value": 0.0,
+      "significant_5pct": true
+     }
+    },
+    "full": {
+     "n_features": 21,
+     "holdout_auc": 0.9239,
+     "oot_auc": 0.9105
+    },
+    "plus_interest_rate_sensitivity": {
+     "oot_auc": 0.919,
+     "note": "lender-priced signal; reported for sensitivity only, excluded from candidate models"
+    }
+   }
+  },
+  "timestamp": "2026-07-12T07:56:51.357023+00:00",
+  "git": "07d67c3"
+ },
+ {
+  "id": "E6",
+  "family": "E6",
+  "name": "5-seed bagged monotone XGB",
+  "seed": 42,
+  "config": {
+   "bag": 5
+  },
+  "data": {
+   "train_file": "309a689734d5",
+   "stress_file": "ad465e30fd4c",
+   "protocol": "FY2010-16 train/cal/holdout, FY2017-19 OOT, FY2005-07 stress",
+   "quick": false
+  },
+  "results": {
+   "holdout": {
+    "n": 45626,
+    "default_rate": 0.0734,
+    "auc": 0.9635,
+    "gini": 0.9269,
+    "ks": 0.8119,
+    "pr_auc": 0.6835,
+    "brier": 0.0372,
+    "ece": 0.0333,
+    "operating_points": {
+     "approve_20pct": {
+      "bad_rate_in_approved_book": 0.0004,
+      "vs_population_bad_rate": 0.0734,
+      "book_cleanliness_multiple": 167.55,
+      "defaults_kept_out_pct": 99.88
+     },
+     "approve_30pct": {
+      "bad_rate_in_approved_book": 0.0004,
+      "vs_population_bad_rate": 0.0734,
+      "book_cleanliness_multiple": 167.55,
+      "defaults_kept_out_pct": 99.82
+     },
+     "approve_40pct": {
+      "bad_rate_in_approved_book": 0.0005,
+      "vs_population_bad_rate": 0.0734,
+      "book_cleanliness_multiple": 148.93,
+      "defaults_kept_out_pct": 99.73
+     },
+     "approve_50pct": {
+      "bad_rate_in_approved_book": 0.0005,
+      "vs_population_bad_rate": 0.0734,
+      "book_cleanliness_multiple": 139.62,
+      "defaults_kept_out_pct": 99.64
+     }
+    },
+    "risk_bands": {
+     "bands": {
+      "A": 0.0004,
+      "B": 0.0005,
+      "C": 0.0021,
+      "D": 0.0175,
+      "E": 0.3466
+     },
+     "monotone": true
+    }
+   },
+   "oot": {
+    "n": 114770,
+    "default_rate": 0.0942,
+    "auc": 0.9624,
+    "gini": 0.9247,
+    "ks": 0.8175,
+    "pr_auc": 0.7455,
+    "brier": 0.0431,
+    "ece": 0.0293,
+    "operating_points": {
+     "approve_20pct": {
+      "bad_rate_in_approved_book": 0.0013,
+      "vs_population_bad_rate": 0.0942,
+      "book_cleanliness_multiple": 72.07,
+      "defaults_kept_out_pct": 99.72
+     },
+     "approve_30pct": {
+      "bad_rate_in_approved_book": 0.0018,
+      "vs_population_bad_rate": 0.0942,
+      "book_cleanliness_multiple": 52.31,
+      "defaults_kept_out_pct": 99.43
+     },
+     "approve_40pct": {
+      "bad_rate_in_approved_book": 0.0018,
+      "vs_population_bad_rate": 0.0942,
+      "book_cleanliness_multiple": 53.39,
+      "defaults_kept_out_pct": 99.25
+     },
+     "approve_50pct": {
+      "bad_rate_in_approved_book": 0.0019,
+      "vs_population_bad_rate": 0.0942,
+      "book_cleanliness_multiple": 50.05,
+      "defaults_kept_out_pct": 99.0
+     }
+    },
+    "risk_bands": {
+     "bands": {
+      "A": 0.0013,
+      "B": 0.0022,
+      "C": 0.003,
+      "D": 0.023,
+      "E": 0.4415
+     },
+     "monotone": true
+    }
+   },
+   "stress": {
+    "n": 257465,
+    "default_rate": 0.3154,
+    "auc": 0.9254,
+    "gini": 0.8507,
+    "ks": 0.7407,
+    "pr_auc": 0.7974,
+    "brier": 0.1202,
+    "ece": 0.0966,
+    "operating_points": {
+     "approve_20pct": {
+      "bad_rate_in_approved_book": 0.0044,
+      "vs_population_bad_rate": 0.3154,
+      "book_cleanliness_multiple": 71.22,
+      "defaults_kept_out_pct": 99.72
+     },
+     "approve_30pct": {
+      "bad_rate_in_approved_book": 0.0045,
+      "vs_population_bad_rate": 0.3154,
+      "book_cleanliness_multiple": 69.8,
+      "defaults_kept_out_pct": 99.57
+     },
+     "approve_40pct": {
+      "bad_rate_in_approved_book": 0.0092,
+      "vs_population_bad_rate": 0.3154,
+      "book_cleanliness_multiple": 34.19,
+      "defaults_kept_out_pct": 98.83
+     },
+     "approve_50pct": {
+      "bad_rate_in_approved_book": 0.0245,
+      "vs_population_bad_rate": 0.3154,
+      "book_cleanliness_multiple": 12.86,
+      "defaults_kept_out_pct": 96.11
+     }
+    },
+    "risk_bands": {
+     "bands": {
+      "A": 0.0044,
+      "B": 0.014,
+      "C": 0.1285,
+      "D": 0.6065,
+      "E": 0.8234
+     },
+     "monotone": true
+    }
+   },
+   "delong_vs_single_oot": {
+    "auc_a": 0.9624,
+    "auc_b": 0.9623,
+    "delta": 0.0001,
+    "z": 1.995,
+    "p_value": 0.0461,
+    "significant_5pct": true
+   },
+   "anti_shroff_gate": "accept ensemble only if significantly better than the single tuned model"
+  },
+  "timestamp": "2026-07-12T07:57:38.270033+00:00",
+  "git": "07d67c3"
+ },
+ {
+  "id": "E7",
+  "family": "E7",
+  "name": "adversarial validation (shift meters)",
+  "seed": 42,
+  "config": {},
+  "data": {
+   "train_file": "309a689734d5",
+   "stress_file": "ad465e30fd4c",
+   "protocol": "FY2010-16 train/cal/holdout, FY2017-19 OOT, FY2005-07 stress",
+   "quick": false
+  },
+  "results": {
+   "train_vs_oot": {
+    "shift_auc": 0.7368,
+    "shift_drivers": {
+     "is_new_business": 1448.2890625,
+     "revolver": 999.5989379882812,
+     "is_change_of_ownership": 860.5824584960938,
+     "guarantee_portion": 417.817138671875,
+     "term_months": 213.89083862304688,
+     "sector_transport": 135.58255004882812
+    }
+   },
+   "train_vs_stress": {
+    "shift_auc": 0.9108,
+    "shift_drivers": {
+     "collateral": 5452.5849609375,
+     "fixed_rate": 2185.720947265625,
+     "guarantee_portion": 598.72802734375,
+     "revolver": 598.3818359375,
+     "is_individual": 425.3209228515625,
+     "term_months": 380.96484375
+    }
+   }
+  },
+  "timestamp": "2026-07-12T07:57:44.052633+00:00",
+  "git": "07d67c3"
+ },
+ {
+  "id": "E8",
+  "family": "E8",
+  "name": "importance-weighted domain adaptation",
+  "seed": 42,
+  "config": {
+   "weights": "clipped density ratio from E7"
+  },
+  "data": {
+   "train_file": "309a689734d5",
+   "stress_file": "ad465e30fd4c",
+   "protocol": "FY2010-16 train/cal/holdout, FY2017-19 OOT, FY2005-07 stress",
+   "quick": false
+  },
+  "results": {
+   "holdout": {
+    "n": 45626,
+    "default_rate": 0.0734,
+    "auc": 0.965,
+    "gini": 0.93,
+    "ks": 0.8255,
+    "pr_auc": 0.6862,
+    "brier": 0.0369,
+    "ece": 0.0333,
+    "operating_points": {
+     "approve_20pct": {
+      "bad_rate_in_approved_book": 0.0004,
+      "vs_population_bad_rate": 0.0734,
+      "book_cleanliness_multiple": 167.55,
+      "defaults_kept_out_pct": 99.88
+     },
+     "approve_30pct": {
+      "bad_rate_in_approved_book": 0.0004,
+      "vs_population_bad_rate": 0.0734,
+      "book_cleanliness_multiple": 167.55,
+      "defaults_kept_out_pct": 99.82
+     },
+     "approve_40pct": {
+      "bad_rate_in_approved_book": 0.0005,
+      "vs_population_bad_rate": 0.0734,
+      "book_cleanliness_multiple": 148.93,
+      "defaults_kept_out_pct": 99.73
+     },
+     "approve_50pct": {
+      "bad_rate_in_approved_book": 0.0007,
+      "vs_population_bad_rate": 0.0734,
+      "book_cleanliness_multiple": 98.56,
+      "defaults_kept_out_pct": 99.49
+     }
+    },
+    "risk_bands": {
+     "bands": {
+      "A": 0.0004,
+      "B": 0.0005,
+      "C": 0.0022,
+      "D": 0.0128,
+      "E": 0.3512
+     },
+     "monotone": true
+    }
+   },
+   "oot": {
+    "n": 114770,
+    "default_rate": 0.0942,
+    "auc": 0.9641,
+    "gini": 0.9282,
+    "ks": 0.8242,
+    "pr_auc": 0.7501,
+    "brier": 0.0426,
+    "ece": 0.0319,
+    "operating_points": {
+     "approve_20pct": {
+      "bad_rate_in_approved_book": 0.0017,
+      "vs_population_bad_rate": 0.0942,
+      "book_cleanliness_multiple": 56.9,
+      "defaults_kept_out_pct": 99.65
+     },
+     "approve_30pct": {
+      "bad_rate_in_approved_book": 0.0016,
+      "vs_population_bad_rate": 0.0942,
+      "book_cleanliness_multiple": 57.92,
+      "defaults_kept_out_pct": 99.48
+     },
+     "approve_40pct": {
+      "bad_rate_in_approved_book": 0.0017,
+      "vs_population_bad_rate": 0.0942,
+      "book_cleanliness_multiple": 56.16,
+      "defaults_kept_out_pct": 99.29
+     },
+     "approve_50pct": {
+      "bad_rate_in_approved_book": 0.0017,
+      "vs_population_bad_rate": 0.0942,
+      "book_cleanliness_multiple": 55.73,
+      "defaults_kept_out_pct": 99.1
+     }
+    },
+    "risk_bands": {
+     "bands": {
+      "A": 0.0017,
+      "B": 0.0017,
+      "C": 0.0019,
+      "D": 0.0208,
+      "E": 0.4449
+     },
+     "monotone": true
+    }
+   },
+   "stress": {
+    "n": 257465,
+    "default_rate": 0.3154,
+    "auc": 0.9295,
+    "gini": 0.8591,
+    "ks": 0.756,
+    "pr_auc": 0.8022,
+    "brier": 0.1176,
+    "ece": 0.1037,
+    "operating_points": {
+     "approve_20pct": {
+      "bad_rate_in_approved_book": 0.0044,
+      "vs_population_bad_rate": 0.3154,
+      "book_cleanliness_multiple": 71.85,
+      "defaults_kept_out_pct": 99.72
+     },
+     "approve_30pct": {
+      "bad_rate_in_approved_book": 0.0047,
+      "vs_population_bad_rate": 0.3154,
+      "book_cleanliness_multiple": 66.55,
+      "defaults_kept_out_pct": 99.55
+     },
+     "approve_40pct": {
+      "bad_rate_in_approved_book": 0.0094,
+      "vs_population_bad_rate": 0.3154,
+      "book_cleanliness_multiple": 33.45,
+      "defaults_kept_out_pct": 98.8
+     },
+     "approve_50pct": {
+      "bad_rate_in_approved_book": 0.0171,
+      "vs_population_bad_rate": 0.3154,
+      "book_cleanliness_multiple": 18.41,
+      "defaults_kept_out_pct": 97.28
+     }
+    },
+    "risk_bands": {
+     "bands": {
+      "A": 0.0044,
+      "B": 0.0145,
+      "C": 0.1114,
+      "D": 0.6225,
+      "E": 0.8241
+     },
+     "monotone": true
+    }
+   },
+   "delong_vs_tuned_oot": {
+    "auc_a": 0.9641,
+    "auc_b": 0.9623,
+    "delta": 0.0018,
+    "z": 4.53,
+    "p_value": 5.89e-06,
+    "significant_5pct": true
+   }
+  },
+  "timestamp": "2026-07-12T07:57:56.299884+00:00",
+  "git": "07d67c3"
+ },
+ {
+  "id": "E9",
+  "family": "E9",
+  "name": "bootstrap uncertainty (tuned champion)",
+  "seed": 42,
+  "config": {
+   "replicates": 200
+  },
+  "data": {
+   "train_file": "309a689734d5",
+   "stress_file": "ad465e30fd4c",
+   "protocol": "FY2010-16 train/cal/holdout, FY2017-19 OOT, FY2005-07 stress",
+   "quick": false
+  },
+  "results": {
+   "oot_auc_ci": {
+    "lower_95": 0.9605,
+    "upper_95": 0.9638
+   },
+   "holdout_auc_ci": {
+    "lower_95": 0.9614,
+    "upper_95": 0.9662
+   }
+  },
+  "timestamp": "2026-07-12T07:58:28.851726+00:00",
+  "git": "07d67c3"
+ },
+ {
+  "id": "E13",
+  "family": "E13",
+  "name": "geographic OOD (train ex-West, test West OOT)",
+  "seed": 42,
+  "config": {},
+  "data": {
+   "train_file": "309a689734d5",
+   "stress_file": "ad465e30fd4c",
+   "protocol": "FY2010-16 train/cal/holdout, FY2017-19 OOT, FY2005-07 stress",
+   "quick": false
+  },
+  "results": {
+   "west_oot": {
+    "n": 29622,
+    "default_rate": 0.0863,
+    "auc": 0.9726,
+    "gini": 0.9451,
+    "ks": 0.8676,
+    "pr_auc": 0.7529,
+    "brier": 0.0371,
+    "ece": 0.0314,
+    "operating_points": {
+     "approve_20pct": {
+      "bad_rate_in_approved_book": 0.0014,
+      "vs_population_bad_rate": 0.0863,
+      "book_cleanliness_multiple": 63.9,
+      "defaults_kept_out_pct": 99.69
+     },
+     "approve_30pct": {
+      "bad_rate_in_approved_book": 0.0011,
+      "vs_population_bad_rate": 0.0863,
+      "book_cleanliness_multiple": 76.68,
+      "defaults_kept_out_pct": 99.61
+     },
+     "approve_40pct": {
+      "bad_rate_in_approved_book": 0.0014,
+      "vs_population_bad_rate": 0.0863,
+      "book_cleanliness_multiple": 63.9,
+      "defaults_kept_out_pct": 99.37
+     },
+     "approve_50pct": {
+      "bad_rate_in_approved_book": 0.0012,
+      "vs_population_bad_rate": 0.0863,
+      "book_cleanliness_multiple": 71.0,
+      "defaults_kept_out_pct": 99.3
+     }
+    },
+    "risk_bands": {
+     "bands": {
+      "A": 0.0014,
+      "B": 0.0014,
+      "C": 0.0008,
+      "D": 0.0061,
+      "E": 0.4218
+     },
+     "monotone": false
+    }
+   },
+   "full_oot_reference_auc": 0.9623
+  },
+  "timestamp": "2026-07-12T07:58:35.709706+00:00",
+  "git": "07d67c3"
+ },
+ {
+  "id": "E14",
+  "family": "E14",
+  "name": "stability: seeds + input perturbation",
+  "seed": 42,
+  "config": {
+   "train_subsample": 120000
+  },
+  "data": {
+   "train_file": "309a689734d5",
+   "stress_file": "ad465e30fd4c",
+   "protocol": "FY2010-16 train/cal/holdout, FY2017-19 OOT, FY2005-07 stress",
+   "quick": false
+  },
+  "results": {
+   "seed_stability": {
+    "auc_mean": 0.9625,
+    "auc_std": 4e-05,
+    "seeds": 5
+   },
+   "perturbation": {
+    "mean_abs_pd_delta": 0.12364,
+    "p95_abs_pd_delta": 0.41829
+   }
+  },
+  "timestamp": "2026-07-12T07:58:51.084735+00:00",
+  "git": "07d67c3"
+ },
+ {
+  "id": "E15",
+  "family": "E15",
+  "name": "regional fairness monitoring (OOT, 30% approval)",
+  "seed": 42,
+  "config": {
+   "note": "region is monitoring-only, never a model input"
+  },
+  "data": {
+   "train_file": "309a689734d5",
+   "stress_file": "ad465e30fd4c",
+   "protocol": "FY2010-16 train/cal/holdout, FY2017-19 OOT, FY2005-07 stress",
+   "quick": false
+  },
+  "results": {
+   "regions": {
+    "west": {
+     "n": 29622,
+     "auc": 0.973,
+     "approval_rate": 0.3801,
+     "good_approval_rate": 0.4154,
+     "bad_rate_in_book": 0.0012
+    },
+    "south": {
+     "n": 31702,
+     "auc": 0.9587,
+     "approval_rate": 0.3025,
+     "good_approval_rate": 0.3437,
+     "bad_rate_in_book": 0.0019
+    },
+    "midwest": {
+     "n": 28383,
+     "auc": 0.9612,
+     "approval_rate": 0.2555,
+     "good_approval_rate": 0.2738,
+     "bad_rate_in_book": 0.0015
+    },
+    "northeast_other": {
+     "n": 25063,
+     "auc": 0.9539,
+     "approval_rate": 0.2547,
+     "good_approval_rate": 0.2814,
+     "bad_rate_in_book": 0.0033
+    }
+   },
+   "max_auc_gap": 0.0191,
+   "max_good_approval_gap": 0.1416
+  },
+  "timestamp": "2026-07-12T07:58:51.362221+00:00",
+  "git": "07d67c3"
+ },
+ {
+  "id": "E10",
+  "family": "E10",
+  "name": "reject inference: approved-only vs fuzzy parcelling",
+  "seed": 42,
+  "config": {
+   "legacy_policy": "logistic on 20k early sample, approves 60%",
+   "iterations": 2,
+   "params": {
+    "max_depth": 7,
+    "eta": 0.05,
+    "min_child_weight": 20,
+    "subsample": 0.9,
+    "colsample_bytree": 0.9,
+    "lambda": 2.0,
+    "alpha": 0.1,
+    "seed": 42
+   },
+   "rounds": 400
+  },
+  "data": {
+   "protocol": "FY2010-16 train, FY2017-19 OOT"
+  },
+  "results": {
+   "holdout": {
+    "approved_only_auc_full_population": 0.8987,
+    "fuzzy_parcelling_auc_full_population": 0.896,
+    "delong_fuzzy_vs_approved_only": {
+     "auc_a": 0.896,
+     "auc_b": 0.8987,
+     "delta": -0.0028,
+     "z": -5.331,
+     "p_value": 9.79e-08,
+     "significant_5pct": true
+    },
+    "rejected_segment": {
+     "n": 18231,
+     "default_rate": 0.159,
+     "approved_only_auc": 0.8151,
+     "fuzzy_parcelling_auc": 0.8114
+    }
+   },
+   "oot": {
+    "approved_only_auc_full_population": 0.8889,
+    "fuzzy_parcelling_auc_full_population": 0.8866,
+    "delong_fuzzy_vs_approved_only": {
+     "auc_a": 0.8866,
+     "auc_b": 0.8889,
+     "delta": -0.0023,
+     "z": -7.16,
+     "p_value": 8.07e-13,
+     "significant_5pct": true
+    },
+    "rejected_segment": {
+     "n": 38886,
+     "default_rate": 0.2354,
+     "approved_only_auc": 0.8118,
+     "fuzzy_parcelling_auc": 0.7989
+    }
+   }
+  },
+  "timestamp": "2026-07-12T08:01:10.180947+00:00",
+  "git": "07d67c3"
+ },
+ {
+  "id": "E16",
+  "family": "E16",
+  "name": "discrete-time hazard (annual person-periods)",
+  "seed": 42,
+  "config": {
+   "horizon_years": 7,
+   "person_period_rows": 1018300,
+   "params": {
+    "max_depth": 7,
+    "eta": 0.05,
+    "min_child_weight": 20,
+    "subsample": 0.9,
+    "colsample_bytree": 0.9,
+    "lambda": 2.0,
+    "alpha": 0.1,
+    "seed": 42
+   },
+   "rounds": 400
+  },
+  "data": {
+   "protocol": "FY2010-16 train, FY2017-19 OOT"
+  },
+  "results": {
+   "oot_12m": {
+    "n": 114770,
+    "event_rate": 0.001,
+    "auc": 0.8197,
+    "ks": 0.5383,
+    "brier": 0.0011,
+    "ece": 0.005,
+    "mean_predicted_pd": 0.0061
+   },
+   "oot_36m": {
+    "n": 114770,
+    "event_rate": 0.0233,
+    "auc": 0.8536,
+    "ks": 0.5718,
+    "brier": 0.0219,
+    "ece": 0.0163,
+    "mean_predicted_pd": 0.0391
+   },
+   "why_it_matters": "Horizon-specific PDs align with the product's dated bad_12m outcome contract; a lifetime binary label cannot produce a 12-month PD."
+  },
+  "timestamp": "2026-07-12T08:01:44.257847+00:00",
+  "git": "07d67c3"
+ }
+]

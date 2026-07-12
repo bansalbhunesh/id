@@ -115,6 +115,37 @@ MSME. It is real-outcome methodology proof, not an IDBI production calibration.
 Reproduce with `python backend/model_training/train_sme_pd_model.py`; served by
 `GET /model/sme-benchmark`.
 
+### v2: loan-level temporal benchmark (champion)
+
+`sba_sme_pd_v2` supersedes the case-sample benchmark as champion (v1 stays
+committed as the baseline). It is selected by a registry-tracked,
+significance-gated experiment programme (`backend/model_training/experiments/`,
+19 runs) over **418,947 resolved real SBA 7(a) FOIA loans at natural base
+rates**, with a genuinely later-in-time out-of-time window and a recession
+stress cohort:
+
+| Split | n | Base rate | ROC-AUC | KS |
+|---|---:|---:|---:|---:|
+| Holdout (FY2010–16) | 45,626 | 7.3% | 0.9634 [0.9614–0.9662] | 0.812 |
+| True OOT (FY2017–19) | 114,770 | 9.4% | 0.9623 [0.9605–0.9638] | 0.819 |
+| Recession stress (FY2005–07) | 257,465 | 31.5% | 0.9255 | 0.712 |
+
+At a 30% approval rate on the OOT window the approved book carries a **0.19%
+bad rate versus the 9.4% population rate (50.7× cleaner; 99.4% of defaults
+kept out)**. Key design findings, all DeLong-tested and recorded in the
+registry: **selective monotonicity** (blanket constraints cost 5.2pp OOT AUC
+because real term-risk is non-monotone at the short end; constraints kept
+where economically true act as shift regularisation and beat the fully
+unconstrained model out-of-time), a pre-registered significance+materiality
+gate that correctly rejected a 5-seed bag "improvement" of 0.0001 AUC, an
+honest negative result on on-support reject inference, quantified covariate
+shift (adversarial validation AUC 0.737 OOT / 0.911 stress), and a
+horizon-aligned discrete-time hazard challenger matching the product's dated
+`bad_12m` outcome contract. Full analysis:
+[docs/research/BENCHMARK_REPORT.md](docs/research/BENCHMARK_REPORT.md).
+Reproduce with `python backend/model_training/train_sme_pd_model_v2.py`;
+served by `GET /model/sme-benchmark` with per-artifact hash verification.
+
 ## Explainability
 
 XGBoost explanations use native `pred_contribs`, which is exact TreeSHAP in margin/logit space. Platt calibration is linear in that space, so applying the calibration slope to feature contributions and the calibration intercept to the bias preserves exact reconstruction. Every response exposes `shap_sum_check_logit`; tests require absolute error below `1e-5`.

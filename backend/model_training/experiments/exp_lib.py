@@ -92,14 +92,33 @@ def operating_points(y: np.ndarray, p: np.ndarray, approval_rates=(0.2, 0.3, 0.4
 
 
 def band_bad_rates(y: np.ndarray, p: np.ndarray, bands: int = 5) -> dict:
-    """Quantile risk bands (A=lowest PD). Monotone bad rates = usable scorecard."""
+    """Quantile risk bands (A=lowest PD). Monotone bad rates = usable scorecard.
+
+    Reports strict monotonicity AND a noise-aware version: an adjacent
+    inversion is tolerated when it is within two binomial standard errors of
+    the pair -- a 2-basis-point flip between 23k-loan bands is sampling noise,
+    not a rank-ordering failure.
+    """
     order = np.argsort(p, kind="mergesort")
     chunks = np.array_split(np.asarray(y)[order], bands)
-    rates = [round(float(chunk.mean()), 4) for chunk in chunks]
+    rates = [float(chunk.mean()) for chunk in chunks]
+    sizes = [len(chunk) for chunk in chunks]
     labels = [chr(ord("A") + i) for i in range(bands)]
+    strict = all(rates[i] <= rates[i + 1] + 1e-12 for i in range(bands - 1))
+    within_noise = True
+    for i in range(bands - 1):
+        inversion = rates[i] - rates[i + 1]
+        if inversion <= 0:
+            continue
+        se = float(np.sqrt(rates[i] * (1 - rates[i]) / sizes[i]
+                           + rates[i + 1] * (1 - rates[i + 1]) / sizes[i + 1]))
+        if inversion > 2 * se:
+            within_noise = False
+            break
     return {
-        "bands": dict(zip(labels, rates)),
-        "monotone": bool(all(rates[i] <= rates[i + 1] + 1e-12 for i in range(len(rates) - 1))),
+        "bands": {label: round(rate, 4) for label, rate in zip(labels, rates)},
+        "monotone": bool(strict),
+        "monotone_within_noise": bool(within_noise),
     }
 
 

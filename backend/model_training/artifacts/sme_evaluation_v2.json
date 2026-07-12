@@ -1,0 +1,326 @@
+{
+  "model_type": "sba_sme_pd_v2",
+  "champion_provider": "sba_sme_pd_v2",
+  "evidence_type": "real_loan_level_temporal_benchmark",
+  "features": [
+    "term_months",
+    "gross_approval_log",
+    "guarantee_portion",
+    "jobs_supported_log",
+    "is_new_business",
+    "is_change_of_ownership",
+    "is_individual",
+    "is_partnership",
+    "revolver",
+    "collateral",
+    "fixed_rate",
+    "has_franchise",
+    "sector_accom_food",
+    "sector_retail",
+    "sector_construction",
+    "sector_professional",
+    "sector_health",
+    "sector_manufacturing",
+    "sector_wholesale",
+    "sector_transport",
+    "sector_other_services"
+  ],
+  "monotone_constraints": {
+    "term_months": 0,
+    "gross_approval_log": 0,
+    "guarantee_portion": 0,
+    "jobs_supported_log": -1,
+    "is_new_business": 1,
+    "is_change_of_ownership": 0,
+    "is_individual": 1,
+    "is_partnership": 0,
+    "revolver": 1,
+    "collateral": -1,
+    "fixed_rate": 0,
+    "has_franchise": 0,
+    "sector_accom_food": 1,
+    "sector_retail": 1,
+    "sector_construction": 1,
+    "sector_professional": 0,
+    "sector_health": -1,
+    "sector_manufacturing": 0,
+    "sector_wholesale": 0,
+    "sector_transport": 1,
+    "sector_other_services": 0
+  },
+  "selective_monotonicity_rationale": "E3/E3b: blanket constraints cost 5.2pp OOT AUC because real SBA term-risk is non-monotone at the short end; freeing term while keeping every defensible constraint beat the unconstrained model out-of-time (DeLong z=-8.6) and under stress.",
+  "params": {
+    "max_depth": 7,
+    "eta": 0.05,
+    "min_child_weight": 20,
+    "subsample": 0.9,
+    "colsample_bytree": 0.9,
+    "lambda": 2.0,
+    "alpha": 0.1,
+    "seed": 42,
+    "rounds": 400
+  },
+  "seed": 42,
+  "dataset": {
+    "name": "SBA 7(a) FOIA loan-level records (official U.S. SBA, public domain)",
+    "protocol": "FY2010-16 train/calibration/holdout; FY2017-19 true out-of-time; FY2005-07 recession stress",
+    "train_rows": 197716,
+    "holdout_rows": 45626,
+    "oot_rows": 114770,
+    "stress_rows": 257465,
+    "base_rates": {
+      "train": 0.0734,
+      "oot": 0.0942,
+      "stress": 0.3154
+    },
+    "manifest": "backend/model_training/experiments/foia_manifest.json"
+  },
+  "splits": {
+    "holdout": {
+      "n": 45626,
+      "default_rate": 0.0734,
+      "auc": 0.9634,
+      "gini": 0.9268,
+      "ks": 0.8116,
+      "pr_auc": 0.6841,
+      "brier": 0.0351,
+      "ece": 0.0026,
+      "operating_points": {
+        "approve_20pct": {
+          "bad_rate_in_approved_book": 0.0004,
+          "vs_population_bad_rate": 0.0734,
+          "book_cleanliness_multiple": 167.55,
+          "defaults_kept_out_pct": 99.88
+        },
+        "approve_30pct": {
+          "bad_rate_in_approved_book": 0.0005,
+          "vs_population_bad_rate": 0.0734,
+          "book_cleanliness_multiple": 143.62,
+          "defaults_kept_out_pct": 99.79
+        },
+        "approve_40pct": {
+          "bad_rate_in_approved_book": 0.0005,
+          "vs_population_bad_rate": 0.0734,
+          "book_cleanliness_multiple": 148.93,
+          "defaults_kept_out_pct": 99.73
+        },
+        "approve_50pct": {
+          "bad_rate_in_approved_book": 0.0006,
+          "vs_population_bad_rate": 0.0734,
+          "book_cleanliness_multiple": 128.88,
+          "defaults_kept_out_pct": 99.61
+        }
+      },
+      "risk_bands": {
+        "bands": {
+          "A": 0.0004,
+          "B": 0.0005,
+          "C": 0.0022,
+          "D": 0.0171,
+          "E": 0.347
+        },
+        "monotone": true,
+        "monotone_within_noise": true
+      }
+    },
+    "oot": {
+      "n": 114770,
+      "default_rate": 0.0942,
+      "auc": 0.9623,
+      "gini": 0.9246,
+      "ks": 0.8191,
+      "pr_auc": 0.7452,
+      "brier": 0.0413,
+      "ece": 0.0209,
+      "operating_points": {
+        "approve_20pct": {
+          "bad_rate_in_approved_book": 0.0013,
+          "vs_population_bad_rate": 0.0942,
+          "book_cleanliness_multiple": 72.07,
+          "defaults_kept_out_pct": 99.72
+        },
+        "approve_30pct": {
+          "bad_rate_in_approved_book": 0.0019,
+          "vs_population_bad_rate": 0.0942,
+          "book_cleanliness_multiple": 50.68,
+          "defaults_kept_out_pct": 99.41
+        },
+        "approve_40pct": {
+          "bad_rate_in_approved_book": 0.002,
+          "vs_population_bad_rate": 0.0942,
+          "book_cleanliness_multiple": 48.05,
+          "defaults_kept_out_pct": 99.17
+        },
+        "approve_50pct": {
+          "bad_rate_in_approved_book": 0.002,
+          "vs_population_bad_rate": 0.0942,
+          "book_cleanliness_multiple": 48.26,
+          "defaults_kept_out_pct": 98.96
+        }
+      },
+      "risk_bands": {
+        "bands": {
+          "A": 0.0013,
+          "B": 0.0026,
+          "C": 0.0024,
+          "D": 0.0222,
+          "E": 0.4425
+        },
+        "monotone": false,
+        "monotone_within_noise": true
+      }
+    },
+    "stress": {
+      "n": 257465,
+      "default_rate": 0.3154,
+      "auc": 0.9255,
+      "gini": 0.851,
+      "ks": 0.742,
+      "pr_auc": 0.7976,
+      "brier": 0.1138,
+      "ece": 0.0889,
+      "operating_points": {
+        "approve_20pct": {
+          "bad_rate_in_approved_book": 0.0045,
+          "vs_population_bad_rate": 0.3154,
+          "book_cleanliness_multiple": 70.0,
+          "defaults_kept_out_pct": 99.71
+        },
+        "approve_30pct": {
+          "bad_rate_in_approved_book": 0.0044,
+          "vs_population_bad_rate": 0.3154,
+          "book_cleanliness_multiple": 71.02,
+          "defaults_kept_out_pct": 99.58
+        },
+        "approve_40pct": {
+          "bad_rate_in_approved_book": 0.0095,
+          "vs_population_bad_rate": 0.3154,
+          "book_cleanliness_multiple": 33.34,
+          "defaults_kept_out_pct": 98.8
+        },
+        "approve_50pct": {
+          "bad_rate_in_approved_book": 0.0246,
+          "vs_population_bad_rate": 0.3154,
+          "book_cleanliness_multiple": 12.81,
+          "defaults_kept_out_pct": 96.1
+        }
+      },
+      "risk_bands": {
+        "bands": {
+          "A": 0.0045,
+          "B": 0.0144,
+          "C": 0.1272,
+          "D": 0.6072,
+          "E": 0.8235
+        },
+        "monotone": true,
+        "monotone_within_noise": true
+      }
+    }
+  },
+  "confidence_intervals": {
+    "holdout_auc": {
+      "lower_95": 0.9614,
+      "upper_95": 0.9662
+    },
+    "oot_auc": {
+      "lower_95": 0.9605,
+      "upper_95": 0.9638
+    }
+  },
+  "baseline_comparison_oot": {
+    "logistic_same_features": {
+      "auc": 0.8571,
+      "delong_vs_v2": {
+        "auc_a": 0.9623,
+        "auc_b": 0.8571,
+        "delta": 0.1051,
+        "z": 59.002,
+        "p_value": 0.0,
+        "significant_5pct": true
+      }
+    },
+    "v1_recipe_blanket_monotone": {
+      "auc": 0.9097,
+      "delong_vs_v2": {
+        "auc_a": 0.9623,
+        "auc_b": 0.9097,
+        "delta": 0.0526,
+        "z": 44.339,
+        "p_value": 0.0,
+        "significant_5pct": true
+      }
+    }
+  },
+  "bag_complexity_gate": {
+    "applied": false,
+    "delong": {
+      "auc_a": 0.9624,
+      "auc_b": 0.9623,
+      "delta": 0.0001,
+      "z": 1.995,
+      "p_value": 0.0461,
+      "significant_5pct": true
+    },
+    "materiality_threshold": 0.003,
+    "reason": "bag not significantly and materially better; shipping the single model"
+  },
+  "calibration_note": "Identity calibration shipped: E5 found the raw large-sample model tied-best on ECE in-distribution (0.0019 holdout) and that OOT calibration error (~0.03) is base-rate drift no static calibrator fixes; operational recalibration remains the product answer.",
+  "explainability": {
+    "method": "native exact TreeSHAP in logit space",
+    "served_reconstruction_error_logit": 9.267e-08,
+    "gain_importance": {
+      "term_months": 76.5169,
+      "gross_approval_log": 5.0382,
+      "guarantee_portion": 26.6451,
+      "jobs_supported_log": 3.6718,
+      "is_individual": 3.776,
+      "is_partnership": 6.0665,
+      "revolver": 11.7178,
+      "collateral": 13.53,
+      "fixed_rate": 17.0474,
+      "has_franchise": 4.8524,
+      "sector_accom_food": 8.2806,
+      "sector_retail": 4.7489,
+      "sector_construction": 2.6073,
+      "sector_professional": 3.7981,
+      "sector_health": 5.7933,
+      "sector_manufacturing": 3.3352,
+      "sector_wholesale": 3.3919,
+      "sector_transport": 6.1336,
+      "sector_other_services": 4.8455
+    }
+  },
+  "stability": {
+    "seed_std_auc": "4e-05 across 5 seeds (registry E14)",
+    "perturbation_continuous": {
+      "mean_abs_pd_delta": 0.10455,
+      "p95_abs_pd_delta": 0.50064,
+      "note": "+/-5% relative noise on continuous inputs only; binary flags excluded (off-manifold)"
+    }
+  },
+  "experiment_registry": "backend/model_training/experiments/registry.json",
+  "cross_references": {
+    "reject_inference": "E10",
+    "survival_12m_pd": "E16",
+    "adversarial_shift": "E7",
+    "domain_adaptation": "E8",
+    "geographic_ood": "E13",
+    "stability": "E14",
+    "regional_fairness": "E15",
+    "ablation": "E2",
+    "calibration": "E5"
+  },
+  "trained_at_utc": "2026-07-12T12:10:45.634617+00:00",
+  "artifacts": {
+    "sba_v2_model_sha256": "d1cb2ae18b681b4aa29504dc1c33097ea9cfb53e3b337bf6b0bce0729dd793ae",
+    "sba_v2_metadata_sha256": "418514b9c66415982b62cd9a2d8a1c03ad99a687e403c74feafbe966159565a4"
+  },
+  "honesty_boundary": {
+    "real_outcomes": "Yes -- 418k resolved real SBA loans with real charge-offs; natural base rates (7-9%), not a balanced research sample.",
+    "temporal": "OOT is genuinely later-in-time (FY2017-19) than every fitted row (FY2010-16).",
+    "censoring": "Resolved-only labelling right-censors slow outcomes in late vintages; the discrete-time hazard experiment (E16) models this explicitly.",
+    "domain": "US small business is a proxy for Indian MSME; this is methodology evidence, not an IDBI calibration.",
+    "v1_baseline": "The v1 case-sample benchmark (sme_evaluation.json) remains committed for like-for-like comparison."
+  }
+}

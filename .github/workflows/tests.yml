@@ -24,6 +24,8 @@ jobs:
           cache-dependency-path: backend/requirements.txt
       - name: Install pinned runtime
         run: pip install -r backend/requirements.txt
+      - name: Install test dependencies
+        run: pip install -r backend/requirements-dev.txt
       - name: Compile backend
         run: python -m compileall -q backend
       - name: Run backend suite

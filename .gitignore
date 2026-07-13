@@ -8,3 +8,4 @@ node_modules/
 backend/audit_log.jsonl
 backend/model_training/data/
 backend/model_training/.venv-training/
+*.stackdump

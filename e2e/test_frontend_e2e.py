@@ -168,12 +168,12 @@ def test_divergence_guardrail_reachable_for_stressed_case(page):
 
 
 def test_case_switching_updates_verdict(page):
+    # Auto-wait for the re-render instead of a fixed settle: the decision tab
+    # now paints several extra sections, so a fixed 350ms is a race under load.
     page.select_option("#msme", "steady_wholesaler")
-    settle(page)
-    assert "Patel Wholesale Traders" in page.inner_text("#caseSummary")
+    page.wait_for_selector("#caseSummary >> text=Patel Wholesale Traders", timeout=15000)
     page.select_option("#msme", "ntc_hero")
-    settle(page)
-    assert "Shree Ganesh Textiles" in page.inner_text("#caseSummary")
+    page.wait_for_selector("#caseSummary >> text=Shree Ganesh Textiles", timeout=15000)
 
 
 def test_decision_tab_hands_off_to_ocen_rail_and_runs_whatif(page):
@@ -284,3 +284,55 @@ def test_no_external_requests_and_selfhosted_fonts(browser, base_url):
     assert "Libre Baskerville" in families
     assert "Source Sans 3" in families
     context.close()
+
+
+def test_sensitivity_lab_runs_two_levers_jointly(page):
+    # Adding a second lever and submitting must produce ONE joint hypothetical
+    # (the /whatif/multi endpoint), with both levers in the register.
+    page.click("[data-add-lever]")
+    rows = page.query_selector_all("[data-whatif] [data-lever-row]")
+    assert len(rows) == 2
+    rows[0].query_selector("select").select_option("cheque_bounce_rate")
+    rows[0].query_selector("input").fill("0.4")
+    rows[1].query_selector("select").select_option("gst_filing_streak_months")
+    rows[1].query_selector("input").fill("6")
+    page.click("[data-whatif] button[type='submit']")
+    settle(page)
+    result = page.inner_text("[data-whatif-result]")
+    assert "Cheque bounce rate" in result
+    assert "GST filing streak" in result
+    assert "Baseline" in result and "Hypothetical" in result
+    assert "no audit record" in result
+    assert not page._console_errors
+
+
+def test_stress_lab_renders_all_three_scenarios(page):
+    page.click("[data-stress-run]")
+    settle(page)
+    assert page.locator("[data-stress-result] .stress-card").count() == 3
+    result = page.inner_text("[data-stress-result]")
+    for label in ("Demand shock", "Conduct slip", "Leverage creep"):
+        assert label in result
+    assert ("Decision holds" in result) or ("Falls to" in result)
+    assert not page._console_errors
+
+
+def test_compare_puts_two_files_side_by_side(page):
+    page.select_option("[data-compare-select]", "stressed_retailer")
+    settle(page)
+    result = page.inner_text("[data-compare-result]")
+    assert "Proxy PD" in result
+    assert "Indicative limit" in result
+    assert "Liquidity" in result  # pillar-by-pillar rows are present
+    assert not page._console_errors
+
+
+def test_risk_map_renders_and_switches_the_active_case(page):
+    dots = page.locator("#riskMap [data-map-case]")
+    assert dots.count() >= 3
+    target = page.locator("#riskMap [data-map-case]:not(.map-dot-active)").first
+    target_id = target.get_attribute("data-map-case")
+    target.click()
+    settle(page)
+    assert page.input_value("#msme") == target_id
+    assert not page._console_errors

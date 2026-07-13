@@ -1105,3 +1105,142 @@ code {
   font-size: 0.7rem;
   white-space: nowrap;
 }
+
+/* ---- Sensitivity, stress, compare, and the portfolio risk map ---- */
+.lever-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+.lever-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin-top: var(--space-2);
+}
+.ghost-action {
+  border: 1px dashed var(--line-strong);
+  background: none;
+  color: var(--ledger-ink);
+  font: inherit;
+  font-size: 0.85rem;
+  padding: 8px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.ghost-action:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+.stress-card {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: var(--space-3);
+  margin-top: var(--space-2);
+  background: var(--veil-strong);
+}
+.stress-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-1);
+}
+.compare-pick {
+  display: block;
+  margin-bottom: var(--space-2);
+  font-size: 0.85rem;
+  color: var(--ink-muted);
+}
+.compare-pick select {
+  display: block;
+  width: 100%;
+  margin-top: var(--space-1);
+  padding: 9px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: var(--veil-strong);
+  color: var(--ledger-ink);
+  font: inherit;
+}
+.risk-map {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: var(--space-3);
+  background: var(--veil);
+  margin-top: var(--space-3);
+}
+.risk-map:empty {
+  display: none;
+}
+.risk-map svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+.risk-map-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-2);
+  flex-wrap: wrap;
+}
+.risk-map-head h2 {
+  font: 700 1rem var(--font-display);
+  margin: 0;
+}
+.map-grid {
+  stroke: var(--line);
+  stroke-width: 1;
+}
+.map-label {
+  fill: var(--ink-muted);
+  font: 10px var(--font-utility);
+}
+.map-dot {
+  stroke: var(--ledger-ink);
+  stroke-width: 1;
+  cursor: pointer;
+  opacity: 0.85;
+}
+.map-dot:hover,
+.map-dot:focus-visible {
+  opacity: 1;
+}
+.map-dot-approved {
+  fill: color-mix(in srgb, var(--gst-ruled-blue) 52%, white);
+}
+.map-dot-review {
+  fill: color-mix(in srgb, var(--marigold-audit) 55%, white);
+}
+.map-dot-rejected {
+  fill: color-mix(in srgb, var(--entry-red) 45%, white);
+}
+.map-dot-active {
+  stroke: var(--stamp-violet);
+  stroke-width: 3;
+  opacity: 1;
+}
+.map-legend {
+  margin-top: var(--space-1);
+}
+.legend-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin: 0 5px 0 12px;
+  vertical-align: middle;
+  border: 1px solid var(--line-strong);
+}
+.legend-dot:first-child {
+  margin-left: 0;
+}
+@media (max-width: 760px) {
+  .lever-row {
+    grid-template-columns: 1fr;
+  }
+}

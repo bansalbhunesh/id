@@ -25,14 +25,14 @@ Use this as the final IDBI Innovate / H2S submission source of truth.
 
 ## Verification Gates
 
-- Backend tests: `127 passed` (clean-venv reproducible; see pinned `backend/requirements.txt` + `backend/requirements-dev.txt`); the UI suites add 9 frontend-unit + 14 Playwright e2e tests (150 total).
+- Backend tests: `135 passed` (clean-venv reproducible; see pinned `backend/requirements.txt` + `backend/requirements-dev.txt`); the UI suites add 9 frontend-unit + 18 Playwright e2e tests (162 total).
 - Public proxy evidence: `GET /model/evaluation` reports random-holdout AUC 0.7497 (95% bootstrap 0.7314-0.7678), Gini 0.4993, KS 0.4225, Brier 0.1415, ECE 0.0122, and explicit no-OOT-yet disclosure; reproducible via `python backend/model_training/train_pd_model.py`.
 - Security: `GET /audit-log` requires the `auditor` role; CORS is allowlisted; JSON is no-store; app CSP, request tracing, body/array bounds and fail-closed promotion are tested. See `docs/SECURITY_COMPLIANCE.md`.
 - Deck export: submission deck is the filled official template (15 pages including the branded cover and closing pages), exported to PDF from the PPTX; the extended deck re-exports from `docs/deck/index.html` (13 pages) after changing model evidence or screenshots.
 - Browser smoke test: desktop/tablet/mobile render with no console errors, no horizontal overflow, WCAG AA Axe violations, keyboard trap, or undersized visible controls.
 - Live app proof: 5 cases, 4 impact cards, 5 source signals, 5 governance controls, validation metrics, pilot KPIs, and expanded fairness slices.
 - Review packet: Decision, Evidence, Model, Governance, Proof, and Sources views render from live API state in a permanent side panel and can be deep-linked with `?case=...&view=...`.
-- Frontend test evidence: `node --test frontend/tests/lib.test.mjs` (9 unit) and `python -m pytest e2e -q` (14 Playwright end-to-end, self-booting server).
+- Frontend test evidence: `node --test frontend/tests/lib.test.mjs` (9 unit) and `python -m pytest e2e -q` (18 Playwright end-to-end, self-booting server) -- including the sensitivity lab, stress battery, borrower comparison, and portfolio risk map.
 - Core demo moment: Shree Ganesh Textiles is traditional `Rejected` but SaakhScore alternate-data `Approved`, grade A, score 86/100, Rs 27,00,000 indicative limit.
 
 ## Form Copy

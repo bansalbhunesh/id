@@ -31,6 +31,7 @@ It is built for New-to-Credit and New-to-Bank MSMEs that traditional bureau-firs
 - Underwriter memo.
 - Borrower improvement plan.
 - Policy guardrails and source map, including EWS-style monitoring signals, a counterparty-concentration limit guardrail, a GST-vs-bank turnover reconciliation guardrail (the looks-fine-on-paper red flag, both directions), and a deterministic bilingual underwriter next-best-action.
+- Sensitivity lab (up to three signals re-scored in one joint pipeline run), a fixed three-scenario adverse stress battery with schema-clamped shocks, side-by-side borrower comparison, and a clickable portfolio risk map (score vs PD, bubble = limit).
 - Audit log.
 - IDBI sandbox-style AA/GST/UPI/EPFO feed endpoint.
 - Portfolio impact, pilot metrics, validation report, and governance endpoints.
@@ -91,7 +92,7 @@ Use the committed screenshots from `docs/deck/assets/`:
 
 ## Slide 11 - Prototype Performance Report / Benchmarking
 
-- 150 automated tests passing (127 backend + 9 frontend unit + 14 Playwright e2e), plus a non-root container build/runtime/fail-closed CI job.
+- 162 automated tests passing (135 backend + 9 frontend unit + 18 Playwright e2e), plus a non-root container build/runtime/fail-closed CI job.
 - Public proxy holdout evidence: ROC-AUC 0.7497 (bootstrap 95% interval 0.7314-0.7678), Gini 0.4993, KS 0.4225, Brier 0.1415, ECE 0.0122 on 4,500 untouched rows. Cross-sectional random holdout, not OOT; reproducible with `python backend/model_training/train_pd_model.py`.
 - Real small-business benchmark (`GET /model/sme-benchmark`): the v2 champion is selected across 418,947 resolved real SBA 7(a) loans at natural base rates (197,716-loan train split) and validated on a true later-in-time window (FY2017-19: 114,770 loans, ROC-AUC 0.9623, KS 0.82) plus a 257k-loan recession stress cohort (ROC-AUC 0.9255), with a registry-tracked experiment programme behind it (docs/research/BENCHMARK_REPORT.md). US proxy domain, disclosed; not an IDBI calibration.
 - Coverage includes scoring, input validation, grade boundaries, NTC reversal, improvement plan, hash-chained audit logging and tamper detection, consent enforcement, auth/RBAC, ML Shapley invariants, sandbox feed mapping, recalibration reports, validation metrics, portfolio impact, governance summary, and API endpoints.

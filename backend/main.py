@@ -32,7 +32,7 @@ from consent_surface import consent_contract
 from portfolio import build_governance_summary, build_portfolio_snapshot
 from rails import build_ocen_offer, rails_registry
 from rate_limit import rate_limit
-from whatif import run_whatif
+from whatif import parse_levers, run_stress, run_whatif, run_whatif_multi
 from recalibration import SandboxRecalibrationRequest, build_recalibration_report
 from scoring import MSMEProfile, score_profile
 from sample_data import SAMPLE_PROFILES
@@ -208,6 +208,27 @@ def get_whatif(msme_id: str, field: str = Query(...), value: float = Query(...))
     # Same safety contract as GET score: a hypothetical is a view, never an
     # audit event. Rate-limited because it runs the full pipeline twice.
     return run_whatif(profile, field, value)
+
+
+@app.get("/msmes/{msme_id}/whatif/multi",
+         dependencies=[Depends(rate_limit(max_requests=30))])
+def get_whatif_multi(msme_id: str, levers: str = Query(..., max_length=500)):
+    profile = SAMPLE_PROFILES.get(msme_id)
+    if profile is None:
+        raise HTTPException(status_code=404, detail="MSME not found")
+    # "field:value,field:value" -- same view contract as the single lever,
+    # tighter rate budget because interactions invite rapid replays.
+    return run_whatif_multi(profile, parse_levers(levers))
+
+
+@app.get("/msmes/{msme_id}/stress",
+         dependencies=[Depends(rate_limit(max_requests=30))])
+def get_stress(msme_id: str):
+    profile = SAMPLE_PROFILES.get(msme_id)
+    if profile is None:
+        raise HTTPException(status_code=404, detail="MSME not found")
+    # Fixed adverse battery over the identical pipeline; view-only.
+    return run_stress(profile)
 
 
 @app.get("/rails")

@@ -145,6 +145,7 @@ def build_portfolio_snapshot() -> dict:
                 "score": item["score"],
                 "grade": item["grade"],
                 "risk_band": item["risk_band"],
+                "pd_estimate": item.get("pd_estimate"),
                 "eligible_limit": item["eligible_limit"],
                 "traditional_decision": item["traditional"]["decision"],
                 "alternate_data_decision": item["alternate_data_decision"],

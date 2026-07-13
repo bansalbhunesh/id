@@ -25,6 +25,8 @@ const state = {
   activeOffer: null,
   activeTab: "decision",
   lang: "en",
+  compareId: null,
+  compareScore: null,
 };
 
 const els = {
@@ -35,6 +37,7 @@ const els = {
   caseList: document.getElementById("caseList"),
   caseSummary: document.getElementById("caseSummary"),
   portfolioMetrics: document.getElementById("portfolioMetrics"),
+  riskMap: document.getElementById("riskMap"),
   tabs: document.getElementById("tabs"),
   tabContent: document.getElementById("tabContent"),
   packet: document.getElementById("reviewPacket"),
@@ -372,33 +375,46 @@ const WHATIF_LEVERS = [
   ["outstanding_debt_to_inflow", "Debt-to-inflow ratio", "0.3"],
   ["top_counterparty_share_pct", "Top counterparty share (%)", "45"],
   ["gst_bank_divergence_pct", "GST-vs-bank divergence (%)", "10"],
+  ["gst_turnover_growth_pct", "GST turnover growth 6mo (%)", "12"],
 ];
+const MAX_UI_LEVERS = 3;
+
+function leverRowMarkup(index) {
+  return `
+    <div class="lever-row" data-lever-row>
+      <label>Signal ${index + 1}
+        <select name="field">${WHATIF_LEVERS.map(([f, label], i) => `<option value="${esc(f)}"${i === index ? " selected" : ""}>${esc(label)}</option>`).join("")}</select>
+      </label>
+      <label>New value
+        <input name="value" type="number" step="any" inputmode="decimal" placeholder="${esc(WHATIF_LEVERS[index]?.[2] || "")}" />
+      </label>
+    </div>`;
+}
 
 function renderWhatIf() {
   return `
     <section class="detail-section">
-      <h3 class="section-title">What-if lever</h3>
-      <p class="muted">Move one signal and re-run the identical live pipeline -- same schema bounds, same policy, no audit record. Answers "what would it take?" without a payload editor.</p>
+      <h3 class="section-title">Sensitivity lab</h3>
+      <p class="muted">Move up to ${MAX_UI_LEVERS} signals together and re-run the identical live pipeline -- one joint run, so interactions are real rather than summed single-lever deltas. Same schema bounds, same policy, no audit record.</p>
       <form class="console-form whatif-form" data-whatif novalidate>
-        <label>Signal
-          <select name="field">${WHATIF_LEVERS.map(([f, label]) => `<option value="${esc(f)}">${esc(label)}</option>`).join("")}</select>
-        </label>
-        <label>New value
-          <input name="value" type="number" step="any" inputmode="decimal" placeholder="${esc(WHATIF_LEVERS[0][2])}" required />
-        </label>
-        <button class="primary-action" type="submit">Re-score hypothetical</button>
+        <div data-lever-rows>${leverRowMarkup(0)}</div>
+        <div class="lever-actions">
+          <button class="ghost-action" type="button" data-add-lever>+ Add signal</button>
+          <button class="primary-action" type="submit">Re-score hypothetical</button>
+        </div>
       </form>
       <div class="console-result" data-whatif-result aria-live="polite"></div>
     </section>`;
 }
 
 function whatifResultCard(body) {
+  const levers = body.levers || (body.lever ? [body.lever] : []);
   const decisionChanged = body.delta.decision_changed;
   const arrowRow = (label, from, to, fmt = (v) => v) => `
     <tr><td>${esc(label)}</td><td class="number">${esc(fmt(from))}</td><td class="number">${esc(fmt(to))}</td></tr>`;
   return `
     <div class="stamp-note console-stamp">
-      <p class="muted">${esc(body.lever.label)}: <strong>${esc(body.lever.from ?? "not set")}</strong> &rarr; <strong>${esc(body.lever.to)}</strong></p>
+      ${levers.map((lever) => `<p class="muted">${esc(lever.label)}: <strong>${esc(lever.from ?? "not set")}</strong> &rarr; <strong>${esc(lever.to)}</strong></p>`).join("")}
       <table class="ledger-table"><tbody>
         <tr><td></td><td class="number"><strong>Baseline</strong></td><td class="number"><strong>Hypothetical</strong></td></tr>
         ${arrowRow("Score", body.baseline.score, body.hypothetical.score)}
@@ -414,19 +430,31 @@ function whatifResultCard(body) {
 async function submitWhatIf(form) {
   const result = form.parentElement.querySelector("[data-whatif-result]");
   const button = form.querySelector("button[type='submit']");
-  const field = form.elements.field.value;
-  const value = form.elements.value.value.trim();
-  if (value === "") {
-    result.innerHTML = `<div class="error-state"><div><strong>Enter a value</strong><p>Pick the hypothetical level for the selected signal.</p></div></div>`;
+  const rows = [...form.querySelectorAll("[data-lever-row]")];
+  const levers = [];
+  const seen = new Set();
+  for (const row of rows) {
+    const field = row.querySelector("select").value;
+    const value = row.querySelector("input").value.trim();
+    if (value === "") continue;
+    if (seen.has(field)) {
+      result.innerHTML = `<div class="error-state"><div><strong>Duplicate signal</strong><p>Each signal can only appear once per hypothetical.</p></div></div>`;
+      return;
+    }
+    seen.add(field);
+    levers.push([field, value]);
+  }
+  if (!levers.length) {
+    result.innerHTML = `<div class="error-state"><div><strong>Enter a value</strong><p>Set a hypothetical level for at least one signal.</p></div></div>`;
     return;
   }
   button.disabled = true;
   result.innerHTML = `<div class="skeleton">Re-scoring the hypothetical...</div>`;
+  const path = levers.length === 1
+    ? `/msmes/${encodeURIComponent(state.activeId)}/whatif?field=${encodeURIComponent(levers[0][0])}&value=${encodeURIComponent(levers[0][1])}`
+    : `/msmes/${encodeURIComponent(state.activeId)}/whatif/multi?levers=${encodeURIComponent(levers.map(([f, v]) => `${f}:${v}`).join(","))}`;
   try {
-    const response = await api(
-      `/msmes/${encodeURIComponent(state.activeId)}/whatif?field=${encodeURIComponent(field)}&value=${encodeURIComponent(value)}`,
-      { raw: true },
-    );
+    const response = await api(path, { raw: true });
     const body = await response.json().catch(() => ({}));
     if (!response.ok) {
       const detail = typeof body.detail === "string" ? body.detail : "The backend rejected the hypothetical.";
@@ -439,6 +467,152 @@ async function submitWhatIf(form) {
   } finally {
     button.disabled = false;
   }
+}
+
+function renderStressLab() {
+  return `
+    <section class="detail-section">
+      <h3 class="section-title">Stress lab</h3>
+      <p class="muted">Three fixed adverse scenarios -- demand shock, conduct slip, leverage creep -- re-run the full pipeline with shocks clamped to the same input schema as every API call. Views only; nothing is audited or persisted.</p>
+      <button class="primary-action" type="button" data-stress-run>Run the stress battery</button>
+      <div class="console-result" data-stress-result aria-live="polite"></div>
+    </section>`;
+}
+
+function stressScenarioCard(scenario, baseline) {
+  const holds = !scenario.delta.decision_changed;
+  const shocks = scenario.applied.map((shock) => `${esc(shock.label)}: ${esc(shock.from)} &rarr; ${esc(shock.to)}`).join(" &middot; ");
+  return `
+    <article class="stress-card">
+      <div class="stress-head">
+        <strong>${esc(scenario.label)}</strong>
+        <span class="journal-state ${holds ? "approved" : "entry-red"}">${holds ? "Decision holds" : `Falls to ${esc(scenario.result.decision)}`}</span>
+      </div>
+      <p class="muted">${esc(scenario.narrative)}</p>
+      <p class="fine-print">${shocks}</p>
+      <table class="ledger-table"><tbody>
+        <tr><td>Score</td><td class="number">${esc(baseline.score)} &rarr; <strong>${esc(scenario.result.score)}</strong> (${scenario.delta.score >= 0 ? "+" : ""}${esc(scenario.delta.score)})</td></tr>
+        <tr><td>Grade</td><td class="number">${esc(baseline.grade)} &rarr; ${esc(scenario.result.grade)}</td></tr>
+        <tr><td>Indicative limit</td><td class="number">${formatCurrency(baseline.eligible_limit)} &rarr; ${formatCurrency(scenario.result.eligible_limit)}</td></tr>
+      </tbody></table>
+    </article>`;
+}
+
+async function runStress(button) {
+  const result = button.parentElement.querySelector("[data-stress-result]");
+  button.disabled = true;
+  result.innerHTML = `<div class="skeleton">Running three adverse scenarios through the live pipeline...</div>`;
+  try {
+    const body = await api(`/msmes/${encodeURIComponent(state.activeId)}/stress`);
+    const verdict = body.verdict || {};
+    const summary = verdict.decision_breaks_under?.length
+      ? `<strong>Decision breaks under:</strong> ${verdict.decision_breaks_under.map(esc).join(", ")}.`
+      : `<strong>The decision holds under all ${verdict.scenarios_run} scenarios.</strong>`;
+    result.innerHTML = `
+      ${(body.scenarios || []).map((scenario) => stressScenarioCard(scenario, body.baseline)).join("")}
+      <p>${summary}</p>
+      <p class="truth-note">${esc(body.note || "")}</p>`;
+  } catch (error) {
+    result.innerHTML = `<div class="error-state"><div><strong>Stress battery failed</strong><p>${esc(error.message)}</p></div></div>`;
+  } finally {
+    button.disabled = false;
+  }
+}
+
+function compareCard(a, b) {
+  const pd = (score) => (typeof score.pd_estimate === "number" ? `${(score.pd_estimate * 100).toFixed(1)}%` : "n/a");
+  const nameOf = (score) => score.profile?.name || "Borrower";
+  const pillarRows = Object.keys(a.pillars || {}).map((key) => `
+    <tr><td>${esc(titleize(key))}</td><td class="number">${esc(a.pillars[key])}/20</td><td class="number">${esc(b.pillars?.[key] ?? "-")}/20</td></tr>`).join("");
+  return `
+    <table class="ledger-table"><tbody>
+      <tr><td></td><td class="number"><strong>${esc(nameOf(a))}</strong></td><td class="number"><strong>${esc(nameOf(b))}</strong></td></tr>
+      <tr><td>Decision</td><td class="number">${esc(a.alternate_data_decision)}</td><td class="number">${esc(b.alternate_data_decision)}</td></tr>
+      <tr><td>Score</td><td class="number">${esc(a.score)}/100 (${esc(a.grade)})</td><td class="number">${esc(b.score)}/100 (${esc(b.grade)})</td></tr>
+      <tr><td>Proxy PD</td><td class="number">${pd(a)}</td><td class="number">${pd(b)}</td></tr>
+      <tr><td>Indicative limit</td><td class="number">${formatCurrency(a.eligible_limit)}</td><td class="number">${formatCurrency(b.eligible_limit)}</td></tr>
+      ${pillarRows}
+    </tbody></table>
+    <p class="truth-note">Both files scored by the identical live pipeline in this session; no audit record is written by comparison views.</p>`;
+}
+
+function renderCompare() {
+  const others = state.msmes.filter((item) => item.id !== state.activeId);
+  return `
+    <section class="detail-section">
+      <h3 class="section-title">Compare borrowers</h3>
+      <p class="muted">Put a second file next to this one -- same pipeline, pillar by pillar.</p>
+      <label class="compare-pick">Compare with
+        <select data-compare-select>
+          <option value="">Pick a borrower file</option>
+          ${others.map((item) => `<option value="${esc(item.id)}"${item.id === state.compareId ? " selected" : ""}>${esc(item.name)}</option>`).join("")}
+        </select>
+      </label>
+      <div class="console-result" data-compare-result aria-live="polite">${state.compareScore && state.activeScore ? compareCard(state.activeScore, state.compareScore) : ""}</div>
+    </section>`;
+}
+
+async function loadCompare(select) {
+  const container = select.closest(".detail-section").querySelector("[data-compare-result]");
+  const id = select.value;
+  if (!id) {
+    state.compareId = null;
+    state.compareScore = null;
+    container.innerHTML = "";
+    return;
+  }
+  container.innerHTML = `<div class="skeleton">Scoring the comparison file...</div>`;
+  try {
+    const score = await api(`/msmes/${encodeURIComponent(id)}/score`);
+    state.compareId = id;
+    state.compareScore = score;
+    container.innerHTML = state.activeScore ? compareCard(state.activeScore, score) : "";
+  } catch (error) {
+    container.innerHTML = `<div class="error-state"><div><strong>Comparison unavailable</strong><p>${esc(error.message)}</p></div></div>`;
+  }
+}
+
+function renderRiskMap() {
+  if (!els.riskMap) return;
+  const cases = (state.portfolio?.cases || []).filter((item) => typeof item.pd_estimate === "number");
+  if (!cases.length) {
+    els.riskMap.innerHTML = "";
+    return;
+  }
+  const W = 640;
+  const H = 240;
+  const mL = 46;
+  const mR = 16;
+  const mT = 18;
+  const mB = 34;
+  const maxPd = (Math.max(...cases.map((c) => c.pd_estimate)) || 0.1) * 1.15;
+  const maxLimit = Math.max(...cases.map((c) => c.eligible_limit)) || 1;
+  const xOf = (score) => mL + (score / 100) * (W - mL - mR);
+  const yOf = (pd) => mT + (1 - pd / maxPd) * (H - mT - mB);
+  const rOf = (limit) => 7 + Math.sqrt(limit / maxLimit) * 13;
+  const dotClass = (decision) => (decision === "Approved" ? "map-dot-approved" : decision === "Rejected" ? "map-dot-rejected" : "map-dot-review");
+  const dots = cases.map((c) => `
+    <circle data-map-case="${esc(c.id)}" class="map-dot ${dotClass(c.alternate_data_decision)}${c.id === state.activeId ? " map-dot-active" : ""}"
+      cx="${xOf(c.score).toFixed(1)}" cy="${yOf(c.pd_estimate).toFixed(1)}" r="${rOf(c.eligible_limit).toFixed(1)}" role="button" tabindex="0"
+      aria-label="${esc(c.name)}: score ${esc(c.score)}, PD ${(c.pd_estimate * 100).toFixed(1)} percent">
+      <title>${esc(c.name)} -- score ${esc(c.score)}, PD ${(c.pd_estimate * 100).toFixed(1)}%, ${esc(c.grade)} grade, ${formatCurrency(c.eligible_limit)}</title>
+    </circle>`).join("");
+  const yTicks = [0, maxPd / 2, maxPd].map((v) => `
+    <line class="map-grid" x1="${mL}" y1="${yOf(v).toFixed(1)}" x2="${W - mR}" y2="${yOf(v).toFixed(1)}"></line>
+    <text class="map-label" x="${mL - 6}" y="${(yOf(v) + 3).toFixed(1)}" text-anchor="end">${(v * 100).toFixed(0)}%</text>`).join("");
+  const xTicks = [0, 50, 100].map((v) => `
+    <text class="map-label" x="${xOf(v).toFixed(1)}" y="${H - 12}" text-anchor="middle">${v}</text>`).join("");
+  els.riskMap.innerHTML = `
+    <div class="risk-map-head">
+      <h2>Portfolio risk map</h2>
+      <p class="fine-print">Health score (x) vs proxy PD (y); bubble area = indicative limit. Click a bubble to open that file.</p>
+    </div>
+    <svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Scatter plot of borrower health score against probability of default">
+      ${yTicks}${xTicks}${dots}
+      <text class="map-label" x="${((mL + W - mR) / 2).toFixed(0)}" y="${H - 1}" text-anchor="middle">health score</text>
+      <text class="map-label" x="12" y="${mT + 8}">PD</text>
+    </svg>
+    <div class="map-legend fine-print"><span class="legend-dot map-dot-approved"></span>Approved<span class="legend-dot map-dot-review"></span>Review<span class="legend-dot map-dot-rejected"></span>Rejected</div>`;
 }
 
 function renderJournal(items = [], emptyLabel = "No rows available.") {
@@ -494,6 +668,8 @@ function renderDecisionTab(score) {
     ${renderLimitBasis(score)}
     ${renderOfferRail(state.activeOffer)}
     ${renderWhatIf()}
+    ${renderStressLab()}
+    ${renderCompare()}
     <section class="detail-section">
       <h3 class="section-title">Underwriter memo</h3>
       <p>${esc(score.memo)}</p>
@@ -1044,8 +1220,11 @@ async function loadCase(id, { updateHistory = true } = {}) {
   // be painted under case B's identity.
   const loadToken = ++activeLoadToken;
   state.activeId = id;
+  state.compareId = null;
+  state.compareScore = null;
   els.msme.value = id;
   renderCases();
+  renderRiskMap();
   els.caseSummary.innerHTML = `<div class="skeleton">Scoring selected MSME...</div>`;
   els.tabContent.innerHTML = `<div class="skeleton">Preparing review packet...</div>`;
   try {
@@ -1107,6 +1286,36 @@ function bindEvents() {
       submitWhatIf(whatifForm);
     }
   });
+  els.tabContent.addEventListener("click", (event) => {
+    const addLever = event.target.closest("[data-add-lever]");
+    if (addLever) {
+      const rows = addLever.closest("form").querySelector("[data-lever-rows]");
+      const count = rows.querySelectorAll("[data-lever-row]").length;
+      if (count < MAX_UI_LEVERS) rows.insertAdjacentHTML("beforeend", leverRowMarkup(count));
+      if (count + 1 >= MAX_UI_LEVERS) addLever.disabled = true;
+      return;
+    }
+    const stressButton = event.target.closest("[data-stress-run]");
+    if (stressButton) runStress(stressButton);
+  });
+  els.tabContent.addEventListener("change", (event) => {
+    const compareSelect = event.target.closest("[data-compare-select]");
+    if (compareSelect) loadCompare(compareSelect);
+  });
+  if (els.riskMap) {
+    els.riskMap.addEventListener("click", (event) => {
+      const dot = event.target.closest("[data-map-case]");
+      if (dot) loadCase(dot.dataset.mapCase);
+    });
+    els.riskMap.addEventListener("keydown", (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      const dot = event.target.closest("[data-map-case]");
+      if (dot) {
+        event.preventDefault();
+        loadCase(dot.dataset.mapCase);
+      }
+    });
+  }
   window.addEventListener("popstate", async () => {
     const urlState = readUrlState();
     const caseId = state.msmes.some((item) => item.id === urlState.caseId)
@@ -1166,6 +1375,7 @@ async function init() {
     const unavailable = optional.filter((result) => result.status === "rejected").length;
     if (unavailable) els.cohortStatus.title = `${unavailable} optional evidence feed(s) unavailable`;
     renderPortfolioMetrics();
+    renderRiskMap();
     renderCases();
     await loadCase(state.activeId, { updateHistory: false });
     setTab(urlState.view || "decision", { updateHistory: false });

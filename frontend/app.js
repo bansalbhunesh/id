@@ -1,5 +1,5 @@
 const API_BASE = window.location.protocol === "file:" ? "http://localhost:8000" : "";
-const VALID_TABS = ["decision", "evidence", "governance", "proof", "sources"];
+const VALID_TABS = ["decision", "evidence", "model", "governance", "proof", "sources"];
 const API_TIMEOUT_MS = 60000;
 const state = {
   health: null,
@@ -8,12 +8,14 @@ const state = {
   governance: null,
   validation: null,
   model: null,
+  benchmark: null,
   deployment: null,
   outcomeContract: null,
   submissionProof: null,
   activeId: "ntc_hero",
   activeScore: null,
   activeTab: "decision",
+  lang: "en",
   drawerOpen: false,
   lastFocus: null,
 };
@@ -46,6 +48,7 @@ const currency = new Intl.NumberFormat("en-IN", {
 const drawerTitles = {
   decision: "Decision packet",
   evidence: "Evidence packet",
+  model: "Model evidence",
   governance: "Governance packet",
   proof: "Judge proof",
   sources: "Source register",
@@ -85,14 +88,17 @@ function statusClass(value) {
   return "";
 }
 
-async function api(path, timeoutMs = API_TIMEOUT_MS) {
+async function api(path, { method = "GET", headers = {}, body, timeoutMs = API_TIMEOUT_MS, raw = false } = {}) {
   const controller = new AbortController();
   const timeout = window.setTimeout(() => controller.abort(), timeoutMs);
   try {
     const response = await fetch(`${API_BASE}${path}`, {
-      headers: { Accept: "application/json" },
+      method,
+      headers: { Accept: "application/json", ...headers },
+      body,
       signal: controller.signal,
     });
+    if (raw) return response;
     if (!response.ok) throw new Error(`${path} returned ${response.status}`);
     return await response.json();
   } catch (error) {
@@ -149,6 +155,8 @@ function trapDrawerFocus(event) {
 function setApiStatus(ok, label) {
   els.apiStatus.textContent = label;
   els.apiStatus.dataset.state = ok ? "live" : "offline";
+  const release = state.health?.release;
+  if (release) els.apiStatus.title = `v${release.version} · ${release.commit} · ${release.mode}`;
 }
 
 function readUrlState() {
@@ -308,6 +316,7 @@ function renderCaseSummary(score) {
           <div><span>UdyamPulse alternate-data review</span><strong class="decision-word ${alternateClass}">${esc(score.alternate_data_decision)}</strong></div>
           <div><span>Runtime</span><strong class="mono">${esc(setModelStatusText())}</strong></div>
         </div>
+        ${score.traditional?.reason ? `<p class="fine-print">${esc(score.traditional.reason)}</p>` : ""}
       </div>
     </aside>
     ${renderSourceGlance(score)}
@@ -358,6 +367,55 @@ function renderReasons(reasons = []) {
   `).join("") || `<div class="empty-state">No reason codes available.</div>`;
 }
 
+function langToggle() {
+  return `
+    <div class="seg-toggle" role="group" aria-label="Reason-code language">
+      <button type="button" data-lang="en" aria-pressed="${state.lang === "en"}">English</button>
+      <button type="button" data-lang="hi" aria-pressed="${state.lang === "hi"}" lang="hi">हिन्दी</button>
+    </div>`;
+}
+
+function renderVernacularReasons(score) {
+  const rows = score.reasons_vernacular;
+  if (!Array.isArray(rows) || !rows.length) return renderReasons(score.reasons);
+  return rows.map((row) => `
+    <article class="reason-row" ${state.lang === "hi" ? 'lang="hi"' : ""}>
+      <strong>${esc(state.lang === "hi" ? (row.hi || row.en) : (row.en || row.hi))}</strong>
+    </article>
+  `).join("");
+}
+
+function nextActionText(nextAction) {
+  if (!nextAction) return "";
+  return state.lang === "hi" ? (nextAction.action_hi || nextAction.action) : nextAction.action;
+}
+
+function renderLimitBasis(score) {
+  const basis = score.limit_basis;
+  if (!basis) return "";
+  const inputs = basis.policy_inputs || {};
+  const binding = basis.binding_constraint === "debt_service_capacity"
+    ? "Spare EMI capacity is the binding constraint."
+    : "The grade policy cap is the binding constraint.";
+  return `
+    <section class="detail-section">
+      <h3 class="section-title">How the limit was sized</h3>
+      <p class="muted">EMI-capacity annuity at documented policy inputs; the grade multiple only caps it. Not a score-times-constant number.</p>
+      ${miniLedger([
+        ["Affordable new EMI", formatCurrency(basis.affordable_new_emi)],
+        ["Existing monthly debt service (est.)", formatCurrency(basis.estimated_existing_monthly_service)],
+        ["Debt-service capacity limit", formatCurrency(basis.debt_service_capacity_limit)],
+        ["Grade policy cap", formatCurrency(basis.grade_policy_cap)],
+        ["Concentration multiplier", basis.concentration_multiplier ?? "1.0"],
+        ["Indicative limit", formatCurrency(basis.indicative_limit ?? score.eligible_limit)],
+        ["Policy rate / tenor", `${((inputs.annual_rate ?? 0) * 100).toFixed(1)}% / ${inputs.tenor_months ?? "-"} months`],
+        ["EMI share of inflow", `${((inputs.emi_capacity_share_of_inflow ?? 0) * 100).toFixed(0)}%`],
+      ])}
+      <p class="muted"><strong>${esc(binding)}</strong></p>
+      ${basis.note ? `<p class="truth-note">${esc(basis.note)}</p>` : ""}
+    </section>`;
+}
+
 function itemTitle(item) {
   return item.control || item.code || item.stage || item.source || item.layer || item.step || item.title || item.criterion || item.common_pattern || "Review item";
 }
@@ -402,16 +460,21 @@ function renderDecisionTab(score) {
       <div class="journal-list">${renderJournal(score.ews_signals, "No monitoring signals available.")}</div>
     </section>
     <section class="detail-section">
-      <h3 class="section-title">Reason-code journal</h3>
-      <div class="reason-list">${renderReasons(score.reasons)}</div>
+      <div class="section-head">
+        <h3 class="section-title">Reason-code journal</h3>
+        ${langToggle()}
+      </div>
+      <p class="muted">Borrower-facing reasons ship in English and Hindi from the same API response -- this is an inclusion track.</p>
+      <div class="reason-list">${renderVernacularReasons(score)}</div>
     </section>
     <section class="detail-section">
       <h3 class="section-title">Underwriter next step</h3>
-      <article class="reason-row">
+      <article class="reason-row" ${state.lang === "hi" ? 'lang="hi"' : ""}>
         <span class="journal-state ${statusClass(nextAction.urgency)}">${esc(nextAction.urgency)} urgency</span>
-        <strong>${esc(nextAction.action)}</strong>
+        <strong>${esc(nextActionText(nextAction))}</strong>
       </article>
     </section>
+    ${renderLimitBasis(score)}
     <section class="detail-section">
       <h3 class="section-title">Underwriter memo</h3>
       <p>${esc(score.memo)}</p>
@@ -450,6 +513,138 @@ function renderEvidenceTab(score) {
       <div class="journal-list">${renderJournal(score.policy_guardrails, "No guardrail rows available.")}</div>
     </section>
   `;
+}
+
+function fmtCi(ci) {
+  if (!ci) return "";
+  return ` [${ci.lower_95} - ${ci.upper_95}]`;
+}
+
+function renderBenchmarkSplits(champion) {
+  const splits = champion?.splits || {};
+  const cis = champion?.confidence_intervals || {};
+  const dataset = champion?.dataset || {};
+  const rows = [
+    ["holdout", "Holdout (FY2010-16)", cis.holdout_auc],
+    ["oot", "True out-of-time (FY2017-19)", cis.oot_auc],
+    ["stress", "Recession stress (FY2005-07)", null],
+  ];
+  return `<table class="ledger-table"><tbody>
+    <tr><td><strong>Split</strong></td><td class="number"><strong>AUC</strong></td><td class="number"><strong>KS</strong></td><td class="number"><strong>n</strong></td></tr>
+    ${rows.map(([key, label, ci]) => {
+      const split = splits[key];
+      if (!split) return "";
+      return `<tr>
+        <td>${esc(label)}</td>
+        <td class="number">${esc(split.auc)}${esc(fmtCi(ci))}</td>
+        <td class="number">${esc(split.ks ?? "-")}</td>
+        <td class="number">${esc((split.n ?? dataset[`${key}_rows`] ?? "-").toLocaleString?.("en-IN") ?? split.n)}</td>
+      </tr>`;
+    }).join("")}
+  </tbody></table>`;
+}
+
+function renderBaselineComparison(champion) {
+  const baselines = champion?.baseline_comparison_oot;
+  if (!baselines) return "";
+  const rows = Object.entries(baselines).map(([name, entry]) => {
+    const z = entry?.delong_vs_v2?.z ?? entry?.delong?.z;
+    return `<tr>
+      <td>${esc(titleize(name))}</td>
+      <td class="number">${esc(entry.auc ?? "-")}</td>
+      <td class="number">${z != null ? `z = ${esc(z)}` : "-"}</td>
+    </tr>`;
+  }).join("");
+  return `<table class="ledger-table"><tbody>
+    <tr><td><strong>Baseline (identical protocol)</strong></td><td class="number"><strong>OOT AUC</strong></td><td class="number"><strong>DeLong vs v2</strong></td></tr>
+    ${rows}
+  </tbody></table>`;
+}
+
+function renderFairnessGroups(evaluation) {
+  const dims = evaluation?.fairness?.dimensions;
+  if (!dims) return `<div class="empty-state">No fairness slices in the evaluation artifact.</div>`;
+  return Object.entries(dims).map(([dim, detail]) => `
+    <h3 class="section-title spaced">${esc(titleize(dim))} (max AUC gap ${esc(detail.max_auc_gap ?? "-")})</h3>
+    <table class="ledger-table"><tbody>
+      <tr><td><strong>Group</strong></td><td class="number"><strong>AUC</strong></td><td class="number"><strong>Brier</strong></td><td class="number"><strong>FPR</strong></td><td class="number"><strong>n</strong></td></tr>
+      ${(detail.groups || []).map((group) => `
+        <tr>
+          <td>${esc(titleize(group.group))}</td>
+          <td class="number">${esc(group.auc)}</td>
+          <td class="number">${esc(group.brier_score)}</td>
+          <td class="number">${esc(group.false_positive_rate)}</td>
+          <td class="number">${esc(group.n)}</td>
+        </tr>`).join("")}
+    </tbody></table>
+  `).join("");
+}
+
+function renderModelTab() {
+  const bench = state.benchmark;
+  const evaluation = state.validation;
+  const champion = bench?.champion;
+  const integrity = bench?.artifact_integrity;
+  const candidates = evaluation?.model_selection?.candidates || {};
+  const cis = evaluation?.holdout_confidence_intervals || {};
+  const threshold = evaluation?.policy_threshold;
+  const baselineV1 = bench?.baseline_v1;
+
+  const benchSection = champion ? `
+    <section class="detail-section">
+      <h3 class="section-title">Real-outcome benchmark -- ${esc(bench.champion_version || "sba_sme_pd_v2")}</h3>
+      <p class="muted">${esc(champion.dataset?.name || "SBA 7(a) FOIA loan-level records")} at natural base rates. ${esc(champion.dataset?.protocol || "")}</p>
+      ${renderBenchmarkSplits(champion)}
+      <h3 class="section-title spaced">DeLong-tested baselines</h3>
+      ${renderBaselineComparison(champion)}
+      ${champion.selective_monotonicity_rationale ? `<p class="muted">${esc(champion.selective_monotonicity_rationale)}</p>` : ""}
+      ${integrity ? `<p class="muted">Artifact integrity: <strong>${esc(integrity.status)}</strong> -- served model hashes match the committed evaluation.</p>` : ""}
+      <p class="truth-note">Real charge-off outcomes on a real time axis -- still a US proxy domain, complementary to the conduct pillars, and explicitly not an IDBI production calibration.</p>
+    </section>` : `
+    <section class="detail-section">
+      <h3 class="section-title">Real-outcome benchmark</h3>
+      <div class="empty-state">Benchmark evidence is not loaded. <code>GET /model/sme-benchmark</code> serves it when available.</div>
+    </section>`;
+
+  const v1Section = baselineV1?.holdout ? `
+    <section class="detail-section">
+      <h3 class="section-title">v1 case-sample baseline (kept for like-for-like comparison)</h3>
+      ${miniLedger([
+        ["Holdout AUC", baselineV1.holdout.auc],
+        ["Holdout KS", baselineV1.holdout.ks],
+        ["PR-AUC", baselineV1.holdout.pr_auc],
+      ])}
+    </section>` : "";
+
+  const proxySection = evaluation ? `
+    <section class="detail-section">
+      <h3 class="section-title">Consumer-proxy conduct model (bootstrap 95% intervals)</h3>
+      ${miniLedger([
+        ["ROC-AUC", `${holdoutMetrics()?.auc ?? "-"}${fmtCi(cis.auc)}`],
+        ["KS", `${holdoutMetrics()?.ks ?? "-"}${fmtCi(cis.ks)}`],
+        ["PR-AUC", `${holdoutMetrics()?.pr_auc ?? "-"}${fmtCi(cis.pr_auc)}`],
+        ["Brier", `${holdoutMetrics()?.brier_score ?? "-"}${fmtCi(cis.brier_score)}`],
+        ["Calibration error (ECE)", holdoutMetrics()?.expected_calibration_error ?? "-"],
+        ["Untouched holdout rows", holdoutMetrics()?.n?.toLocaleString?.("en-IN") ?? "-"],
+      ])}
+      ${threshold ? `<p class="muted">Review threshold ${esc(threshold.pd_review_threshold)} selected on the ${esc(threshold.selected_on)}: ${esc(threshold.objective)}</p>` : ""}
+      <h3 class="section-title spaced">Champion vs challenger (same splits)</h3>
+      <table class="ledger-table"><tbody>
+        <tr><td><strong>Candidate</strong></td><td class="number"><strong>Holdout AUC</strong></td><td class="number"><strong>KS</strong></td></tr>
+        ${Object.entries(candidates).map(([name, cand]) => `
+          <tr><td>${esc(name)}</td><td class="number">${esc(cand.holdout?.auc ?? "-")}</td><td class="number">${esc(cand.holdout?.ks ?? "-")}</td></tr>
+        `).join("")}
+      </tbody></table>
+      <h3 class="section-title spaced">Outcome-linked fairness slices (untouched holdout)</h3>
+      <p class="muted">${esc(evaluation.fairness?.note || "Protected attributes are monitoring-only, never model inputs.")}</p>
+      ${renderFairnessGroups(evaluation)}
+    </section>` : `
+    <section class="detail-section">
+      <h3 class="section-title">Consumer-proxy conduct model</h3>
+      <div class="empty-state">Evaluation artifact is not loaded.</div>
+    </section>`;
+
+  return benchSection + v1Section + proxySection;
 }
 
 function renderGovernanceTab() {
@@ -541,6 +736,7 @@ function renderProofTab() {
       <h3 class="section-title">Judge proof</h3>
       ${miniLedger([
         ["Proof API", proof.status || "Live"],
+        ["Release", state.health?.release ? `v${state.health.release.version} · ${state.health.release.commit}` : "-"],
         ["Hero case", hero.case || "-"],
         ["Traditional", hero.traditional_decision || "-"],
         ["UdyamPulse", hero.alternate_data_decision || "-"],
@@ -623,7 +819,106 @@ function renderSourcesTab(score) {
         </article>
       </div>
     </section>
+    ${renderConsole()}
   `;
+}
+
+const CONSOLE_EXAMPLE = {
+  consent: {
+    consent_id: "consent-demo-001",
+    purpose: "msme_underwriting",
+    scope: ["account_aggregator", "gst", "upi", "epfo", "bureau"],
+    granted_at: new Date(Date.now() - 2 * 86400000).toISOString(),
+    expires_at: new Date(Date.now() + 90 * 86400000).toISOString(),
+  },
+  profile: { name: "Asha Precision Works", sector: "Manufacturing", district: "Pune", gender: "Female", vintage_months: 42 },
+  account_aggregator: { monthly_inflows: [480000, 510000, 535000, 560000, 590000, 625000], cheque_bounces: 1, cheque_presentations: 42, outstanding_debt: 180000 },
+  gst: { filing_streak_months: 18, trailing_6m_turnover: [460000, 480000, 505000, 530000, 570000, 615000] },
+  upi: { monthly_transaction_count: 310, unique_counterparties: 54 },
+  epfo: { employees: 14 },
+  bureau: { has_bureau_history: false },
+};
+
+function renderConsole() {
+  return `
+    <section class="detail-section">
+      <h3 class="section-title">Live underwriter console</h3>
+      <p class="muted">Send a real sandbox-style payload to ${code("POST /sandbox/score")} on this running backend. The demo-scoped underwriter key is documented in the repository (docs/DEMO_SCRIPT.md); real deployments override it. Errors render as errors -- nothing here is mocked.</p>
+      <form class="console-form" data-console novalidate>
+        <label>Underwriter bearer key
+          <input type="password" name="key" autocomplete="off" spellcheck="false" placeholder="udyampulse-demo-underwriter-key" />
+        </label>
+        <label>Sandbox payload (editable JSON)
+          <textarea name="payload" rows="12" spellcheck="false">${esc(JSON.stringify(CONSOLE_EXAMPLE, null, 2))}</textarea>
+        </label>
+        <button class="primary-action" type="submit">Score this payload</button>
+      </form>
+      <div class="console-result" data-console-result aria-live="polite"></div>
+    </section>`;
+}
+
+function consoleResultCard(packet) {
+  const alternateClass = (packet.alternate_data_decision || "").toLowerCase();
+  return `
+    <div class="stamp-note console-stamp">
+      ${riskMark(packet.risk_band)}
+      <div class="stamp-score">
+        <span class="stamp-letter">${esc(packet.grade)}</span>
+        <strong>${esc(packet.score)}/100</strong>
+      </div>
+      <div class="decision-line">
+        <div><span>Decision</span><strong class="decision-word ${esc(alternateClass)}">${esc(packet.alternate_data_decision)}</strong></div>
+        <div><span>Indicative limit</span><strong>${formatCurrency(packet.eligible_limit)}</strong></div>
+      </div>
+      <div class="reason-list">${renderReasons((packet.reasons || []).slice(0, 4))}</div>
+      <details><summary>Full response JSON</summary><pre class="console-json">${esc(JSON.stringify(packet, null, 2))}</pre></details>
+    </div>`;
+}
+
+async function submitConsole(form) {
+  const result = form.parentElement.querySelector("[data-console-result]");
+  const button = form.querySelector("button[type='submit']");
+  const key = form.elements.key.value.trim();
+  if (!key) {
+    result.innerHTML = `<div class="error-state"><div><strong>Bearer key required</strong><p>Paste the demo underwriter key documented in docs/DEMO_SCRIPT.md. The endpoint returns 401 without it -- by design.</p></div></div>`;
+    return;
+  }
+  let parsed;
+  try {
+    parsed = JSON.parse(form.elements.payload.value);
+  } catch (error) {
+    result.innerHTML = `<div class="error-state"><div><strong>Payload is not valid JSON</strong><p>${esc(error.message)}</p></div></div>`;
+    return;
+  }
+  button.disabled = true;
+  button.textContent = "Scoring...";
+  result.innerHTML = `<div class="skeleton">Scoring the payload against the live policy engine...</div>`;
+  try {
+    const response = await api("/sandbox/score", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${key}` },
+      body: JSON.stringify(parsed),
+      raw: true,
+    });
+    const bodyJson = await response.json().catch(() => ({}));
+    if (response.status === 401 || response.status === 403) {
+      result.innerHTML = `<div class="error-state"><div><strong>${response.status} -- not authorised</strong><p>${esc(bodyJson.detail || "The backend rejected the key.")}</p></div></div>`;
+    } else if (response.status === 422) {
+      const details = Array.isArray(bodyJson.detail)
+        ? bodyJson.detail.map((item) => `${(item.loc || []).join(".")}: ${item.msg}`).slice(0, 6)
+        : [String(bodyJson.detail || "Validation failed")];
+      result.innerHTML = `<div class="error-state"><div><strong>422 -- payload rejected by validation</strong>${details.map((d) => `<p>${esc(d)}</p>`).join("")}</div></div>`;
+    } else if (!response.ok) {
+      result.innerHTML = `<div class="error-state"><div><strong>${response.status} -- request failed</strong><p>${esc(bodyJson.detail || "Unexpected backend response.")}</p></div></div>`;
+    } else {
+      result.innerHTML = consoleResultCard(bodyJson);
+    }
+  } catch (error) {
+    result.innerHTML = `<div class="error-state"><div><strong>Request failed</strong><p>${esc(error.message)}</p></div></div>`;
+  } finally {
+    button.disabled = false;
+    button.textContent = "Score this payload";
+  }
 }
 
 function applyMeterWidths(container) {
@@ -645,6 +940,7 @@ function renderTabContent() {
   const views = {
     decision: () => renderDecisionTab(score),
     evidence: () => renderEvidenceTab(score),
+    model: () => renderModelTab(),
     governance: () => renderGovernanceTab(),
     proof: () => renderProofTab(),
     sources: () => renderSourcesTab(score),
@@ -754,6 +1050,18 @@ function bindEvents() {
   els.drawer.addEventListener("keydown", trapDrawerFocus);
   document.addEventListener("click", (event) => {
     if (event.target.closest("[data-retry]")) window.location.reload();
+    const langButton = event.target.closest("[data-lang]");
+    if (langButton && langButton.dataset.lang !== state.lang) {
+      state.lang = langButton.dataset.lang;
+      renderTabContent();
+    }
+  });
+  els.tabContent.addEventListener("submit", (event) => {
+    const form = event.target.closest("[data-console]");
+    if (form) {
+      event.preventDefault();
+      submitConsole(form);
+    }
   });
   window.addEventListener("keydown", (event) => {
     if (event.key === "Escape" && state.drawerOpen) closeDrawer();
@@ -792,8 +1100,9 @@ async function init() {
       api("/deployment/readiness"),
       api("/sandbox/outcome-contract"),
       api("/submission/proof"),
+      api("/model/sme-benchmark"),
     ]);
-    const [governance, validation, model, deployment, outcomeContract, submissionProof] = optional.map(settledValue);
+    const [governance, validation, model, deployment, outcomeContract, submissionProof, benchmark] = optional.map(settledValue);
 
     state.health = health;
     state.msmes = msmes;
@@ -801,6 +1110,7 @@ async function init() {
     state.governance = governance;
     state.validation = validation;
     state.model = model;
+    state.benchmark = benchmark;
     state.deployment = deployment || governance?.deployment || null;
     state.outcomeContract = outcomeContract;
     state.submissionProof = submissionProof;

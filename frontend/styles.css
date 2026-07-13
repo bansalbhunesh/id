@@ -1003,3 +1003,111 @@ body.drawer-open .drawer-launch {
     grid-template-columns: 1fr;
   }
 }
+
+/* --- Surfaced-capability components (Phase 3: model tab, bilingual toggle, console) --- */
+
+.section-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.seg-toggle {
+  display: inline-flex;
+  border: 1px solid var(--line-strong);
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--veil-strong);
+}
+
+.seg-toggle button {
+  appearance: none;
+  border: 0;
+  margin: 0;
+  padding: 4px 14px;
+  font: 600 0.8rem var(--font-body);
+  color: var(--ink-muted);
+  background: transparent;
+  cursor: pointer;
+}
+
+.seg-toggle button[aria-pressed="true"] {
+  background: var(--ledger-ink);
+  color: var(--passbook-paper);
+}
+
+.seg-toggle button:focus-visible {
+  outline: 3px solid var(--gst-ruled-blue);
+  outline-offset: -3px;
+}
+
+.console-form {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-3);
+}
+
+.console-form label {
+  display: grid;
+  gap: var(--space-1);
+  font: 600 0.82rem var(--font-body);
+  color: var(--ink-muted);
+}
+
+.console-form input,
+.console-form textarea {
+  width: 100%;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  padding: var(--space-2) var(--space-3);
+  font: 500 0.82rem var(--font-utility);
+  color: var(--ledger-ink);
+  background: color-mix(in srgb, white 55%, transparent);
+}
+
+.console-form textarea {
+  resize: vertical;
+  min-height: 180px;
+  line-height: 1.45;
+}
+
+.console-form input:focus-visible,
+.console-form textarea:focus-visible {
+  outline: 3px solid var(--gst-ruled-blue);
+  outline-offset: 1px;
+}
+
+.console-result {
+  margin-top: var(--space-4);
+}
+
+.console-stamp {
+  margin-top: var(--space-2);
+}
+
+.console-json {
+  margin: var(--space-2) 0 0;
+  max-height: 320px;
+  overflow: auto;
+  padding: var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: color-mix(in srgb, white 45%, transparent);
+  font: 500 0.72rem/1.5 var(--font-utility);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.console-result details summary {
+  cursor: pointer;
+  font: 600 0.8rem var(--font-body);
+  color: var(--gst-ruled-blue);
+  margin-top: var(--space-2);
+}
+
+[lang="hi"] strong {
+  font-family: var(--font-body);
+  line-height: 1.6;
+}

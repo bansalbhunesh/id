@@ -6,7 +6,7 @@ Use this as the final IDBI Innovate / H2S submission source of truth.
 
 - GitHub repository: https://github.com/bansalbhunesh/id
 - Live product: https://id-ysm9.onrender.com
-- Demo video (YouTube): https://youtu.be/eLkfrYma6nE
+- Demo video (YouTube): https://youtu.be/0I5BY6DKB1E
 - Submission deck PDF (official IDBI Innovate template): `docs/deck/SaakhScore-IDBI-Submission-Deck.pdf` (source PPTX alongside)
 - Extended deck (13-slide detail edition): `docs/deck/SaakhScore-Extended-Deck.pdf`
 - Animated walkthrough: `docs/demo.gif` (browser-automation capture of the live app)
@@ -17,7 +17,7 @@ Use this as the final IDBI Innovate / H2S submission source of truth.
 - Source code: public GitHub repository with backend, frontend, tests, Dockerfile, and Render Blueprint.
 - Backend proof API: `/submission/proof` exposes the truth boundary, rubric scorecard, competitor gap map, API catalog, and judge runbook.
 - Pitch deck: built on the official IDBI Innovate template (all 13 required sections filled; branded cover and closers untouched).
-- Demo video: narrated walkthrough at https://youtu.be/eLkfrYma6nE, plus the committed GIF walkthrough at `docs/demo.gif`.
+- Demo video: narrated walkthrough at https://youtu.be/0I5BY6DKB1E, plus the committed GIF walkthrough at `docs/demo.gif`.
 - Screenshots: live cockpit, decision pack, governance/evidence rail, proof tab, and mobile flow.
 - Model governance: `MODEL_CARD.md`, audit log endpoint, source map, policy guardrails, validation metrics, pilot KPIs, fairness summary.
 - Architecture and security posture: `docs/ARCHITECTURE.md`, `docs/SECURITY_COMPLIANCE.md`, `docs/THREAT_MODEL.md`.

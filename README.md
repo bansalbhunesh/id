@@ -7,7 +7,7 @@
 
 [Live demo](https://id-ysm9.onrender.com) |
 [Submission deck](docs/deck/SaakhScore-IDBI-Submission-Deck.pdf) |
-[Demo video](https://youtu.be/eLkfrYma6nE) |
+[Demo video](https://youtu.be/0I5BY6DKB1E) |
 [Animated walkthrough](docs/demo.gif) |
 [Model card](MODEL_CARD.md) |
 [Pilot runbook](docs/PILOT_RUNBOOK.md)
@@ -57,7 +57,7 @@ The core demo moment is a New-to-Credit case traditional underwriting rejects be
 - Live API proof: [https://id-ysm9.onrender.com/submission/proof](https://id-ysm9.onrender.com/submission/proof)
 - OpenAPI docs: [https://id-ysm9.onrender.com/docs](https://id-ysm9.onrender.com/docs)
 - Runtime readiness: [https://id-ysm9.onrender.com/health/ready](https://id-ysm9.onrender.com/health/ready)
-- Demo video (narrated walkthrough): [https://youtu.be/eLkfrYma6nE](https://youtu.be/eLkfrYma6nE)
+- Demo video (narrated walkthrough): [https://youtu.be/0I5BY6DKB1E](https://youtu.be/0I5BY6DKB1E)
 - Animated walkthrough (browser-automation capture of the live app, current build): [docs/demo.gif](docs/demo.gif)
 - Submission deck (official IDBI Innovate template): [docs/deck/SaakhScore-IDBI-Submission-Deck.pdf](docs/deck/SaakhScore-IDBI-Submission-Deck.pdf)
 - Extended deck (13-slide detail edition): [docs/deck/SaakhScore-Extended-Deck.pdf](docs/deck/SaakhScore-Extended-Deck.pdf)

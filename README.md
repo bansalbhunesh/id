@@ -1,11 +1,13 @@
 <div align="center">
 
-# UdyamPulse
+# SaakhScore
 
 **Explainable MSME Financial Health Card for IDBI Innovate 2026 PS3.**
+*Saakh (साख) is a trader's earned creditworthiness — SaakhScore proves it for businesses the bureau can't see.*
 
 [Live demo](https://id-ysm9.onrender.com) |
-[Submission deck](docs/deck/UdyamPulse-IDBI-Submission-Deck.pdf) |
+[Submission deck](docs/deck/SaakhScore-IDBI-Submission-Deck.pdf) |
+[Demo video](#) *(YouTube link — added at submission)* |
 [Animated walkthrough](docs/demo.gif) |
 [Model card](MODEL_CARD.md) |
 [Pilot runbook](docs/PILOT_RUNBOOK.md)
@@ -39,11 +41,11 @@ Built for **IDBI Innovate 2026** - Problem Statement 3: Financial Health Score -
 
 ## Overview
 
-UdyamPulse turns consented alternate-data signals into a bank-reviewable credit decision for thin-file MSMEs. The public prototype uses a synthetic cohort and sandbox-ready API contracts; it does not claim private IDBI data access.
+SaakhScore turns consented alternate-data signals into a bank-reviewable credit decision for thin-file MSMEs. The public prototype uses a synthetic cohort and sandbox-ready API contracts; it does not claim private IDBI data access.
 
-The core demo moment is a New-to-Credit case traditional underwriting rejects because there is no bureau file. UdyamPulse approves the same business with a defensible Grade A health score, reason codes, Shapley attribution, policy guardrails, and an underwriter memo.
+The core demo moment is a New-to-Credit case traditional underwriting rejects because there is no bureau file. SaakhScore approves the same business with a defensible Grade A health score, reason codes, Shapley attribution, policy guardrails, and an underwriter memo.
 
-| Case | Traditional bureau-only | UdyamPulse alternate data |
+| Case | Traditional bureau-only | SaakhScore alternate data |
 |---|:---:|:---:|
 | Shree Ganesh Textiles, no bureau file | Rejected | Approved - Grade A, Score 86/100 |
 | Indicative credit limit | Rs 0 | Rs 27,00,000 |
@@ -57,7 +59,7 @@ The core demo moment is a New-to-Credit case traditional underwriting rejects be
 - Runtime readiness: [https://id-ysm9.onrender.com/health/ready](https://id-ysm9.onrender.com/health/ready)
 - Animated walkthrough (browser-automation capture of the live app, current build): [docs/demo.gif](docs/demo.gif)
 - Narration + click path + backend verification companion: [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md)
-- Submission deck: [docs/deck/UdyamPulse-IDBI-Submission-Deck.pdf](docs/deck/UdyamPulse-IDBI-Submission-Deck.pdf)
+- Submission deck: [docs/deck/SaakhScore-IDBI-Submission-Deck.pdf](docs/deck/SaakhScore-IDBI-Submission-Deck.pdf)
 - First-round rules check: [docs/FIRST_ROUND_RULES_CHECK.md](docs/FIRST_ROUND_RULES_CHECK.md)
 - Pilot promotion runbook: [docs/PILOT_RUNBOOK.md](docs/PILOT_RUNBOOK.md)
 - Threat model: [docs/THREAT_MODEL.md](docs/THREAT_MODEL.md)
@@ -65,7 +67,7 @@ The core demo moment is a New-to-Credit case traditional underwriting rejects be
 What to verify in under three minutes:
 
 1. Open the live app and keep the default Shree Ganesh Textiles case selected.
-2. Compare `Traditional bureau-only: Rejected` with `UdyamPulse alternate data: Approved`.
+2. Compare `Traditional bureau-only: Rejected` with `SaakhScore alternate data: Approved`.
 3. In the review packet alongside, inspect the pillars, English/Hindi reason codes, the EMI limit-sizing ledger, model attribution, decision path, and policy guardrails.
 4. Switch to `Model`, `Governance`, and `Proof` to confirm the real-outcome benchmark, audit, validation, pilot gates, fairness, rubric, and competitor-gap proof -- then try the live underwriter console under `Sources`.
 
@@ -130,7 +132,7 @@ Rubric coverage is implemented as backend data, not only README copy:
 
 ## Architecture
 
-![UdyamPulse architecture flow](docs/diagrams/readme-architecture.svg)
+![SaakhScore architecture flow](docs/diagrams/readme-architecture.svg)
 
 <details>
 <summary>Mermaid source (renders live on GitHub too; the image above is a committed fallback so the diagram never depends on a client-side renderer)</summary>
@@ -197,9 +199,9 @@ python -m pytest backend -q
 Container deploy:
 
 ```bash
-docker build -t udyampulse .
-docker run -d --name udyampulse -p 8000:8000 udyampulse
-docker inspect --format='{{json .State.Health}}' udyampulse
+docker build -t saakhscore .
+docker run -d --name saakhscore -p 8000:8000 saakhscore
+docker inspect --format='{{json .State.Health}}' saakhscore
 ```
 
 The image runs as a non-root user and probes `/health/ready`. `Dockerfile` and `render.yaml` define the same single-service deployment used by Render.
@@ -221,7 +223,7 @@ The image runs as a non-root user and probes `/health/ready`. `Dockerfile` and `
 <table>
   <tr>
     <td width="50%" valign="top">
-      <img src="docs/deck/assets/live-cockpit-viewport.png" width="100%" alt="UdyamPulse two-rail workspace: decision stage with stamped approval card beside the open review packet" />
+      <img src="docs/deck/assets/live-cockpit-viewport.png" width="100%" alt="SaakhScore two-rail workspace: decision stage with stamped approval card beside the open review packet" />
       <br />
       <strong>Two-rail workspace</strong><br />
       One clear NTC rejection reversal beside a permanent review packet -- Decision, Evidence, Model, Governance, Proof, and Sources are always one click away, never hidden behind a modal.
@@ -255,7 +257,7 @@ The image runs as a non-root user and probes `/health/ready`. `Dockerfile` and `
       Rubric scorecard, truth boundary, competitor gap map, runbook, and backend API catalog pulled from `/submission/proof`.
     </td>
     <td width="50%" valign="top">
-      <img src="docs/deck/assets/mobile-live.png" width="45%" alt="Mobile UdyamPulse review flow" />
+      <img src="docs/deck/assets/mobile-live.png" width="45%" alt="Mobile SaakhScore review flow" />
       <br />
       <strong>Mobile review</strong><br />
       The packet stacks below the stage on a phone -- adapted, not amputated.
@@ -270,7 +272,7 @@ Full-resolution images remain in [docs/deck/assets](docs/deck/assets) for detail
 - Track fit: IDBI's public MSME Inclusion track asks for a Financial Health Card using alternate data for faster credit decisions and finance access for underserved MSMEs.
 - Public event surface: the official public event venue found during review is [IDBI Innovate 2026 on Hack2skill](https://hack2skill.com/event/idbinnovate); no official IDBI Devpost page was found.
 - Sandbox interpretation: the official schedule says shortlist results arrive July 21 and finalists receive sandbox access July 22-31. This repo therefore ships synthetic proof plus a ready feed contract, dated outcome schema, automatic temporal/OOT readiness analysis, and fail-closed promotion controls without claiming early access.
-- Differentiation: many PS3 demos stop at a score; UdyamPulse shows the bank decision pack around that score - rejection reversal, reasons, attribution, memo, source map, guardrails, audit, validation, pilot metrics, fairness checks, and a backend-verifiable judge proof endpoint.
+- Differentiation: many PS3 demos stop at a score; SaakhScore shows the bank decision pack around that score - rejection reversal, reasons, attribution, memo, source map, guardrails, audit, validation, pilot metrics, fairness checks, and a backend-verifiable judge proof endpoint.
 - Competitive notes: [docs/COMPETITIVE_RESEARCH.md](docs/COMPETITIVE_RESEARCH.md)
 - Model roadmap (real-outcome benchmark + two-tower plan): [docs/MSME_MODEL_ROADMAP.md](docs/MSME_MODEL_ROADMAP.md)
 - Submission checklist: [docs/SUBMISSION_CHECKLIST.md](docs/SUBMISSION_CHECKLIST.md)
@@ -283,7 +285,7 @@ Full-resolution images remain in [docs/deck/assets](docs/deck/assets) for detail
 - API authentication is a real, enforced bearer-token/role scheme sized for a public demo (no login flow or per-underwriter identity), not full IDBI SSO -- see docs/SECURITY_COMPLIANCE.md.
 - Pilot mode is intentionally not ready today: `/deployment/readiness` blocks it on public-proxy model scope, absent true OOT evidence, demo credentials/HMAC, and local JSONL audit storage.
 - AWS Bedrock memo generation is optional and requires configured credentials and a model ID; deterministic memo generation remains the default fallback.
-- UdyamPulse is decision support for underwriters, not a fully automated approve/decline system without human review.
+- SaakhScore is decision support for underwriters, not a fully automated approve/decline system without human review.
 
 ## License
 

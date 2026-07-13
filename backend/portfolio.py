@@ -1,4 +1,4 @@
-"""Portfolio and governance summaries for the UdyamPulse demo."""
+"""Portfolio and governance summaries for the SaakhScore demo."""
 from collections import defaultdict
 
 from operational import APP_VERSION
@@ -200,7 +200,7 @@ def build_governance_summary(audit_events: list[dict]) -> dict:
 
     return {
         "model": {
-            "name": "UdyamPulse scorecard + calibrated PD champion/challenger",
+            "name": "SaakhScore scorecard + calibrated PD champion/challenger",
             "version": f"{APP_VERSION}-flagship",
             "training_data": "Public borrower cohort is synthetic. The PD benchmark is trained on a 30,000-row public consumer-credit proxy; neither is IDBI/MSME outcome data.",
             "explainability": "Calibrated XGBoost uses native exact TreeSHAP in logit space; calibrated logistic remains the deterministic fallback.",

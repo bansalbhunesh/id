@@ -30,8 +30,8 @@ This is a public hackathon control set, not an assertion of IDBI production cert
 
 When `UDYAMPULSE_API_KEYS` is unset, the synthetic public demo exposes:
 
-- `udyampulse-demo-underwriter-key` with `underwriter` scope;
-- `udyampulse-demo-auditor-key` with `auditor` scope.
+- `saakhscore-demo-underwriter-key` with `underwriter` scope;
+- `saakhscore-demo-auditor-key` with `auditor` scope.
 
 They are intentionally public and must never be used with real data. A pilot sets its own credentials and `UDYAMPULSE_AUDIT_HMAC_KEY`; it does not inherit the demo defaults.
 
@@ -40,7 +40,7 @@ Setting `UDYAMPULSE_MODE=pilot` does not bypass this requirement. Startup fails 
 Example:
 
 ```bash
-curl -H "Authorization: Bearer udyampulse-demo-auditor-key" \
+curl -H "Authorization: Bearer saakhscore-demo-auditor-key" \
   https://id-ysm9.onrender.com/audit-log
 ```
 

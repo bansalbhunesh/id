@@ -6,7 +6,8 @@ Use this as the final IDBI Innovate / H2S submission source of truth.
 
 - GitHub repository: https://github.com/bansalbhunesh/id
 - Live product: https://id-ysm9.onrender.com
-- Submission deck PDF: `docs/deck/UdyamPulse-IDBI-Submission-Deck.pdf`
+- Demo video (YouTube): **[PLACEHOLDER — paste the unlisted YouTube link here before submitting]**
+- Submission deck PDF: `docs/deck/SaakhScore-IDBI-Submission-Deck.pdf`
 - Animated walkthrough: `docs/demo.gif` (browser-automation capture of the live app; narration in `docs/DEMO_SCRIPT.md`)
 - Demo script for voiceover/video: `docs/DEMO_SCRIPT.md`
 
@@ -33,16 +34,16 @@ Use this as the final IDBI Innovate / H2S submission source of truth.
 - Live app proof: 5 cases, 4 impact cards, 5 source signals, 5 governance controls, validation metrics, pilot KPIs, and expanded fairness slices.
 - Review packet: Decision, Evidence, Model, Governance, Proof, and Sources views render from live API state in a permanent side panel and can be deep-linked with `?case=...&view=...`.
 - Frontend test evidence: `node --test frontend/tests/lib.test.mjs` (9 unit) and `python -m pytest e2e -q` (12 Playwright end-to-end, self-booting server).
-- Core demo moment: Shree Ganesh Textiles is traditional `Rejected` but UdyamPulse alternate-data `Approved`, grade A, score 86/100, Rs 27,00,000 indicative limit.
+- Core demo moment: Shree Ganesh Textiles is traditional `Rejected` but SaakhScore alternate-data `Approved`, grade A, score 86/100, Rs 27,00,000 indicative limit.
 
 ## Form Copy
 
-**Project title:** UdyamPulse
+**Project title:** SaakhScore
 
 **One-line description:** Banker-grade MSME Financial Health Card that converts consented alternate data into explainable credit decisions, indicative limits, audit trails, and borrower improvement plans.
 
 **Problem statement:** IDBI Innovate 2026 PS3 - MSME Financial Health Score.
 
-**Differentiator:** Most competitor demos stop at an alternate-data score. UdyamPulse shows the full bank decision pack: rejected-vs-approved reversal, reason codes, Shapley attribution, memo, source map, policy guardrails, audit log, validation metrics, pilot KPIs, governance summary, portfolio impact, and backend-verifiable proof endpoint.
+**Differentiator:** Most competitor demos stop at an alternate-data score. SaakhScore shows the full bank decision pack: rejected-vs-approved reversal, reason codes, Shapley attribution, memo, source map, policy guardrails, audit log, validation metrics, pilot KPIs, governance summary, portfolio impact, and backend-verifiable proof endpoint.
 
 **Stage 2 ask:** IDBI sandbox AA/GST/UPI/EPFO access and dated repayment outcomes. The implemented outcome contract, temporal readiness report, and fail-closed promotion gate will turn those inputs into an IDBI-scoped champion and genuine OOT evidence without weakening the public truth boundary.

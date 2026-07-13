@@ -11,7 +11,7 @@ from scoring import score_profile
 
 
 client = TestClient(app)
-UNDERWRITER_HEADERS = {"Authorization": "Bearer udyampulse-demo-underwriter-key"}
+UNDERWRITER_HEADERS = {"Authorization": "Bearer saakhscore-demo-underwriter-key"}
 
 
 def _consent(*, expired: bool = False) -> dict:
@@ -276,7 +276,7 @@ def test_bedrock_memo_provider_falls_back_without_model_id(monkeypatch):
     assert "indicative limit" in memo
 
 
-AUDITOR_HEADERS = {"Authorization": "Bearer udyampulse-demo-auditor-key"}
+AUDITOR_HEADERS = {"Authorization": "Bearer saakhscore-demo-auditor-key"}
 
 
 def test_audit_log_limit_is_validated():

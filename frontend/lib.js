@@ -50,7 +50,7 @@
 
   function itemDetail(item) {
     return item.detail || item.evidence || item.signal || item.proves || item.expected
-      || item.implemented || item.udyampulse_advantage || item.proof || "";
+      || item.implemented || item.saakhscore_advantage || item.proof || "";
   }
 
   function reasonText(row, lang) {

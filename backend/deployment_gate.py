@@ -132,10 +132,10 @@ def assert_deployment_allowed() -> None:
     readiness = build_deployment_readiness()
     if readiness["mode"] not in VALID_MODES:
         raise RuntimeError(
-            f"UdyamPulse startup blocked: invalid UDYAMPULSE_MODE={readiness['mode']}"
+            f"SaakhScore startup blocked: invalid UDYAMPULSE_MODE={readiness['mode']}"
         )
     if not readiness["runtime_allowed"]:
         codes = ", ".join(blocker["code"] for blocker in readiness["blockers"])
         raise RuntimeError(
-            f"UdyamPulse {readiness['mode']} startup blocked by promotion gates: {codes}"
+            f"SaakhScore {readiness['mode']} startup blocked by promotion gates: {codes}"
         )

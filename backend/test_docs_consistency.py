@@ -1,6 +1,6 @@
 """Guard against decision-figure drift between prose and the live backend.
 
-UdyamPulse's core claim is that its headline numbers are backend-verifiable
+SaakhScore's core claim is that its headline numbers are backend-verifiable
 (`curl /portfolio`). These tests fail if a judge-facing document stops matching
 what `build_portfolio_snapshot()` actually computes, or if a known-stale figure
 creeps back in. This is the automated fix for the README/pitch/demo-script

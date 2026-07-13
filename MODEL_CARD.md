@@ -1,8 +1,8 @@
-# Model Card: UdyamPulse Public Proxy Champion
+# Model Card: SaakhScore Public Proxy Champion
 
 ## Purpose
 
-UdyamPulse is decision support for MSME underwriting. It produces a descriptive financial-health score, a separately labelled probability-of-default proxy, a versioned policy route, reason codes, a proposed limit, and an underwriter memo. It is not a production auto-decision system.
+SaakhScore is decision support for MSME underwriting. It produces a descriptive financial-health score, a separately labelled probability-of-default proxy, a versioned policy route, reason codes, a proposed limit, and an underwriter memo. It is not a production auto-decision system.
 
 ## Three Separate Layers
 

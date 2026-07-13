@@ -1,4 +1,4 @@
-"""Train UdyamPulse's real small-business default benchmark.
+"""Train SaakhScore's real small-business default benchmark.
 
 Unlike the pillar PD proxy (which reduces consumer-credit conduct to three
 concepts), this pipeline trains on **real SBA 7(a) small-business loans with a

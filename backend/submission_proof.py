@@ -186,32 +186,32 @@ RUBRIC_SCORECARD = [
 COMPETITOR_GAP_MAP = [
     {
         "common_pattern": "Score-card-only demo",
-        "udyampulse_advantage": "Full bank decision pack: verdict comparison, limit, pillars, reasons, Shapley attribution, memo, guardrails, and improvement plan.",
+        "saakhscore_advantage": "Full bank decision pack: verdict comparison, limit, pillars, reasons, Shapley attribution, memo, guardrails, and improvement plan.",
         "proof": "/msmes/ntc_hero/score",
     },
     {
         "common_pattern": "Frontend-first prototype",
-        "udyampulse_advantage": "Backend-verifiable API catalog and submission proof endpoint expose the same evidence shown in the cockpit.",
+        "saakhscore_advantage": "Backend-verifiable API catalog and submission proof endpoint expose the same evidence shown in the cockpit.",
         "proof": "/submission/proof",
     },
     {
         "common_pattern": "Alternate-data claims without sandbox path",
-        "udyampulse_advantage": "Sandbox-style AA/GST/UPI/EPFO/Bureau ingestion and recalibration contracts are implemented now, while private access is not falsely claimed.",
+        "saakhscore_advantage": "Sandbox-style AA/GST/UPI/EPFO/Bureau ingestion and recalibration contracts are implemented now, while private access is not falsely claimed.",
         "proof": "/sandbox/score",
     },
     {
         "common_pattern": "Explainability as a slide",
-        "udyampulse_advantage": "Every score packet returns exact calibrated TreeSHAP/logistic contributions plus human-readable reason codes.",
+        "saakhscore_advantage": "Every score packet returns exact calibrated TreeSHAP/logistic contributions plus human-readable reason codes.",
         "proof": "/msmes/{id}/score",
     },
     {
         "common_pattern": "Missing model-risk story",
-        "udyampulse_advantage": "Governance exposes model evidence and a machine-enforced promotion gate; public-proxy artifacts cannot start in pilot mode.",
+        "saakhscore_advantage": "Governance exposes model evidence and a machine-enforced promotion gate; public-proxy artifacts cannot start in pilot mode.",
         "proof": "/deployment/readiness",
     },
     {
         "common_pattern": "Model evidence on synthetic labels or a single random holdout",
-        "udyampulse_advantage": "A real small-business default benchmark trained on genuine SBA charge-offs and validated OUT OF DISTRIBUTION on a differently-distributed real sample -- real outcomes plus generalisation evidence, which a synthetic-label score or a re-scored random holdout cannot provide.",
+        "saakhscore_advantage": "A real small-business default benchmark trained on genuine SBA charge-offs and validated OUT OF DISTRIBUTION on a differently-distributed real sample -- real outcomes plus generalisation evidence, which a synthetic-label score or a re-scored random holdout cannot provide.",
         "proof": "/model/sme-benchmark",
     },
 ]

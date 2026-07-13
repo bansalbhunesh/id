@@ -1,23 +1,23 @@
-# UdyamPulse - Content for the Official IDBI Innovate Deck
+# SaakhScore - Content for the Official IDBI Innovate Deck
 
 This maps onto the IDBI Innovate prototype submission template. Keep the official visual template, but refresh screenshots and copy from the current app.
 
 ## Slide 1 - Team Details
 
 - Team name: Looper
-- Project: UdyamPulse
+- Project: SaakhScore
 - Problem Statement: PS3 - Financial Health Score
 - One-liner: Consented alternate data in; explainable financial health card, indicative credit line, and improvement plan out.
 
 ## Slide 2 - Brief About The Idea
 
-UdyamPulse is a banker-grade MSME Financial Health Card. It turns consented alternate data - GST, UPI, Account Aggregator-style bank statements, EPFO, sector, geography, vintage, and bureau status - into an explainable 0-100 score, A-E grade, risk band, indicative credit limit, underwriter memo, and borrower improvement plan.
+SaakhScore is a banker-grade MSME Financial Health Card. It turns consented alternate data - GST, UPI, Account Aggregator-style bank statements, EPFO, sector, geography, vintage, and bureau status - into an explainable 0-100 score, A-E grade, risk band, indicative credit limit, underwriter memo, and borrower improvement plan.
 
 It is built for New-to-Credit and New-to-Bank MSMEs that traditional bureau-first underwriting rejects even when their real operating data is healthy.
 
 ## Slide 3 - Opportunities
 
-- Difference from existing ideas: most teams and fintech demos stop at a score. UdyamPulse exposes the decision path, reason codes, Shapley attribution, audit trail, policy guardrails, source map, validation metrics, pilot KPIs, and fairness monitor.
+- Difference from existing ideas: most teams and fintech demos stop at a score. SaakhScore exposes the decision path, reason codes, Shapley attribution, audit trail, policy guardrails, source map, validation metrics, pilot KPIs, and fairness monitor.
 - Problem solved: it makes viable thin-file MSMEs visible to IDBI without turning model-assisted underwriting into a black box.
 - USP: the rejected-to-approved NTC reversal is visible in the first minute and backed by regulator-ready evidence.
 
@@ -49,7 +49,7 @@ Use the first viewport of the current underwriter cockpit:
 - Portfolio impact strip.
 - Case queue.
 - Decision pack for Shree Ganesh Textiles.
-- Traditional Rejected vs UdyamPulse Approved verdict boxes.
+- Traditional Rejected vs SaakhScore Approved verdict boxes.
 
 ## Slide 7 - Architecture Diagram
 
@@ -85,7 +85,7 @@ Stage 2 targets: live IDBI sandbox credentials and repayment labels, an IDBI-cal
 
 Use the committed screenshots from `docs/deck/assets/`:
 
-1. First viewport of the cockpit - portfolio impact, case queue, grade A, Rs 27,00,000 limit, Traditional Rejected / UdyamPulse Approved.
+1. First viewport of the cockpit - portfolio impact, case queue, grade A, Rs 27,00,000 limit, Traditional Rejected / SaakhScore Approved.
 2. Middle of decision pack - pillar bars, reason codes, Shapley attribution, and memo.
 3. Governance rail - source map, policy guardrails, audit count, validation metrics, pilot KPIs, fairness summary, and Sunrise Auto Parts improvement plan.
 

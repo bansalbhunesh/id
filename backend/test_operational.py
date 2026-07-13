@@ -14,7 +14,7 @@ from validation import ValidationRecord, build_validation_report
 
 
 client = TestClient(app)
-UNDERWRITER_HEADERS = {"Authorization": "Bearer udyampulse-demo-underwriter-key"}
+UNDERWRITER_HEADERS = {"Authorization": "Bearer saakhscore-demo-underwriter-key"}
 
 
 def test_liveness_and_readiness_expose_release_and_integrity():

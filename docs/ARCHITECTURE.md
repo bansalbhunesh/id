@@ -4,7 +4,7 @@
 
 One Python 3.12 Docker service runs FastAPI and serves the static review cockpit. The zero-build frontend and API stay same-origin; API route definitions are mounted before `StaticFiles`.
 
-![UdyamPulse runtime architecture](diagrams/architecture-flow.svg)
+![SaakhScore runtime architecture](diagrams/architecture-flow.svg)
 
 <details>
 <summary>Mermaid source (renders live on GitHub too; the image above is a committed fallback so the diagram never depends on a client-side renderer)</summary>
@@ -61,7 +61,7 @@ Regenerate the image after editing the source: save the block above to a `.mmd` 
 
 ## Decision Contract
 
-UdyamPulse intentionally avoids one opaque "AI score":
+SaakhScore intentionally avoids one opaque "AI score":
 
 1. `scoring.py` computes five descriptive pillars, grade and proposed limit.
 2. `ml.py` loads the committed champion manifest and returns PD plus exact attribution.
@@ -133,7 +133,7 @@ The operational sequence, sign-offs and rollback triggers are in [PILOT_RUNBOOK.
 
 ## Promotion State Machine
 
-![UdyamPulse promotion state machine](diagrams/promotion-state.svg)
+![SaakhScore promotion state machine](diagrams/promotion-state.svg)
 
 <details>
 <summary>Mermaid source (renders live on GitHub too; the image above is a committed fallback so the diagram never depends on a client-side renderer)</summary>

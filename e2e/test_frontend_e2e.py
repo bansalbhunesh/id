@@ -1,4 +1,4 @@
-"""Playwright end-to-end suite for the UdyamPulse frontend.
+"""Playwright end-to-end suite for the SaakhScore frontend.
 
 Run (from the repo root, with the backend virtualenv):
 
@@ -220,7 +220,7 @@ def test_console_requires_key_then_scores_for_real(page, base_url):
     page.wait_for_timeout(1200)
     assert "401" in page.inner_text("[data-console-result]")
 
-    page.fill("[data-console] input[name='key']", "udyampulse-demo-underwriter-key")
+    page.fill("[data-console] input[name='key']", "saakhscore-demo-underwriter-key")
     page.click("[data-console] button[type='submit']")
     page.wait_for_timeout(2000)
     result = page.inner_text("[data-console-result]")

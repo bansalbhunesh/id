@@ -8,8 +8,8 @@ from main import app
 
 client = TestClient(app)
 
-UNDERWRITER_HEADERS = {"Authorization": "Bearer udyampulse-demo-underwriter-key"}
-AUDITOR_HEADERS = {"Authorization": "Bearer udyampulse-demo-auditor-key"}
+UNDERWRITER_HEADERS = {"Authorization": "Bearer saakhscore-demo-underwriter-key"}
+AUDITOR_HEADERS = {"Authorization": "Bearer saakhscore-demo-auditor-key"}
 CUSTOM_PROFILE = {
     "name": "Audit Contract Test Co",
     "avg_monthly_inflow": 100000,

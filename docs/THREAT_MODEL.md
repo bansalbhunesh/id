@@ -2,7 +2,7 @@
 
 ## Scope And Status
 
-This model covers the public UdyamPulse prototype and the controls required before an IDBI sandbox pilot. It is not a certification, DPIA, penetration test, or legal opinion. The public deployment contains fixed synthetic MSME cases and a public proxy model; it must not receive real customer data.
+This model covers the public SaakhScore prototype and the controls required before an IDBI sandbox pilot. It is not a certification, DPIA, penetration test, or legal opinion. The public deployment contains fixed synthetic MSME cases and a public proxy model; it must not receive real customer data.
 
 ## Assets
 
@@ -15,7 +15,7 @@ This model covers the public UdyamPulse prototype and the controls required befo
 
 ## Trust Boundaries
 
-![UdyamPulse trust boundaries](diagrams/threat-model-trust-boundaries.svg)
+![SaakhScore trust boundaries](diagrams/threat-model-trust-boundaries.svg)
 
 <details>
 <summary>Mermaid source (renders live on GitHub too; the image above is a committed fallback so the diagram never depends on a client-side renderer)</summary>
@@ -68,7 +68,7 @@ Regenerate the image after editing the source: save the block above to a `.mmd` 
 
 The public sample cohort is source-controlled synthetic data. Caller-supplied scoring payloads are validated and scored in process; the prototype does not persist them as records. The pilot-readiness endpoint processes submitted records in memory and returns aggregate counts without application IDs. Decision audit events retain pseudonymised decision metadata, not raw feed payloads.
 
-Before pilot, IDBI must approve collection purpose, legal basis, data location, encryption/key ownership, retention, deletion, access review and incident handling. UdyamPulse documents technical alignment but does not claim compliance certification.
+Before pilot, IDBI must approve collection purpose, legal basis, data location, encryption/key ownership, retention, deletion, access review and incident handling. SaakhScore documents technical alignment but does not claim compliance certification.
 
 ## References
 

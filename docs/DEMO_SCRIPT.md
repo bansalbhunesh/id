@@ -39,7 +39,7 @@ Nobody breaks the loop. So we did."
 *[Optionally flash the **Sources** tab here — the consented GST/UPI/AA/EPFO
 source map — then return to Decision.]*
 
-"UdyamPulse reads the proof this business creates every day —
+"SaakhScore reads the proof this business creates every day —
 GST bills, UPI payments, bank inflows — with the owner's permission —
 and turns it into a **Financial Health Card**.
 Same shop. New answer: **86 out of 100. Grade A. Approved.**
@@ -80,7 +80,7 @@ turnover runs +38% versus bank-observed inflow". Point the cursor at it.]*
 
 "It works in both directions.
 This shop claims high sales on paper — its bank account disagrees.
-UdyamPulse catches the gap and flags it for review.
+SaakhScore catches the gap and flags it for review.
 Approve the invisible-but-honest. Catch the impressive-but-fake."
 
 ## 2:00–2:35 — The proof gauntlet
@@ -110,7 +110,7 @@ experiment is committed for inspection."
 
 "And proof five is the one no other team will show you:
 **our system telling *us* no.**
-We don't have IDBI's data yet. So UdyamPulse **refuses to start**
+We don't have IDBI's data yet. So SaakhScore **refuses to start**
 in pilot mode until real data and every safety check exists.
 We built it so it cannot exaggerate.
 Not to you. Not for us. **Not even to win.**"
@@ -123,7 +123,7 @@ Not to you. Not for us. **Not even to win.**"
 
 "Millions of good businesses aren't risky.
 They're just **invisible**.
-UdyamPulse makes them visible.
+SaakhScore makes them visible.
 **A credit score for those who never got one.**
 It's live. Judge it yourself — it's waiting for you."
 
@@ -154,6 +154,6 @@ curl https://id-ysm9.onrender.com/deployment/readiness  # fail-closed gates
 ```
 
 Demo-scoped credentials for the authenticated write routes:
-`Authorization: Bearer udyampulse-demo-underwriter-key` (scores) and
-`udyampulse-demo-auditor-key` (audit log). Real deployments override both via
+`Authorization: Bearer saakhscore-demo-underwriter-key` (scores) and
+`saakhscore-demo-auditor-key` (audit log). Real deployments override both via
 `UDYAMPULSE_API_KEYS`.

@@ -1,4 +1,4 @@
-"""Rebuild the UdyamPulse champion/challenger PD evidence.
+"""Rebuild the SaakhScore champion/challenger PD evidence.
 
 The public proxy dataset is cross-sectional, so this pipeline deliberately
 uses the honest names development/calibration/holdout. It does not call the

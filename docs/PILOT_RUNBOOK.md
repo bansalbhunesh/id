@@ -1,12 +1,12 @@
 # Pilot Promotion Runbook
 
-This runbook defines how UdyamPulse moves from the public demonstration into an approved IDBI sandbox pilot. It is an engineering control document, not evidence that a pilot has already been authorised.
+This runbook defines how SaakhScore moves from the public demonstration into an approved IDBI sandbox pilot. It is an engineering control document, not evidence that a pilot has already been authorised.
 
 ## Promotion Principle
 
 The public service cannot become a pilot through configuration alone. Promotion requires new bank-approved data evidence, a newly scoped model artifact, private identity and audit controls, and independent sign-off.
 
-![UdyamPulse pilot promotion flow](diagrams/pilot-promotion-flow.svg)
+![SaakhScore pilot promotion flow](diagrams/pilot-promotion-flow.svg)
 
 <details>
 <summary>Mermaid source (renders live on GitHub too; the image above is a committed fallback so the diagram never depends on a client-side renderer)</summary>

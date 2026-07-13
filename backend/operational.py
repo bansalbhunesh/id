@@ -9,7 +9,7 @@ from dataclasses import dataclass
 from starlette.responses import JSONResponse
 
 APP_VERSION = "0.7.0"
-SERVICE_NAME = "udyampulse"
+SERVICE_NAME = "saakhscore"
 DEFAULT_MAX_BODY_BYTES = 8 * 1024 * 1024
 _REQUEST_ID = re.compile(r"^[A-Za-z0-9._:-]{8,128}$")
 

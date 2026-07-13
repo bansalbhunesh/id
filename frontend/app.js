@@ -224,7 +224,7 @@ function renderCaseSummary(score) {
   els.caseSummary.innerHTML = `
     <div class="stage-copy">
       <div class="stage-file">
-        <span class="mono">UP-${esc(fileId)}</span>
+        <span class="mono">SA-${esc(fileId)}</span>
         <span>${esc(profile.sector || "MSME")} / ${esc(profile.district || "India")}</span>
         <span>${esc(ntcLabel)}</span>
       </div>
@@ -249,7 +249,7 @@ function renderCaseSummary(score) {
         </div>
         <div class="decision-line">
           <div><span>Traditional bureau screen</span><strong class="decision-word ${traditionalClass}">${esc(score.traditional.decision)}</strong></div>
-          <div><span>UdyamPulse alternate-data review</span><strong class="decision-word ${alternateClass}">${esc(score.alternate_data_decision)}</strong></div>
+          <div><span>SaakhScore alternate-data review</span><strong class="decision-word ${alternateClass}">${esc(score.alternate_data_decision)}</strong></div>
           <div><span>Runtime</span><strong class="mono">${esc(setModelStatusText())}</strong></div>
         </div>
         ${score.traditional?.reason ? `<p class="fine-print">${esc(score.traditional.reason)}</p>` : ""}
@@ -754,7 +754,7 @@ function renderProofTab() {
         ["Release", state.health?.release ? `v${state.health.release.version} · ${state.health.release.commit}` : "-"],
         ["Hero case", hero.case || "-"],
         ["Traditional", hero.traditional_decision || "-"],
-        ["UdyamPulse", hero.alternate_data_decision || "-"],
+        ["SaakhScore", hero.alternate_data_decision || "-"],
         ["Grade", `${hero.grade || "-"} / ${hero.score ?? "-"} score`],
       ])}
     </section>
@@ -896,7 +896,7 @@ function renderConsole() {
       <p class="muted">Send a real sandbox-style payload to ${code("POST /sandbox/score")} on this running backend. The demo-scoped underwriter key is documented in the repository (docs/DEMO_SCRIPT.md); real deployments override it. Errors render as errors -- nothing here is mocked.</p>
       <form class="console-form" data-console novalidate>
         <label>Underwriter bearer key
-          <input type="password" name="key" autocomplete="off" spellcheck="false" placeholder="udyampulse-demo-underwriter-key" />
+          <input type="password" name="key" autocomplete="off" spellcheck="false" placeholder="saakhscore-demo-underwriter-key" />
         </label>
         <label>Sandbox payload (editable JSON)
           <textarea name="payload" rows="12" spellcheck="false">${esc(JSON.stringify(CONSOLE_EXAMPLE, null, 2))}</textarea>

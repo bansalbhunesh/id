@@ -1,4 +1,4 @@
-"""UdyamPulse API - MSME Financial Health Card."""
+"""SaakhScore API - MSME Financial Health Card."""
 import os
 from pathlib import Path
 from time import perf_counter
@@ -45,7 +45,7 @@ FRONTEND_DIR = Path(__file__).parent.parent / "frontend"
 assert_deployment_allowed()
 
 app = FastAPI(
-    title="UdyamPulse",
+    title="SaakhScore",
     version=APP_VERSION,
     description=(
         "Explainable MSME credit-review and governance API for the IDBI Innovate "
@@ -129,7 +129,7 @@ async def security_headers(request, call_next):
     )
     for name, value in build_security_headers(context).items():
         response.headers[name] = value
-    response.headers["X-UdyamPulse-Mode"] = os.getenv("UDYAMPULSE_MODE", "public_demo")
+    response.headers["X-SaakhScore-Mode"] = os.getenv("UDYAMPULSE_MODE", "public_demo")
     return response
 
 

@@ -1,6 +1,6 @@
 # MSME Risk Model — Domination Roadmap
 
-How UdyamPulse's credit model goes from "honest proxy" to the strongest,
+How SaakhScore's credit model goes from "honest proxy" to the strongest,
 most-defensible MSME risk engine in the field, without ever faking IDBI data.
 
 ## 1. The problem we are fixing
@@ -132,7 +132,7 @@ itself explainable. No LLM ever touches the decision path.
 
 ## 6. Why this is ahead of the field (factual, not marketing)
 
-| Axis | Common in the field | UdyamPulse target |
+| Axis | Common in the field | SaakhScore target |
 |---|---|---|
 | Label | synthetic, or one cross-sectional holdout | **real** SBA charge-offs now; real IDBI outcomes in sandbox |
 | Generalisation | in-sample holdout only | **out-of-distribution** validated now; true dated OOT in sandbox |

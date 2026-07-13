@@ -1,6 +1,6 @@
 # Security Policy
 
-UdyamPulse is a public hackathon prototype. The public deployment serves only
+SaakhScore is a public hackathon prototype. The public deployment serves only
 synthetic MSME cases and a public credit-default proxy model -- it never holds
 real IDBI customer data. See [`docs/THREAT_MODEL.md`](docs/THREAT_MODEL.md) for
 the full trust-boundary model and [`docs/SECURITY_COMPLIANCE.md`](docs/SECURITY_COMPLIANCE.md)

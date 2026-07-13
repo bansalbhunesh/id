@@ -12,8 +12,8 @@ import os
 from fastapi import Header, HTTPException
 
 _DEMO_KEYS = {
-    "udyampulse-demo-underwriter-key": "underwriter",
-    "udyampulse-demo-auditor-key": "auditor",
+    "saakhscore-demo-underwriter-key": "underwriter",
+    "saakhscore-demo-auditor-key": "auditor",
 }
 
 

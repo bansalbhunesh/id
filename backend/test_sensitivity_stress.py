@@ -34,6 +34,9 @@ def test_multi_lever_matches_a_direct_pipeline_run():
         body["hypothetical"]["score"] - body["baseline"]["score"])
     assert {lever["field"] for lever in body["levers"]} == {
         "cheque_bounce_rate", "gst_filing_streak_months"}
+    streak = next(lever for lever in body["levers"]
+                  if lever["field"] == "gst_filing_streak_months")
+    assert streak["to"] == 6 and isinstance(streak["to"], int)
     # Baseline must equal the plain GET score for the same case.
     score = client.get("/msmes/ntc_hero/score").json()
     assert body["baseline"]["score"] == score["score"]

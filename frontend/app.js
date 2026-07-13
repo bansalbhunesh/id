@@ -422,7 +422,7 @@ function whatifResultCard(body) {
         ${arrowRow("Decision", body.baseline.decision, body.hypothetical.decision)}
         ${arrowRow("Indicative limit", body.baseline.eligible_limit, body.hypothetical.eligible_limit, formatCurrency)}
       </tbody></table>
-      <p class="${decisionChanged ? "" : "muted"}"><strong>${decisionChanged ? "The decision itself changes." : "The decision holds; score and limit move as shown."}</strong> (score ${body.delta.score >= 0 ? "+" : ""}${esc(body.delta.score)})</p>
+      <p class="${decisionChanged ? "" : "muted"}"><strong>${decisionChanged ? "The decision itself changes." : body.delta.grade_changed ? "The grade moves; the decision holds." : "The decision holds; score and limit move as shown."}</strong> (score ${body.delta.score >= 0 ? "+" : ""}${esc(body.delta.score)})</p>
       <p class="truth-note">${esc(body.note)}</p>
     </div>`;
 }

@@ -143,6 +143,8 @@ def parse_levers(raw: str) -> list[tuple[str, float]]:
                 status_code=422, detail=f"lever value for {field} is not a number"
             ) from None
         seen.add(field)
+        if field in INT_FIELDS and value == int(value):
+            value = int(value)  # keep integer levers integral in the register
         pairs.append((field, value))
     if not pairs:
         raise HTTPException(status_code=422, detail="no levers supplied")

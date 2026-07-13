@@ -66,8 +66,8 @@ What to verify in under three minutes:
 
 1. Open the live app and keep the default Shree Ganesh Textiles case selected.
 2. Compare `Traditional bureau-only: Rejected` with `UdyamPulse alternate data: Approved`.
-3. Inspect the health-card pillars, reason codes, model attribution, decision path, and policy guardrails.
-4. Switch to `Proof` and `Governance` to confirm audit, validation, pilot KPI, fairness, source-map, rubric, and competitor-gap proof.
+3. In the review packet alongside, inspect the pillars, English/Hindi reason codes, the EMI limit-sizing ledger, model attribution, decision path, and policy guardrails.
+4. Switch to `Model`, `Governance`, and `Proof` to confirm the real-outcome benchmark, audit, validation, pilot gates, fairness, rubric, and competitor-gap proof -- then try the live underwriter console under `Sources`.
 
 ## Backend Proof
 
@@ -111,7 +111,9 @@ Rubric coverage is implemented as backend data, not only README copy:
 
 ## Features
 
-- Deep-linkable, keyboard-accessible underwriter cockpit with borrower queue, score, grade, risk band, credit-line recommendation, and decision comparison.
+- Deep-linkable, keyboard-accessible two-rail underwriter workspace: decision stage beside a permanent review packet (Decision, Evidence, Model, Governance, Proof, Sources) with borrower queue, score, grade, risk band, credit-line recommendation, and decision comparison. Fonts are self-hosted; the app makes zero external requests.
+- **In-product model evidence**: the `Model` tab renders `GET /model/sme-benchmark` (v2 real-outcome splits with bootstrap intervals, DeLong-tested baselines, artifact integrity) plus the consumer-proxy evaluation with candidate comparison and outcome-linked fairness slices.
+- **Live underwriter console** under `Sources`: send a real editable payload to `POST /sandbox/score` with the documented demo key -- loading, 401, and validation errors render honestly; nothing is mocked.
 - Five-pillar financial health card: Liquidity, Discipline, Momentum, Leverage, and Digital Footprint.
 - Calibrated monotonic XGBoost champion with native exact TreeSHAP, a calibrated logistic fallback, and an untouched 4,500-row public-proxy holdout -- not a regressor fit against a synthetic score. See [MODEL_CARD.md](MODEL_CARD.md).
 - Deterministic underwriter memo and borrower improvement plan; optional AWS Bedrock memo generation is a Stage 2 configuration path.
@@ -121,7 +123,7 @@ Rubric coverage is implemented as backend data, not only README copy:
 - **GST-vs-bank turnover reconciliation**: when both feeds are present, declared turnover is compared against bank-observed inflow; a divergence beyond +/-25% routes to review and becomes the underwriter's top next action -- the "looks-fine-on-paper" red flag, detected in both directions.
 - **EMI-capacity indicative limit**: the limit is sized from spare debt-service capacity (existing-debt service estimated, policy rate/tenor annuity) and only *capped* by the grade multiple, with the full `limit_basis` breakdown in every response -- not a bare score-times-constant number.
 - **Favorable-only conduct prior**: strong GST momentum and UPI footprint reduce the routed PD through a capped, disclosed expert prior (never inflating PD for thin digital visibility -- absence of signal is not evidence of risk); the coefficients become trainable the moment dated sandbox outcomes arrive.
-- **Bilingual reason codes**: borrower-facing reasons, improvement actions, and the underwriter next-best-action ship in English and Hindi for the financial-inclusion audience.
+- **Bilingual reason codes**: borrower-facing reasons, improvement actions, and the underwriter next-best-action ship in English and Hindi -- and render in-product behind an English/हिन्दी toggle, in a committed Devanagari face.
 - Recalibration and monitoring APIs for holdout AUC/Gini/KS/PR-AUC/Brier/ECE, bootstrap intervals, PSI, reason stability, pilot targets, and proxy fairness slices -- see `GET /model/evaluation`.
 - Dated `bad_12m` outcome contract with 365-day maturity checks and automatic chronological development/calibration/OOT cohorts -- see `GET /sandbox/outcome-contract` and `POST /sandbox/pilot-readiness`.
 - Explicit `public_demo`, `pilot`, and `production` modes. Pilot/production startup fails closed until private credentials, IDBI-scoped artifacts, true OOT evidence, and durable audit storage pass -- see `GET /deployment/readiness`.
@@ -219,42 +221,44 @@ The image runs as a non-root user and probes `/health/ready`. `Dockerfile` and `
 <table>
   <tr>
     <td width="50%" valign="top">
-      <img src="docs/deck/assets/live-cockpit-viewport.png" width="100%" alt="UdyamPulse first viewport showing a calm decision stage, top index, borrower strip, and stamped approval card" />
+      <img src="docs/deck/assets/live-cockpit-viewport.png" width="100%" alt="UdyamPulse two-rail workspace: decision stage with stamped approval card beside the open review packet" />
       <br />
-      <strong>First viewport</strong><br />
-      Judge path starts with one clear NTC rejection reversal, a top review index, and optional slide-over detail instead of a wall of boxes.
+      <strong>Two-rail workspace</strong><br />
+      One clear NTC rejection reversal beside a permanent review packet -- Decision, Evidence, Model, Governance, Proof, and Sources are always one click away, never hidden behind a modal.
     </td>
     <td width="50%" valign="top">
-      <img src="docs/deck/assets/decision-pack.png" width="100%" alt="Decision slide-over showing the five-pillar health ledger and reason-code journal" />
+      <img src="docs/deck/assets/decision-pack.png" width="100%" alt="Decision packet showing the five-pillar health ledger, bilingual reason codes, and EMI limit sizing" />
       <br />
-      <strong>Decision pack</strong><br />
-      Half-page slide-over reveals the five-pillar health ledger, reason-code journal, memo, and improvement note on demand.
+      <strong>Decision packet</strong><br />
+      Five-pillar ledger, English/Hindi reason codes, underwriter next step, memo, and the full EMI limit-sizing breakdown.
     </td>
   </tr>
   <tr>
     <td width="50%" valign="top">
-      <img src="docs/deck/assets/governance-evidence.png" width="100%" alt="Governance slide-over with public proxy evidence and fail-closed pilot promotion status" />
+      <img src="docs/deck/assets/model-evidence.png" width="100%" alt="Model evidence tab with the real-outcome benchmark, confidence intervals, and DeLong-tested baselines" />
+      <br />
+      <strong>Model evidence</strong><br />
+      The real-SBA v2 benchmark with bootstrap intervals, DeLong-tested baselines, artifact integrity, and outcome-linked fairness slices -- rendered from `GET /model/sme-benchmark`.
+    </td>
+    <td width="50%" valign="top">
+      <img src="docs/deck/assets/governance-evidence.png" width="100%" alt="Governance packet with public proxy evidence and fail-closed pilot promotion status" />
       <br />
       <strong>Governance evidence</strong><br />
-      The public proxy boundary and five blocking pilot gates are visible before any reviewer could mistake demo evidence for bank validation.
+      The public proxy boundary and blocking pilot gates are visible before any reviewer could mistake demo evidence for bank validation.
     </td>
+  </tr>
+  <tr>
     <td width="50%" valign="top">
       <img src="docs/deck/assets/proof-runbook.png" width="100%" alt="Proof tab showing truth boundary, rubric scorecard, judge runbook, and backend API catalog" />
       <br />
       <strong>Judge proof tab</strong><br />
       Rubric scorecard, truth boundary, competitor gap map, runbook, and backend API catalog pulled from `/submission/proof`.
     </td>
-  </tr>
-  <tr>
     <td width="50%" valign="top">
       <img src="docs/deck/assets/mobile-live.png" width="45%" alt="Mobile UdyamPulse review flow" />
       <br />
       <strong>Mobile review</strong><br />
-      Same borrower review flow compressed for a phone screen without hiding the decision evidence.
-    </td>
-    <td width="50%" valign="top">
-      <strong>Full-resolution assets</strong><br />
-      The gallery stays intentionally compact. Reviewers can open the PNGs in `docs/deck/assets/` for larger inspection.
+      The packet stacks below the stage on a phone -- adapted, not amputated.
     </td>
   </tr>
 </table>

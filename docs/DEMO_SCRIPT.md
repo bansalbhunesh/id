@@ -4,15 +4,14 @@ Voiceover + exact screen path for the demo video. Speak calmly (~140 words/min);
 confidence is quiet. `[SHOW]` = what is on screen. Live URL:
 https://id-ysm9.onrender.com
 
-**Prep — keep six tabs ready to switch instantly:**
+**Prep — keep five tabs ready to switch instantly:**
 
-1. Live app — https://id-ysm9.onrender.com (Shree Ganesh Textiles is the default case)
+1. Live app — https://id-ysm9.onrender.com (Shree Ganesh Textiles is the default
+   case; the review packet is permanently open beside the stage)
 2. Terminal with this typed, ready to press Enter: `curl https://id-ysm9.onrender.com/submission/proof`
 3. GitHub repo README — green tests badge visible
 4. GitHub — `backend/model_training/experiments/` folder
 5. Browser — https://id-ysm9.onrender.com/deployment/readiness
-6. Browser — https://id-ysm9.onrender.com/msmes/ntc_hero/score (the JSON where the
-   Hindi reason codes `reasons_vernacular` are visible on screen)
 
 ## 0:00–0:15 — Cold open: two facts and a promise
 
@@ -62,9 +61,10 @@ Go ahead. We'll wait."
 
 ## 1:25–1:45 — It explains itself, in your language
 
-*[SHOW: click the "Review packet" button — the decision drawer opens with the
-five-pillar ledger and reason codes. On "in English and in Hindi", flash Tab 6 —
-the score JSON with the Devanagari `reasons_vernacular` strings clearly visible.]*
+*[SHOW: the review packet beside the stage — five-pillar ledger and reason
+codes. On "in English and in Hindi", click the **हिन्दी** toggle in the
+Reason-code journal: the reasons switch to Devanagari on screen. Click back
+to English.]*
 
 "And it's not a black box.
 Every decision comes with reasons — what's strong, what's weak,
@@ -73,10 +73,10 @@ The banker gets evidence. The owner gets a roadmap."
 
 ## 1:45–2:00 — It catches liars too
 
-*[SHOW: pick "City Corner Retail" from the borrower list, open the **Evidence**
-tab — under "Policy guardrails", the row "GST-vs-bank turnover reconciliation"
-reads **Review** — "GST-declared turnover runs +38% versus bank-observed
-inflow". Point the cursor at it.]*
+*[SHOW: pick "City Corner Retail" from the borrower strip, click the
+**Evidence** tab in the packet — under "Policy guardrails", the row
+"GST-vs-bank turnover reconciliation" reads **Review** — "GST-declared
+turnover runs +38% versus bank-observed inflow". Point the cursor at it.]*
 
 "It works in both directions.
 This shop claims high sales on paper — its bank account disagrees.
@@ -96,11 +96,13 @@ One command, and the running system returns every claim in this video."
 **115 automated tests** run on every change — the green tick is
 machine-checked, not self-declared."
 
-*[SHOW: Tab 4 — the experiments folder, scroll slowly.]*
+*[SHOW: the app's **Model** tab — OOT AUC 0.9623 with intervals on screen —
+then Tab 4, the experiments folder on GitHub, scroll slowly.]*
 
 "Proof four: **real data.**
 Validated against **more than 4 lakh real small-business loans** —
-including recession years — every experiment committed for inspection."
+including recession years — the evidence is in the product, and every
+experiment is committed for inspection."
 
 ## 2:35–2:55 — The twist: it refuses to lie
 

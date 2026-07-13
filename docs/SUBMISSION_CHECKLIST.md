@@ -31,7 +31,8 @@ Use this as the final IDBI Innovate / H2S submission source of truth.
 - Deck export: 13 pages, not encrypted. Re-export from the refreshed `docs/deck/index.html` after changing model evidence or screenshots.
 - Browser smoke test: desktop/tablet/mobile render with no console errors, no horizontal overflow, WCAG AA Axe violations, keyboard trap, or undersized visible controls.
 - Live app proof: 5 cases, 4 impact cards, 5 source signals, 5 governance controls, validation metrics, pilot KPIs, and expanded fairness slices.
-- Proof tab: Decision, Evidence, Governance, Proof, and Sources views render from live API state and can be deep-linked with `?case=...&view=...`.
+- Review packet: Decision, Evidence, Model, Governance, Proof, and Sources views render from live API state in a permanent side panel and can be deep-linked with `?case=...&view=...`.
+- Frontend test evidence: `node --test frontend/tests/lib.test.mjs` (9 unit) and `python -m pytest e2e -q` (12 Playwright end-to-end, self-booting server).
 - Core demo moment: Shree Ganesh Textiles is traditional `Rejected` but UdyamPulse alternate-data `Approved`, grade A, score 86/100, Rs 27,00,000 indicative limit.
 
 ## Form Copy

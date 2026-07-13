@@ -129,8 +129,14 @@ def test_hindi_toggle_switches_reason_codes(page):
     page.click("#tab-decision")
     settle(page, 250)
     page.click("[data-lang='hi']")
-    page.wait_for_timeout(300)
+    page.wait_for_timeout(600)
     assert "मज़बूत" in page.inner_text("#tabContent")
+    # The committed Devanagari face must actually activate, not a system
+    # fallback: the hi rows name it first in their stack, which triggers the
+    # unicode-ranged WOFF2 load.
+    assert page.evaluate(
+        "async () => { await document.fonts.ready; return [...document.fonts]"
+        ".some(f => f.family === 'Noto Sans Devanagari' && f.status === 'loaded'); }")
     page.click("[data-lang='en']")
     page.wait_for_timeout(300)
     assert "Strong:" in page.inner_text("#tabContent")

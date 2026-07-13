@@ -1064,8 +1064,11 @@ code {
   margin-top: var(--space-2);
 }
 
+[lang="hi"],
 [lang="hi"] strong {
-  font-family: var(--font-body);
+  /* Naming the Devanagari face activates the committed WOFF2 (its
+     unicode-range keeps Latin glyphs on Source Sans 3). */
+  font-family: "Noto Sans Devanagari", var(--font-body);
   line-height: 1.6;
 }
 

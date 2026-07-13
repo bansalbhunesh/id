@@ -58,7 +58,13 @@ def base_url(tmp_path_factory):
         yield url
     finally:
         proc.terminate()
-        proc.wait(timeout=10)
+        try:
+            proc.wait(timeout=10)
+        except subprocess.TimeoutExpired:
+            # A uvicorn that ignores the polite signal must still die, or the
+            # leaked server keeps the port and its audit temp dir locked.
+            proc.kill()
+            proc.wait(timeout=10)
 
 
 @pytest.fixture(scope="session")

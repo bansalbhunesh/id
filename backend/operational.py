@@ -120,9 +120,9 @@ def security_headers(context: SecurityHeaderContext) -> dict[str, str]:
     documentation = context.path in {"/docs", "/redoc"}
     script_sources = "'self' 'unsafe-inline' https://cdn.jsdelivr.net" if documentation else "'self'"
     style_sources = (
-        "'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com"
+        "'self' 'unsafe-inline' https://cdn.jsdelivr.net"
         if documentation
-        else "'self' https://fonts.googleapis.com"
+        else "'self'"
     )
     headers = {
         "X-Request-ID": context.request_id,
@@ -137,7 +137,7 @@ def security_headers(context: SecurityHeaderContext) -> dict[str, str]:
             "default-src 'self'; "
             f"script-src {script_sources}; "
             f"style-src {style_sources}; "
-            "font-src 'self' https://fonts.gstatic.com; "
+            "font-src 'self'; "
             "img-src 'self' data:; "
             "connect-src 'self'; "
             "object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'"

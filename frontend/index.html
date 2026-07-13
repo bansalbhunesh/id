@@ -7,16 +7,13 @@
 <meta name="description" content="UdyamPulse is an explainable MSME credit-review cockpit for thin-file lending, model governance, and sandbox readiness." />
 <title>UdyamPulse - MSME Credit Review</title>
 <link rel="canonical" href="https://id-ysm9.onrender.com/" />
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Azeret+Mono:wght@500;600;700&family=Libre+Baskerville:wght@400;700&family=Source+Sans+3:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%231B2A2F'/%3E%3Cpath d='M8 9h16v2H8zM8 15h16v2H8zM8 21h10v2H8z' fill='%23F4EBDD'/%3E%3Cpath d='M20 19h5v5h-5z' fill='%235B4A8B'/%3E%3C/svg%3E" />
 <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <a class="skip-link" href="#mainStage">Skip to credit decision</a>
   <div class="app-canvas">
-    <header class="top-index" data-inert-when-drawer>
+    <header class="top-index">
       <a class="brand" href="#mainStage" aria-label="UdyamPulse home">
         <span class="brand-mark" aria-hidden="true">Up</span>
         <span>
@@ -30,15 +27,6 @@
         </span>
       </a>
 
-      <nav id="tabs" class="nav-index" role="tablist" aria-label="Review packet index">
-        <button id="tab-decision" type="button" role="tab" data-tab="decision" aria-controls="tabContent" aria-selected="true" tabindex="0">Decision</button>
-        <button id="tab-evidence" type="button" role="tab" data-tab="evidence" aria-controls="tabContent" aria-selected="false" tabindex="-1">Evidence</button>
-        <button id="tab-model" type="button" role="tab" data-tab="model" aria-controls="tabContent" aria-selected="false" tabindex="-1">Model</button>
-        <button id="tab-governance" type="button" role="tab" data-tab="governance" aria-controls="tabContent" aria-selected="false" tabindex="-1">Governance</button>
-        <button id="tab-proof" type="button" role="tab" data-tab="proof" aria-controls="tabContent" aria-selected="false" tabindex="-1">Proof</button>
-        <button id="tab-sources" type="button" role="tab" data-tab="sources" aria-controls="tabContent" aria-selected="false" tabindex="-1">Sources</button>
-      </nav>
-
       <div class="case-picker">
         <label for="msme">Borrower file</label>
         <select id="msme" class="case-select">
@@ -47,37 +35,37 @@
       </div>
     </header>
 
-    <section class="file-index" aria-label="Borrower file index" data-inert-when-drawer>
+    <section class="file-index" aria-label="Borrower file index">
       <div id="caseList" class="case-list">
         <div class="skeleton">Loading cases...</div>
       </div>
     </section>
 
-    <main id="mainStage" class="stage-shell" tabindex="-1" data-inert-when-drawer>
-      <section id="caseSummary" class="decision-stage" aria-live="polite">
-        <div class="skeleton">Loading borrower assessment...</div>
-      </section>
+    <div class="workspace">
+      <main id="mainStage" class="stage-shell" tabindex="-1">
+        <section id="caseSummary" class="decision-stage" aria-live="polite">
+          <div class="skeleton">Loading borrower assessment...</div>
+        </section>
 
-      <section id="portfolioMetrics" class="portfolio-ribbon" aria-label="Portfolio impact"></section>
-    </main>
+        <section id="portfolioMetrics" class="portfolio-ribbon" aria-label="Portfolio impact"></section>
+      </main>
 
-    <button id="drawerToggle" class="drawer-launch" type="button" aria-haspopup="dialog" aria-controls="reviewDrawer" data-inert-when-drawer>Review packet</button>
-    <div id="drawerScrim" class="scrim" aria-hidden="true"></div>
-
-    <div id="reviewDrawer" class="review-drawer" role="dialog" aria-modal="true" aria-labelledby="drawerTitle" aria-hidden="true" inert>
-      <div class="drawer-head">
-        <div>
-          <h2 id="drawerTitle" class="drawer-title" tabindex="-1">Decision packet</h2>
-          <p class="muted">Focused detail for the selected index item.</p>
+      <aside id="reviewPacket" class="review-packet" aria-labelledby="packetTitle">
+        <div class="packet-head">
+          <h2 id="packetTitle" class="packet-title">Decision packet</h2>
+          <nav id="tabs" class="nav-index" role="tablist" aria-label="Review packet index">
+            <button id="tab-decision" type="button" role="tab" data-tab="decision" aria-controls="tabContent" aria-selected="true" tabindex="0">Decision</button>
+            <button id="tab-evidence" type="button" role="tab" data-tab="evidence" aria-controls="tabContent" aria-selected="false" tabindex="-1">Evidence</button>
+            <button id="tab-model" type="button" role="tab" data-tab="model" aria-controls="tabContent" aria-selected="false" tabindex="-1">Model</button>
+            <button id="tab-governance" type="button" role="tab" data-tab="governance" aria-controls="tabContent" aria-selected="false" tabindex="-1">Governance</button>
+            <button id="tab-proof" type="button" role="tab" data-tab="proof" aria-controls="tabContent" aria-selected="false" tabindex="-1">Proof</button>
+            <button id="tab-sources" type="button" role="tab" data-tab="sources" aria-controls="tabContent" aria-selected="false" tabindex="-1">Sources</button>
+          </nav>
         </div>
-        <button id="drawerClose" class="drawer-close" type="button" aria-label="Close review packet">Close</button>
-      </div>
-      <section id="decisionStamp" class="drawer-stamp" aria-label="Decision summary">
-        <div class="skeleton">Loading decision stamp...</div>
-      </section>
-      <div id="tabContent" class="drawer-body" role="tabpanel" aria-labelledby="tab-decision" tabindex="0">
-        <div class="skeleton">Preparing review packet...</div>
-      </div>
+        <div id="tabContent" class="packet-body" role="tabpanel" aria-labelledby="tab-decision" tabindex="0">
+          <div class="skeleton">Preparing review packet...</div>
+        </div>
+      </aside>
     </div>
   </div>
 

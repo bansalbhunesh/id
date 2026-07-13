@@ -16,8 +16,6 @@ const state = {
   activeScore: null,
   activeTab: "decision",
   lang: "en",
-  drawerOpen: false,
-  lastFocus: null,
 };
 
 const els = {
@@ -27,16 +25,11 @@ const els = {
   msme: document.getElementById("msme"),
   caseList: document.getElementById("caseList"),
   caseSummary: document.getElementById("caseSummary"),
-  decisionStamp: document.getElementById("decisionStamp"),
   portfolioMetrics: document.getElementById("portfolioMetrics"),
   tabs: document.getElementById("tabs"),
   tabContent: document.getElementById("tabContent"),
-  drawer: document.getElementById("reviewDrawer"),
-  drawerTitle: document.getElementById("drawerTitle"),
-  drawerToggle: document.getElementById("drawerToggle"),
-  drawerClose: document.getElementById("drawerClose"),
-  drawerScrim: document.getElementById("drawerScrim"),
-  inertWhenDrawer: [...document.querySelectorAll("[data-inert-when-drawer]")],
+  packet: document.getElementById("reviewPacket"),
+  packetTitle: document.getElementById("packetTitle"),
 };
 
 const currency = new Intl.NumberFormat("en-IN", {
@@ -45,7 +38,7 @@ const currency = new Intl.NumberFormat("en-IN", {
   maximumFractionDigits: 0,
 });
 
-const drawerTitles = {
+const packetTitles = {
   decision: "Decision packet",
   evidence: "Evidence packet",
   model: "Model evidence",
@@ -109,47 +102,13 @@ async function api(path, { method = "GET", headers = {}, body, timeoutMs = API_T
   }
 }
 
-function setDrawerOpen(open, restoreFocus = true) {
-  if (open && !state.drawerOpen && !els.drawer.contains(document.activeElement)) {
-    state.lastFocus = document.activeElement;
-  }
-  state.drawerOpen = open;
-  document.body.classList.toggle("drawer-open", open);
-  els.drawer.setAttribute("aria-hidden", String(!open));
-  els.drawer.inert = !open;
-  els.inertWhenDrawer.forEach((element) => { element.inert = open; });
-  if (open) {
-    window.requestAnimationFrame(() => els.drawerTitle.focus({ preventScroll: true }));
-  } else if (restoreFocus && state.lastFocus instanceof HTMLElement) {
-    state.lastFocus.focus({ preventScroll: true });
-  }
-}
-
-function focusableInDrawer() {
-  return [...els.drawer.querySelectorAll("button:not([disabled]), a[href], select:not([disabled]), [tabindex]:not([tabindex='-1'])")]
-    .filter((element) => !element.inert && element.getClientRects().length > 0);
-}
-
-function trapDrawerFocus(event) {
-  if (!state.drawerOpen || event.key !== "Tab") return;
-  const focusable = focusableInDrawer();
-  if (!focusable.length) {
-    event.preventDefault();
-    els.drawerTitle.focus();
-    return;
-  }
-  const first = focusable[0];
-  const last = focusable[focusable.length - 1];
-  if (!focusable.includes(document.activeElement)) {
-    event.preventDefault();
-    (event.shiftKey ? last : first).focus();
-  } else if (event.shiftKey && document.activeElement === first) {
-    event.preventDefault();
-    last.focus();
-  } else if (!event.shiftKey && document.activeElement === last) {
-    event.preventDefault();
-    first.focus();
-  }
+function scrollPacketIntoView() {
+  // On single-column layouts the packet sits below the stage; a stage CTA
+  // should bring it into view. On the two-rail desktop layout it is already
+  // visible, so this is a no-op there.
+  if (!window.matchMedia("(max-width: 1179px)").matches) return;
+  const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  els.packet.scrollIntoView({ behavior: reduced ? "auto" : "smooth", block: "start" });
 }
 
 function setApiStatus(ok, label) {
@@ -168,14 +127,14 @@ function readUrlState() {
   };
 }
 
-function writeUrlState({ replace = false, includeView = state.drawerOpen } = {}) {
+function writeUrlState({ replace = false } = {}) {
   if (window.location.protocol === "file:") return;
   const url = new URL(window.location.href);
   url.searchParams.set("case", state.activeId);
-  if (includeView) url.searchParams.set("view", state.activeTab);
+  if (state.activeTab !== "decision") url.searchParams.set("view", state.activeTab);
   else url.searchParams.delete("view");
   window.history[replace ? "replaceState" : "pushState"](
-    { caseId: state.activeId, view: includeView ? state.activeTab : null },
+    { caseId: state.activeId, view: state.activeTab },
     "",
     url,
   );
@@ -293,10 +252,10 @@ function renderCaseSummary(score) {
         <span>${esc(ntcLabel)}</span>
       </div>
       <h2 class="stage-title">${esc(title)}</h2>
-      <p class="stage-lede">${esc(score.name)} is ${esc(score.alternate_data_decision.toLowerCase())} for ${formatCurrency(score.eligible_limit)} after consented cash-flow, GST, UPI, EPFO-style, and bureau signals are reviewed. Detailed reasons, fairness checks, proof, and sandbox boundaries live in the sliding review packet.</p>
+      <p class="stage-lede">${esc(score.name)} is ${esc(score.alternate_data_decision.toLowerCase())} for ${formatCurrency(score.eligible_limit)} after consented cash-flow, GST, UPI, EPFO-style, and bureau signals are reviewed. Reasons, model evidence, fairness checks, and proof sit in the review packet alongside.</p>
       <div class="stage-actions">
-        <button class="primary-action" type="button" data-open-tab="decision">Open decision packet</button>
-        <button class="quiet-action" type="button" data-open-tab="sources">View source map</button>
+        <button class="primary-action" type="button" data-open-tab="decision">Read decision packet</button>
+        <button class="quiet-action" type="button" data-open-tab="model">See model evidence</button>
       </div>
     </div>
     <aside class="verdict-stage" aria-label="Decision stage">
@@ -323,28 +282,11 @@ function renderCaseSummary(score) {
   `;
 
   els.caseSummary.querySelectorAll("[data-open-tab]").forEach((button) => {
-    button.addEventListener("click", () => setTab(button.dataset.openTab, true));
+    button.addEventListener("click", () => {
+      setTab(button.dataset.openTab);
+      scrollPacketIntoView();
+    });
   });
-}
-
-function renderDecisionStamp(score) {
-  const validation = holdoutMetrics();
-  const governance = state.governance;
-  if (!score) {
-    els.decisionStamp.innerHTML = `<div class="skeleton">Decision summary unavailable.</div>`;
-    return;
-  }
-  els.decisionStamp.innerHTML = `
-    <span class="stamp-letter">${esc(score.grade)}</span>
-    <div class="stamp-ledger">
-      <div><span>Score</span><strong>${esc(score.score)}/100</strong></div>
-      <div><span>Risk</span><strong>${esc(score.risk_band)}</strong></div>
-      <div><span>Limit</span><strong>${formatCurrency(score.eligible_limit)}</strong></div>
-      <div><span>Model</span><strong>${esc(setModelStatusText())}</strong></div>
-      <div><span>Audit</span><strong>${esc(governance?.audit?.events_recorded ?? "-")} events</strong></div>
-      <div><span>Holdout AUC</span><strong>${esc(validation?.auc ?? "-")}</strong></div>
-    </div>
-  `;
 }
 
 function renderPillars(score) {
@@ -945,14 +887,14 @@ function renderTabContent() {
     proof: () => renderProofTab(),
     sources: () => renderSourcesTab(score),
   };
-  els.drawerTitle.textContent = drawerTitles[state.activeTab] || "Review packet";
+  els.packetTitle.textContent = packetTitles[state.activeTab] || "Review packet";
   els.tabContent.setAttribute("aria-labelledby", `tab-${state.activeTab}`);
   els.tabContent.innerHTML = views[state.activeTab]?.() || views.decision();
   applyMeterWidths(els.tabContent);
   els.tabContent.scrollTop = 0;
 }
 
-function setTab(tab, openDrawer = true, { updateHistory = true } = {}) {
+function setTab(tab, { updateHistory = true } = {}) {
   if (!VALID_TABS.includes(tab)) tab = "decision";
   state.activeTab = tab;
   els.tabs.querySelectorAll("[data-tab]").forEach((button) => {
@@ -961,13 +903,7 @@ function setTab(tab, openDrawer = true, { updateHistory = true } = {}) {
     button.tabIndex = selected ? 0 : -1;
   });
   renderTabContent();
-  if (openDrawer) setDrawerOpen(true);
-  if (updateHistory) writeUrlState({ includeView: openDrawer });
-}
-
-function closeDrawer({ updateHistory = true, restoreFocus = true } = {}) {
-  setDrawerOpen(false, restoreFocus);
-  if (updateHistory) writeUrlState({ replace: true, includeView: false });
+  if (updateHistory) writeUrlState();
 }
 
 function handleTabKeydown(event) {
@@ -982,7 +918,7 @@ function handleTabKeydown(event) {
   if (event.key === "ArrowLeft") next = (current - 1 + tabs.length) % tabs.length;
   if (event.key === "ArrowRight") next = (current + 1) % tabs.length;
   tabs[next].focus();
-  setTab(tabs[next].dataset.tab, true);
+  setTab(tabs[next].dataset.tab);
 }
 
 async function refreshGovernance() {
@@ -1003,7 +939,6 @@ async function loadCase(id, { updateHistory = true } = {}) {
   els.msme.value = id;
   renderCases();
   els.caseSummary.innerHTML = `<div class="skeleton">Scoring selected MSME...</div>`;
-  els.decisionStamp.innerHTML = `<div class="skeleton">Refreshing decision summary...</div>`;
   els.tabContent.innerHTML = `<div class="skeleton">Preparing review packet...</div>`;
   try {
     const score = await api(`/msmes/${encodeURIComponent(id)}/score`);
@@ -1016,7 +951,6 @@ async function loadCase(id, { updateHistory = true } = {}) {
     }
     if (loadToken !== activeLoadToken) return; // superseded while awaiting governance
     renderCaseSummary(score);
-    renderDecisionStamp(score);
     renderTabContent();
     setApiStatus(true, "Live API");
     updateStatusLine();
@@ -1025,7 +959,6 @@ async function loadCase(id, { updateHistory = true } = {}) {
     if (loadToken !== activeLoadToken) return; // a newer load owns the screen now
     setApiStatus(false, "Offline");
     els.caseSummary.innerHTML = errorState("Borrower decision unavailable", error.message);
-    els.decisionStamp.innerHTML = `<div class="empty-state">Decision summary unavailable while the API is offline.</div>`;
     els.tabContent.innerHTML = `<div class="empty-state">Review evidence is unavailable while the API is offline.</div>`;
   }
 }
@@ -1038,16 +971,9 @@ function bindEvents() {
   });
   els.tabs.addEventListener("click", (event) => {
     const button = event.target.closest("[data-tab]");
-    if (button) setTab(button.dataset.tab, true);
+    if (button) setTab(button.dataset.tab);
   });
   els.tabs.addEventListener("keydown", handleTabKeydown);
-  els.drawerToggle.addEventListener("click", () => {
-    setDrawerOpen(true);
-    writeUrlState({ includeView: true });
-  });
-  els.drawerClose.addEventListener("click", () => closeDrawer());
-  els.drawerScrim.addEventListener("click", () => closeDrawer());
-  els.drawer.addEventListener("keydown", trapDrawerFocus);
   document.addEventListener("click", (event) => {
     if (event.target.closest("[data-retry]")) window.location.reload();
     const langButton = event.target.closest("[data-lang]");
@@ -1063,21 +989,13 @@ function bindEvents() {
       submitConsole(form);
     }
   });
-  window.addEventListener("keydown", (event) => {
-    if (event.key === "Escape" && state.drawerOpen) closeDrawer();
-  });
   window.addEventListener("popstate", async () => {
     const urlState = readUrlState();
     const caseId = state.msmes.some((item) => item.id === urlState.caseId)
       ? urlState.caseId
       : state.msmes[0]?.id;
     if (caseId && caseId !== state.activeId) await loadCase(caseId, { updateHistory: false });
-    if (urlState.view) {
-      setTab(urlState.view, true, { updateHistory: false });
-    } else {
-      setTab("decision", false, { updateHistory: false });
-      closeDrawer({ updateHistory: false, restoreFocus: false });
-    }
+    setTab(urlState.view || "decision", { updateHistory: false });
   });
 }
 
@@ -1128,12 +1046,10 @@ async function init() {
     renderPortfolioMetrics();
     renderCases();
     await loadCase(state.activeId, { updateHistory: false });
-    if (urlState.view) setTab(urlState.view, true, { updateHistory: false });
-    else setTab("decision", false, { updateHistory: false });
+    setTab(urlState.view || "decision", { updateHistory: false });
   } catch (error) {
     setApiStatus(false, "Offline");
     els.caseSummary.innerHTML = errorState("Startup check failed", error.message);
-    els.decisionStamp.innerHTML = `<div class="empty-state">Model and audit status could not be fetched.</div>`;
     els.tabContent.innerHTML = `<div class="empty-state">The review shell loaded, but API evidence could not be fetched.</div>`;
   }
 }

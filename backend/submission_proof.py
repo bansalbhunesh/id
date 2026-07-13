@@ -83,6 +83,24 @@ API_CATALOG = [
         "layer": "Audit",
         "proves": "Scoring calls append reconstructable decision events.",
     },
+    {
+        "method": "GET",
+        "path": "/rails/ocen/offer/{id}",
+        "layer": "Lending rail output",
+        "proves": "Every verdict reshapes into an OCEN 4.0-aligned, deterministically replayable loan-offer artifact with documented risk-based pricing -- or an honest review/reject status.",
+    },
+    {
+        "method": "GET",
+        "path": "/consent/contract",
+        "layer": "Consent",
+        "proves": "The purpose/scope/expiry/revocation rules the sandbox route enforces are machine-readable, and each names the request that triggers it.",
+    },
+    {
+        "method": "GET",
+        "path": "/msmes/{id}/whatif",
+        "layer": "Underwriter tooling",
+        "proves": "Single-lever hypotheticals re-run the identical bounded pipeline side-effect-free -- 'what would it take?' is answerable without a payload editor.",
+    },
 ]
 
 
@@ -101,6 +119,11 @@ BACKEND_CAPABILITIES = [
         "layer": "Sandbox ingestion",
         "modules": ["feed_ingestion.py", "recalibration.py", "pilot_readiness.py"],
         "implemented": "IDBI sandbox-style feed contracts, source profiling, a dated 12-month outcome contract, automatic chronological splits, maturity checks, and segment-volume gates.",
+    },
+    {
+        "layer": "Lending rail output",
+        "modules": ["rails.py", "whatif.py", "consent_surface.py"],
+        "implemented": "OCEN 4.0-aligned offer artifacts with documented pricing policy, an honest per-rail integration register, a visible enforced consent contract, and single-lever what-if re-scoring.",
     },
     {
         "layer": "Model governance",

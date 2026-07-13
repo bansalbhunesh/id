@@ -176,6 +176,38 @@ def test_case_switching_updates_verdict(page):
     assert "Shree Ganesh Textiles" in page.inner_text("#caseSummary")
 
 
+def test_decision_tab_hands_off_to_ocen_rail_and_runs_whatif(page):
+    page.click("#tab-decision")
+    settle(page, 250)
+    body = page.inner_text("#tabContent")
+    assert "Lending rail hand-off" in body
+    assert "OFFER EXTENDED" in body or "PENDING MANUAL REVIEW" in body
+    assert "not an IDBI sanction" in body
+    # Drive the what-if lever against the live backend: a chronic bounce
+    # problem must move the hero's score in the rendered comparison.
+    page.select_option("[data-whatif] select[name='field']", "cheque_bounce_rate")
+    page.fill("[data-whatif] input[name='value']", "0.5")
+    page.click("[data-whatif] button[type='submit']")
+    page.wait_for_timeout(1500)
+    result = page.inner_text("[data-whatif-result]")
+    assert "Baseline" in result and "Hypothetical" in result
+    assert "no audit record" in result
+    assert not page._console_errors
+
+
+def test_sources_tab_shows_consent_contract_and_rails_register(page):
+    page.click("#tab-sources")
+    settle(page, 300)
+    body = page.inner_text("#tabContent")
+    assert "Consent contract" in body
+    assert "Purpose-bound" in body
+    assert "Integration rails, honestly labelled" in body
+    assert "spec aligned output artifact" in body
+    # The register must never claim a production connection.
+    assert "production network connection" in body  # from the honesty note
+    assert not page._console_errors
+
+
 def test_console_requires_key_then_scores_for_real(page, base_url):
     page.click("#tab-sources")
     settle(page, 300)

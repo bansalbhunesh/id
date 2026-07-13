@@ -18,8 +18,11 @@ const state = {
   deployment: null,
   outcomeContract: null,
   submissionProof: null,
+  rails: null,
+  consentContract: null,
   activeId: "ntc_hero",
   activeScore: null,
+  activeOffer: null,
   activeTab: "decision",
   lang: "en",
 };
@@ -329,6 +332,115 @@ function renderLimitBasis(score) {
     </section>`;
 }
 
+function renderOfferRail(offer) {
+  if (!offer) return "";
+  const isOffer = offer.status === "OFFER_EXTENDED";
+  const isReview = offer.status === "PENDING_MANUAL_REVIEW";
+  const terms = offer.terms;
+  const termRows = terms ? miniLedger([
+    ["Principal", formatCurrency(terms.principal_inr)],
+    ["Rate / type", `${terms.annual_interest_rate_pct}% p.a. / ${terms.interest_type.replace("_", " ").toLowerCase()}`],
+    ["Tenure / EMI", `${terms.tenure_months} months / ${formatCurrency(terms.emi_inr)}`],
+    ["Processing fee", formatCurrency(terms.processing_fee_inr)],
+    ["Pricing basis", terms.pricing_basis],
+    ["Offer id / validity", `${offer.offer_id} / ${offer.offer_validity_days} days`],
+  ]) : "";
+  const statusLine = isOffer
+    ? "Priced offer artifact, ready for a lender-side hand-off."
+    : isReview
+      ? `Indicatively priced, held for the mandated review: ${offer.review_reason || ""}`
+      : `No offer: ${offer.rejection_reason || "policy decline"}`;
+  return `
+    <section class="detail-section">
+      <h3 class="section-title">Lending rail hand-off (OCEN-aligned)</h3>
+      <p class="muted">The verdict above, reshaped into the artifact a Loan Service Provider would receive -- ${code(`GET /rails/ocen/offer/${esc(state.activeId)}`)} returns exactly this.</p>
+      <article class="journal-row">
+        <span class="journal-state ${statusClass(offer.status)}">${esc(offer.status.replaceAll("_", " "))}</span>
+        <strong>${esc(statusLine)}</strong>
+      </article>
+      ${termRows}
+      ${terms?.note ? `<p class="muted">${esc(terms.note)}</p>` : ""}
+      <p class="truth-note">${esc(offer.spec_alignment)}</p>
+    </section>`;
+}
+
+const WHATIF_LEVERS = [
+  ["gst_filing_streak_months", "GST filing streak (months)", "36"],
+  ["cheque_bounce_rate", "Cheque bounce rate (0-1)", "0.05"],
+  ["inflow_volatility", "Inflow volatility (0-1)", "0.2"],
+  ["upi_txn_count_monthly", "Monthly UPI transactions", "250"],
+  ["outstanding_debt_to_inflow", "Debt-to-inflow ratio", "0.3"],
+  ["top_counterparty_share_pct", "Top counterparty share (%)", "45"],
+  ["gst_bank_divergence_pct", "GST-vs-bank divergence (%)", "10"],
+];
+
+function renderWhatIf() {
+  return `
+    <section class="detail-section">
+      <h3 class="section-title">What-if lever</h3>
+      <p class="muted">Move one signal and re-run the identical live pipeline -- same schema bounds, same policy, no audit record. Answers "what would it take?" without a payload editor.</p>
+      <form class="console-form whatif-form" data-whatif novalidate>
+        <label>Signal
+          <select name="field">${WHATIF_LEVERS.map(([f, label]) => `<option value="${esc(f)}">${esc(label)}</option>`).join("")}</select>
+        </label>
+        <label>New value
+          <input name="value" type="number" step="any" inputmode="decimal" placeholder="${esc(WHATIF_LEVERS[0][2])}" required />
+        </label>
+        <button class="primary-action" type="submit">Re-score hypothetical</button>
+      </form>
+      <div class="console-result" data-whatif-result aria-live="polite"></div>
+    </section>`;
+}
+
+function whatifResultCard(body) {
+  const decisionChanged = body.delta.decision_changed;
+  const arrowRow = (label, from, to, fmt = (v) => v) => `
+    <tr><td>${esc(label)}</td><td class="number">${esc(fmt(from))}</td><td class="number">${esc(fmt(to))}</td></tr>`;
+  return `
+    <div class="stamp-note console-stamp">
+      <p class="muted">${esc(body.lever.label)}: <strong>${esc(body.lever.from ?? "not set")}</strong> &rarr; <strong>${esc(body.lever.to)}</strong></p>
+      <table class="ledger-table"><tbody>
+        <tr><td></td><td class="number"><strong>Baseline</strong></td><td class="number"><strong>Hypothetical</strong></td></tr>
+        ${arrowRow("Score", body.baseline.score, body.hypothetical.score)}
+        ${arrowRow("Grade", body.baseline.grade, body.hypothetical.grade)}
+        ${arrowRow("Decision", body.baseline.decision, body.hypothetical.decision)}
+        ${arrowRow("Indicative limit", body.baseline.eligible_limit, body.hypothetical.eligible_limit, formatCurrency)}
+      </tbody></table>
+      <p class="${decisionChanged ? "" : "muted"}"><strong>${decisionChanged ? "The decision itself changes." : "The decision holds; score and limit move as shown."}</strong> (score ${body.delta.score >= 0 ? "+" : ""}${esc(body.delta.score)})</p>
+      <p class="truth-note">${esc(body.note)}</p>
+    </div>`;
+}
+
+async function submitWhatIf(form) {
+  const result = form.parentElement.querySelector("[data-whatif-result]");
+  const button = form.querySelector("button[type='submit']");
+  const field = form.elements.field.value;
+  const value = form.elements.value.value.trim();
+  if (value === "") {
+    result.innerHTML = `<div class="error-state"><div><strong>Enter a value</strong><p>Pick the hypothetical level for the selected signal.</p></div></div>`;
+    return;
+  }
+  button.disabled = true;
+  result.innerHTML = `<div class="skeleton">Re-scoring the hypothetical...</div>`;
+  try {
+    const response = await api(
+      `/msmes/${encodeURIComponent(state.activeId)}/whatif?field=${encodeURIComponent(field)}&value=${encodeURIComponent(value)}`,
+      { raw: true },
+    );
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      const detail = typeof body.detail === "string" ? body.detail : "The backend rejected the hypothetical.";
+      result.innerHTML = `<div class="error-state"><div><strong>${response.status} -- rejected</strong><p>${esc(detail)}</p></div></div>`;
+    } else {
+      result.innerHTML = whatifResultCard(body);
+    }
+  } catch (error) {
+    result.innerHTML = `<div class="error-state"><div><strong>Request failed</strong><p>${esc(error.message)}</p></div></div>`;
+  } finally {
+    button.disabled = false;
+  }
+}
+
 function renderJournal(items = [], emptyLabel = "No rows available.") {
   return items.map((item) => {
     const stateText = item.status || item.decision || item.method || item.endpoint || item.category || "Review";
@@ -380,6 +492,8 @@ function renderDecisionTab(score) {
       </article>
     </section>
     ${renderLimitBasis(score)}
+    ${renderOfferRail(state.activeOffer)}
+    ${renderWhatIf()}
     <section class="detail-section">
       <h3 class="section-title">Underwriter memo</h3>
       <p>${esc(score.memo)}</p>
@@ -720,8 +834,43 @@ function renderSourcesTab(score) {
         </article>
       </div>
     </section>
+    ${renderConsentContract()}
+    ${renderRailsRegister()}
     ${renderConsole()}
   `;
+}
+
+function renderConsentContract() {
+  const contract = state.consentContract;
+  if (!contract) return "";
+  return `
+    <section class="detail-section">
+      <h3 class="section-title">Consent contract (enforced, not aspirational)</h3>
+      <p class="muted">Every rule below is enforced by code on this deployment; each row names the request that triggers it. ${code("GET /consent/contract")} serves this same register.</p>
+      <div class="journal-list">${contract.contract.map((row) => `
+        <article class="journal-row">
+          <span class="journal-state">${esc(row.rule)}</span>
+          <strong>${esc(row.enforced)}</strong>
+          <p class="muted">Trigger: ${esc(row.trigger)}</p>
+        </article>`).join("")}</div>
+      <details><summary>Sample consent artifact the sandbox route accepts</summary><pre class="console-json">${esc(JSON.stringify(contract.sample_valid_consent, null, 2))}</pre></details>
+    </section>`;
+}
+
+function renderRailsRegister() {
+  const rails = state.rails;
+  if (!rails) return "";
+  return `
+    <section class="detail-section">
+      <h3 class="section-title">Integration rails, honestly labelled</h3>
+      <p class="muted">${esc(rails.honesty_note)}</p>
+      <div class="journal-list">${rails.rails.map((rail) => `
+        <article class="journal-row">
+          <span class="journal-state">${esc(rail.rail)} &middot; ${esc(rail.direction)}</span>
+          <strong>${esc(rail.status.replaceAll("_", " "))}</strong>
+          <p class="muted">${esc(rail.evidence)}</p>
+        </article>`).join("")}</div>
+    </section>`;
 }
 
 const CONSOLE_EXAMPLE = {
@@ -900,9 +1049,13 @@ async function loadCase(id, { updateHistory = true } = {}) {
   els.caseSummary.innerHTML = `<div class="skeleton">Scoring selected MSME...</div>`;
   els.tabContent.innerHTML = `<div class="skeleton">Preparing review packet...</div>`;
   try {
-    const score = await api(`/msmes/${encodeURIComponent(id)}/score`);
+    const [score, offer] = await Promise.all([
+      api(`/msmes/${encodeURIComponent(id)}/score`),
+      api(`/rails/ocen/offer/${encodeURIComponent(id)}`).catch(() => null),
+    ]);
     if (loadToken !== activeLoadToken) return; // superseded by a newer selection
     state.activeScore = score;
+    state.activeOffer = offer;
     try {
       await refreshGovernance();
     } catch (_error) {
@@ -946,6 +1099,12 @@ function bindEvents() {
     if (form) {
       event.preventDefault();
       submitConsole(form);
+      return;
+    }
+    const whatifForm = event.target.closest("[data-whatif]");
+    if (whatifForm) {
+      event.preventDefault();
+      submitWhatIf(whatifForm);
     }
   });
   window.addEventListener("popstate", async () => {
@@ -978,8 +1137,10 @@ async function init() {
       api("/sandbox/outcome-contract"),
       api("/submission/proof"),
       api("/model/sme-benchmark"),
+      api("/rails"),
+      api("/consent/contract"),
     ]);
-    const [governance, validation, model, deployment, outcomeContract, submissionProof, benchmark] = optional.map(settledValue);
+    const [governance, validation, model, deployment, outcomeContract, submissionProof, benchmark, rails, consentContract] = optional.map(settledValue);
 
     state.health = health;
     state.msmes = msmes;
@@ -991,6 +1152,8 @@ async function init() {
     state.deployment = deployment || governance?.deployment || null;
     state.outcomeContract = outcomeContract;
     state.submissionProof = submissionProof;
+    state.rails = rails;
+    state.consentContract = consentContract;
 
     const urlState = readUrlState();
     state.activeId = state.msmes.some((item) => item.id === urlState.caseId)

@@ -28,8 +28,11 @@ from operational import (
     request_id,
     security_headers as build_security_headers,
 )
+from consent_surface import consent_contract
 from portfolio import build_governance_summary, build_portfolio_snapshot
+from rails import build_ocen_offer, rails_registry
 from rate_limit import rate_limit
+from whatif import run_whatif
 from recalibration import SandboxRecalibrationRequest, build_recalibration_report
 from scoring import MSMEProfile, score_profile
 from sample_data import SAMPLE_PROFILES
@@ -193,6 +196,35 @@ def get_score(msme_id: str):
     # only from the authenticated POST decision routes (and the one-time demo
     # seed below), so the audit trail reflects decisions, not page loads.
     return score_profile(profile, record_audit=False)
+
+
+@app.get("/msmes/{msme_id}/whatif",
+         dependencies=[Depends(rate_limit(max_requests=60))])
+def get_whatif(msme_id: str, field: str = Query(...), value: float = Query(...)):
+    profile = SAMPLE_PROFILES.get(msme_id)
+    if profile is None:
+        raise HTTPException(status_code=404, detail="MSME not found")
+    # Same safety contract as GET score: a hypothetical is a view, never an
+    # audit event. Rate-limited because it runs the full pipeline twice.
+    return run_whatif(profile, field, value)
+
+
+@app.get("/rails")
+def get_rails():
+    return rails_registry()
+
+
+@app.get("/rails/ocen/offer/{msme_id}")
+def get_ocen_offer(msme_id: str):
+    profile = SAMPLE_PROFILES.get(msme_id)
+    if profile is None:
+        raise HTTPException(status_code=404, detail="MSME not found")
+    return build_ocen_offer(msme_id, score_profile(profile, record_audit=False))
+
+
+@app.get("/consent/contract")
+def get_consent_contract():
+    return consent_contract()
 
 
 @app.post("/score", dependencies=[Depends(rate_limit(max_requests=60))])

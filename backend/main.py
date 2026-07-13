@@ -36,6 +36,7 @@ from whatif import run_whatif
 from recalibration import SandboxRecalibrationRequest, build_recalibration_report
 from scoring import MSMEProfile, score_profile
 from sample_data import SAMPLE_PROFILES
+from screening import screen
 from submission_proof import build_submission_proof
 from validation import ValidationRecord, ValidationRequest, build_validation_report
 
@@ -225,6 +226,18 @@ def get_ocen_offer(msme_id: str):
 @app.get("/consent/contract")
 def get_consent_contract():
     return consent_contract()
+
+
+@app.get("/screening/check", dependencies=[Depends(rate_limit(max_requests=60))])
+def get_screening_check(
+    name: str = Query(..., min_length=1, max_length=200),
+    gstin: str | None = Query(default=None, max_length=15),
+    pan: str | None = Query(default=None, max_length=10),
+    cin: str | None = Query(default=None, max_length=21),
+):
+    # Advisory view over the loaded negative registries; not wired into the
+    # decision path on this deployment (see screening.py docstring).
+    return screen(name, gstin=gstin, pan=pan, cin=cin)
 
 
 @app.post("/score", dependencies=[Depends(rate_limit(max_requests=60))])

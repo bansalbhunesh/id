@@ -101,6 +101,12 @@ API_CATALOG = [
         "layer": "Underwriter tooling",
         "proves": "Single-lever hypotheticals re-run the identical bounded pipeline side-effect-free -- 'what would it take?' is answerable without a payload editor.",
     },
+    {
+        "method": "GET",
+        "path": "/screening/check",
+        "layer": "Fraud screening (advisory)",
+        "proves": "Negative-registry screening with governed routing: exact-ID hits force human review, name-only hits stay advisory, nothing auto-declines; shipped rows are labelled samples by design.",
+    },
 ]
 
 

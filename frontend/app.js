@@ -1,3 +1,9 @@
+const {
+  esc, formatCurrency, titleize, statusClass, fmtCi,
+  itemTitle, itemDetail, reasonText, nextActionText: nextActionTextFor,
+  limitBasisBinding,
+} = window.UdyamLib;
+
 const API_BASE = window.location.protocol === "file:" ? "http://localhost:8000" : "";
 const VALID_TABS = ["decision", "evidence", "model", "governance", "proof", "sources"];
 const API_TIMEOUT_MS = 60000;
@@ -32,12 +38,6 @@ const els = {
   packetTitle: document.getElementById("packetTitle"),
 };
 
-const currency = new Intl.NumberFormat("en-IN", {
-  style: "currency",
-  currency: "INR",
-  maximumFractionDigits: 0,
-});
-
 const packetTitles = {
   decision: "Decision packet",
   evidence: "Evidence packet",
@@ -47,38 +47,12 @@ const packetTitles = {
   sources: "Source register",
 };
 
-function esc(value) {
-  return String(value ?? "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-
-function formatCurrency(value) {
-  return currency.format(Number(value || 0));
-}
-
-function titleize(value) {
-  return String(value ?? "-")
-    .replace(/_/g, " ")
-    .replace(/\b\w/g, (char) => char.toUpperCase());
-}
-
 function code(value) {
   return `<code>${esc(value)}</code>`;
 }
 
 function riskMark(label) {
   return `<span class="risk-mark">${esc(label || "Review risk")}</span>`;
-}
-
-function statusClass(value) {
-  const text = String(value || "").toLowerCase();
-  if (/(reject|decline|missing|fail|offline|high|thin)/.test(text)) return "entry-red";
-  if (/(approved|pass|live|connected|ready|low|stable)/.test(text)) return "approved";
-  return "";
 }
 
 async function api(path, { method = "GET", headers = {}, body, timeoutMs = API_TIMEOUT_MS, raw = false } = {}) {
@@ -322,23 +296,20 @@ function renderVernacularReasons(score) {
   if (!Array.isArray(rows) || !rows.length) return renderReasons(score.reasons);
   return rows.map((row) => `
     <article class="reason-row" ${state.lang === "hi" ? 'lang="hi"' : ""}>
-      <strong>${esc(state.lang === "hi" ? (row.hi || row.en) : (row.en || row.hi))}</strong>
+      <strong>${esc(reasonText(row, state.lang))}</strong>
     </article>
   `).join("");
 }
 
 function nextActionText(nextAction) {
-  if (!nextAction) return "";
-  return state.lang === "hi" ? (nextAction.action_hi || nextAction.action) : nextAction.action;
+  return nextActionTextFor(nextAction, state.lang);
 }
 
 function renderLimitBasis(score) {
   const basis = score.limit_basis;
   if (!basis) return "";
   const inputs = basis.policy_inputs || {};
-  const binding = basis.binding_constraint === "debt_service_capacity"
-    ? "Spare EMI capacity is the binding constraint."
-    : "The grade policy cap is the binding constraint.";
+  const binding = limitBasisBinding(basis);
   return `
     <section class="detail-section">
       <h3 class="section-title">How the limit was sized</h3>
@@ -356,14 +327,6 @@ function renderLimitBasis(score) {
       <p class="muted"><strong>${esc(binding)}</strong></p>
       ${basis.note ? `<p class="truth-note">${esc(basis.note)}</p>` : ""}
     </section>`;
-}
-
-function itemTitle(item) {
-  return item.control || item.code || item.stage || item.source || item.layer || item.step || item.title || item.criterion || item.common_pattern || "Review item";
-}
-
-function itemDetail(item) {
-  return item.detail || item.evidence || item.signal || item.proves || item.expected || item.implemented || item.udyampulse_advantage || item.proof || "";
 }
 
 function renderJournal(items = [], emptyLabel = "No rows available.") {
@@ -455,11 +418,6 @@ function renderEvidenceTab(score) {
       <div class="journal-list">${renderJournal(score.policy_guardrails, "No guardrail rows available.")}</div>
     </section>
   `;
-}
-
-function fmtCi(ci) {
-  if (!ci) return "";
-  return ` [${ci.lower_95} - ${ci.upper_95}]`;
 }
 
 function renderBenchmarkSplits(champion) {

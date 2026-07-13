@@ -2,7 +2,7 @@
 
 Every run appends a reproducible record (config, seed, data hashes, git rev,
 metrics, or the failure reason) to registry.json. Families map to the E-numbers
-documented in docs/research/RESEARCH_NOTES.md.
+documented in docs/research/BENCHMARK_REPORT.md.
 
 Usage:
     python backend/model_training/experiments/run_experiments.py            # first wave

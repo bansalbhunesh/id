@@ -111,5 +111,6 @@ Use the committed screenshots from `docs/deck/assets/`:
 ## Slide 13 - Links
 
 - GitHub repository: https://github.com/bansalbhunesh/id
+- Demo video: https://youtu.be/eLkfrYma6nE
 - Live product link: https://id-ysm9.onrender.com
 - Animated walkthrough: https://github.com/bansalbhunesh/id/blob/main/docs/demo.gif

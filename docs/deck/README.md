@@ -1,20 +1,20 @@
-# Submission Deck
+# Decks
 
-`index.html` is the full 13-slide SaakhScore pitch deck, mapped 1:1 to the official IDBI Innovate template's required sections: Team Details, Brief, Opportunities, Features, Process Flow, Wireframes, Architecture, Technologies, Cost, Snapshots, Performance Report, Additional Details, and Links.
+Two decks are committed here:
 
-It includes live-product screenshots under `docs/deck/assets/`, current repository and product links, calibrated champion-model evidence, temporal/promotion gates, and 150-test verification. The generated PDF is committed as `docs/deck/SaakhScore-IDBI-Submission-Deck.pdf`; re-export it from the refreshed `index.html` whenever model evidence or screenshots change.
+1. **`SaakhScore-IDBI-Submission-Deck.pdf`** — the deck uploaded to the H2S submission form.
+   It is the **official IDBI Innovate template** with every required section filled
+   (Team Details, Brief, Opportunities, Features, Process Flow, Wireframes, Architecture,
+   Technologies, Cost, Snapshots, Performance Report, Additional Details, Links); the branded
+   cover, headers, footers and closing pages are untouched. The editable source is
+   `SaakhScore-IDBI-Submission-Deck.pptx` alongside; export the PDF from PowerPoint
+   (File → Save As → PDF) after any edit.
 
-## To Get The Mandatory PDF
+2. **`SaakhScore-Extended-Deck.pdf`** — the 13-slide detail edition generated from
+   `index.html`, with live-product screenshots (`assets/`), champion-model evidence,
+   temporal/promotion gates, and the 150-test verification story. To re-export: open
+   `index.html` in Chrome, `Ctrl+P`, Save as PDF — the print stylesheet renders each
+   slide at 1280x720, one slide per page (13 pages).
 
-1. Open `index.html` in Chrome.
-2. Print with `Ctrl+P`.
-3. Choose **Save as PDF**.
-4. The print stylesheet renders each slide at 1280x720, one slide per page.
-5. Upload the resulting PDF to the H2S submission form.
-
-The current exported PDF is already available at `docs/deck/SaakhScore-IDBI-Submission-Deck.pdf`.
-
-## Notes
-
-- This deck was built independently, but follows the official section order so the content can be pasted into the IDBI template if needed.
-- `docs/PITCH_OUTLINE.md` has the same pitch in plain text.
+`docs/PITCH_OUTLINE.md` carries the same content in plain text, mapped slide-by-slide
+to the official template sections.

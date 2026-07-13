@@ -893,7 +893,7 @@ function renderConsole() {
   return `
     <section class="detail-section">
       <h3 class="section-title">Live underwriter console</h3>
-      <p class="muted">Send a real sandbox-style payload to ${code("POST /sandbox/score")} on this running backend. The demo-scoped underwriter key is documented in the repository (docs/DEMO_SCRIPT.md); real deployments override it. Errors render as errors -- nothing here is mocked.</p>
+      <p class="muted">Send a real sandbox-style payload to ${code("POST /sandbox/score")} on this running backend. The demo-scoped underwriter key is documented in the repository README (Setup section); real deployments override it. Errors render as errors -- nothing here is mocked.</p>
       <form class="console-form" data-console novalidate>
         <label>Underwriter bearer key
           <input type="password" name="key" autocomplete="off" spellcheck="false" placeholder="saakhscore-demo-underwriter-key" />
@@ -930,7 +930,7 @@ async function submitConsole(form) {
   const button = form.querySelector("button[type='submit']");
   const key = form.elements.key.value.trim();
   if (!key) {
-    result.innerHTML = `<div class="error-state"><div><strong>Bearer key required</strong><p>Paste the demo underwriter key documented in docs/DEMO_SCRIPT.md. The endpoint returns 401 without it -- by design.</p></div></div>`;
+    result.innerHTML = `<div class="error-state"><div><strong>Bearer key required</strong><p>Paste the demo underwriter key documented in the repository README. The endpoint returns 401 without it -- by design.</p></div></div>`;
     return;
   }
   let parsed;

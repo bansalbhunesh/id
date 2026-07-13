@@ -15,7 +15,6 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 JUDGE_FACING_DOCS = [
     REPO_ROOT / "README.md",
     REPO_ROOT / "docs" / "PITCH_OUTLINE.md",
-    REPO_ROOT / "docs" / "DEMO_SCRIPT.md",
 ]
 
 # Figures that were once documented but never matched the computed cohort.

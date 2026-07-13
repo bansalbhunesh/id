@@ -7,7 +7,7 @@
 
 [Live demo](https://id-ysm9.onrender.com) |
 [Submission deck](docs/deck/SaakhScore-IDBI-Submission-Deck.pdf) |
-[Demo video](#) *(YouTube link — added at submission)* |
+[Demo video](https://youtu.be/eLkfrYma6nE) |
 [Animated walkthrough](docs/demo.gif) |
 [Model card](MODEL_CARD.md) |
 [Pilot runbook](docs/PILOT_RUNBOOK.md)
@@ -57,10 +57,10 @@ The core demo moment is a New-to-Credit case traditional underwriting rejects be
 - Live API proof: [https://id-ysm9.onrender.com/submission/proof](https://id-ysm9.onrender.com/submission/proof)
 - OpenAPI docs: [https://id-ysm9.onrender.com/docs](https://id-ysm9.onrender.com/docs)
 - Runtime readiness: [https://id-ysm9.onrender.com/health/ready](https://id-ysm9.onrender.com/health/ready)
+- Demo video (narrated walkthrough): [https://youtu.be/eLkfrYma6nE](https://youtu.be/eLkfrYma6nE)
 - Animated walkthrough (browser-automation capture of the live app, current build): [docs/demo.gif](docs/demo.gif)
-- Narration + click path + backend verification companion: [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md)
-- Submission deck: [docs/deck/SaakhScore-IDBI-Submission-Deck.pdf](docs/deck/SaakhScore-IDBI-Submission-Deck.pdf)
-- First-round rules check: [docs/FIRST_ROUND_RULES_CHECK.md](docs/FIRST_ROUND_RULES_CHECK.md)
+- Submission deck (official IDBI Innovate template): [docs/deck/SaakhScore-IDBI-Submission-Deck.pdf](docs/deck/SaakhScore-IDBI-Submission-Deck.pdf)
+- Extended deck (13-slide detail edition): [docs/deck/SaakhScore-Extended-Deck.pdf](docs/deck/SaakhScore-Extended-Deck.pdf)
 - Pilot promotion runbook: [docs/PILOT_RUNBOOK.md](docs/PILOT_RUNBOOK.md)
 - Threat model: [docs/THREAT_MODEL.md](docs/THREAT_MODEL.md)
 
@@ -188,7 +188,7 @@ uvicorn main:app --reload
 
 Open `http://localhost:8000`.
 
-Demo-scoped credentials for protected write/audit routes are documented in [docs/DEMO_SCRIPT.md](docs/DEMO_SCRIPT.md); real deployments override `UDYAMPULSE_API_KEYS` and `UDYAMPULSE_AUDIT_HMAC_KEY`.
+Demo-scoped credentials for protected write/audit routes (public by design for judging): `saakhscore-demo-underwriter-key` (underwriter role — scoring/sandbox/validation writes) and `saakhscore-demo-auditor-key` (auditor role — audit log). Real deployments override `UDYAMPULSE_API_KEYS` and `UDYAMPULSE_AUDIT_HMAC_KEY`.
 
 Run tests:
 
@@ -271,9 +271,8 @@ Full-resolution images remain in [docs/deck/assets](docs/deck/assets) for detail
 
 - Track fit: IDBI's public MSME Inclusion track asks for a Financial Health Card using alternate data for faster credit decisions and finance access for underserved MSMEs.
 - Public event surface: the official public event venue found during review is [IDBI Innovate 2026 on Hack2skill](https://hack2skill.com/event/idbinnovate); no official IDBI Devpost page was found.
-- Sandbox interpretation: the official schedule says shortlist results arrive July 21 and finalists receive sandbox access July 22-31. This repo therefore ships synthetic proof plus a ready feed contract, dated outcome schema, automatic temporal/OOT readiness analysis, and fail-closed promotion controls without claiming early access.
+- Sandbox interpretation: sandbox APIs and datasets are granted to shortlisted teams after the first round. This repo therefore ships synthetic proof plus a ready feed contract, dated outcome schema, automatic temporal/OOT readiness analysis, and fail-closed promotion controls without claiming early access.
 - Differentiation: many PS3 demos stop at a score; SaakhScore shows the bank decision pack around that score - rejection reversal, reasons, attribution, memo, source map, guardrails, audit, validation, pilot metrics, fairness checks, and a backend-verifiable judge proof endpoint.
-- Competitive notes: [docs/COMPETITIVE_RESEARCH.md](docs/COMPETITIVE_RESEARCH.md)
 - Model roadmap (real-outcome benchmark + two-tower plan): [docs/MSME_MODEL_ROADMAP.md](docs/MSME_MODEL_ROADMAP.md)
 - Submission checklist: [docs/SUBMISSION_CHECKLIST.md](docs/SUBMISSION_CHECKLIST.md)
 

@@ -1089,3 +1089,16 @@ code {
 .mono {
   font-variant-numeric: tabular-nums;
 }
+
+/* --- Critique pass: benchmark table breathing room. --- */
+
+.ledger-table td + td {
+  padding-left: 14px;
+}
+
+.ledger-table .ci {
+  display: block;
+  color: var(--ink-muted);
+  font-size: 0.7rem;
+  white-space: nowrap;
+}

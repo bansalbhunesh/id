@@ -434,9 +434,10 @@ function renderBenchmarkSplits(champion) {
     ${rows.map(([key, label, ci]) => {
       const split = splits[key];
       if (!split) return "";
+      const ciText = fmtCi(ci).trim();
       return `<tr>
         <td>${esc(label)}</td>
-        <td class="number">${esc(split.auc)}${esc(fmtCi(ci))}</td>
+        <td class="number">${esc(split.auc)}${ciText ? `<span class="ci">${esc(ciText)}</span>` : ""}</td>
         <td class="number">${esc(split.ks ?? "-")}</td>
         <td class="number">${esc((split.n ?? dataset[`${key}_rows`] ?? "-").toLocaleString?.("en-IN") ?? split.n)}</td>
       </tr>`;
@@ -492,7 +493,7 @@ function renderModelTab() {
 
   const benchSection = champion ? `
     <section class="detail-section">
-      <h3 class="section-title">Real-outcome benchmark -- ${esc(bench.champion_version || "sba_sme_pd_v2")}</h3>
+      <h3 class="section-title">Real-outcome benchmark · ${esc(bench.champion_version || "sba_sme_pd_v2")}</h3>
       <p class="muted">${esc(champion.dataset?.name || "SBA 7(a) FOIA loan-level records")} at natural base rates. ${esc(champion.dataset?.protocol || "")}</p>
       ${renderBenchmarkSplits(champion)}
       <h3 class="section-title spaced">DeLong-tested baselines</h3>

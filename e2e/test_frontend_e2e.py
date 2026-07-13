@@ -10,9 +10,11 @@ The suite boots its own uvicorn on a free port, drives real Chromium against
 the real backend, and asserts on live API-rendered content -- no mocks.
 Kept outside backend/ so the default CI job (`pytest backend`) is unaffected.
 """
+import os
 import socket
 import subprocess
 import sys
+import tempfile
 import time
 from pathlib import Path
 
@@ -29,12 +31,17 @@ def _free_port() -> int:
 
 
 @pytest.fixture(scope="session")
-def base_url():
+def base_url(tmp_path_factory):
     port = _free_port()
+    # Isolated audit log: the hash chain must never be shared with (or corrupt)
+    # a developer server appending to backend/audit_log.jsonl concurrently.
+    audit_path = tmp_path_factory.mktemp("audit") / "audit_log.jsonl"
+    env = {**os.environ, "UDYAMPULSE_AUDIT_LOG_PATH": str(audit_path)}
     proc = subprocess.Popen(
         [sys.executable, "-m", "uvicorn", "main:app", "--port", str(port),
          "--log-level", "warning"],
         cwd=REPO / "backend",
+        env=env,
         stdout=subprocess.DEVNULL,
         stderr=subprocess.DEVNULL,
     )

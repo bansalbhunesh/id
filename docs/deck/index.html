@@ -345,7 +345,7 @@ table.tech-table td:last-child { color: var(--ink-muted); }
     <h2>Explainability and auditability, by default.</h2>
     <div class="grid cols-3">
       <div class="card"><span class="tag">Differentiation</span><h3>Beyond a number</h3><p>Most alternate-data scoring tools return a score. UdyamPulse returns a decision a bank can defend to a regulator and a borrower can act on.</p></div>
-      <div class="card"><span class="tag">Approach</span><h3>Two engines, one verdict</h3><p>Independent, cross-checkable scoring methods run side by side and show explicitly what bureau-only underwriting would have decided vs. alternate data.</p></div>
+      <div class="card"><span class="tag">Approach</span><h3>Deterministic core, generative shell</h3><p>No LLM ever sits on the decision path. Independent, cross-checkable scoring engines run side by side; generative text only narrates a decision the deterministic core already made and logged.</p></div>
       <div class="card"><span class="tag">USP</span><h3>The regulatory gap</h3><p>Of 127 AI-using regulated entities surveyed, only 15 use SHAP/LIME explainability and only 18 keep audit logs (RBI). UdyamPulse ships both by default.</p></div>
     </div>
     <div class="footer-mark">UdyamPulse · IDBI Innovate 2026</div>
@@ -373,7 +373,7 @@ table.tech-table td:last-child { color: var(--ink-muted); }
       <div class="flow-arrow">→</div>
       <div class="flow-step"><span class="step-num">03</span><h3>Verdict & explain</h3><p style="color:var(--ink-muted);font-size:0.9rem;">Traditional vs. alternate, Shapley reasons</p></div>
       <div class="flow-arrow">→</div>
-      <div class="flow-step"><span class="step-num">04</span><h3>Memo & audit</h3><p style="color:var(--ink-muted);font-size:0.9rem;">Underwriter memo, decision logged</p></div>
+      <div class="flow-step"><span class="step-num">04</span><h3>Memo, audit, hand-off</h3><p style="color:var(--ink-muted);font-size:0.9rem;">Memo, audit log, OCEN-aligned offer</p></div>
     </div>
     <div class="footer-mark">UdyamPulse · IDBI Innovate 2026</div>
   </section>
@@ -460,7 +460,7 @@ table.tech-table td:last-child { color: var(--ink-muted); }
     <div class="eyebrow"><span class="num">11</span> Performance Report / Benchmarking</div>
     <h2>Verified, not just claimed.</h2>
     <div class="stat-row">
-      <div class="stat"><div class="value">115/115</div><div class="label">Automated tests passing</div></div>
+      <div class="stat"><div class="value">150/150</div><div class="label">Automated tests passing</div></div>
       <div class="stat"><div class="value">0.962</div><div class="label">Real-SBA out-of-time AUC</div></div>
       <div class="stat"><div class="value">0.926</div><div class="label">Recession-stress AUC</div></div>
       <div class="stat"><div class="value">418k</div><div class="label">Real loans, real charge-offs</div></div>

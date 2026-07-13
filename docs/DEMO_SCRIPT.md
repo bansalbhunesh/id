@@ -93,8 +93,8 @@ One command, and the running system returns every claim in this video."
 *[SHOW: Tab 3 — GitHub README, zoom on the green tests badge.]*
 
 "Proof three: **the code is public.**
-**115 automated tests** run on every change — the green tick is
-machine-checked, not self-declared."
+**127 automated backend tests** run on every change — the green tick is
+machine-checked, not self-declared. (150 in all, with the UI suites.)"
 
 *[SHOW: the app's **Model** tab — OOT AUC 0.9623 with intervals on screen —
 then Tab 4, the experiments folder on GitHub, scroll slowly.]*

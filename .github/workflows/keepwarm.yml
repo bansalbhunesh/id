@@ -1,0 +1,21 @@
+name: keep-warm
+
+# Render's free tier spins the service down after ~15 minutes idle, which costs
+# the first visitor a 20-30s cold start. Ping the readiness probe on a schedule
+# so judges always land on a warm app. Remove after the hackathon window.
+on:
+  schedule:
+    - cron: "*/10 * * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - name: Warm the live demo
+        run: |
+          curl -fsS --max-time 90 --retry 2 --retry-delay 5 \
+            https://id-ysm9.onrender.com/health/ready

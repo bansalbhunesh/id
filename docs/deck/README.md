@@ -12,7 +12,7 @@ Two decks are committed here:
 
 2. **`SaakhScore-Extended-Deck.pdf`** — the 13-slide detail edition generated from
    `index.html`, with live-product screenshots (`assets/`), champion-model evidence,
-   temporal/promotion gates, and the 150-test verification story. To re-export: open
+   temporal/promotion gates, and the 162-test verification story. To re-export: open
    `index.html` in Chrome, `Ctrl+P`, Save as PDF — the print stylesheet renders each
    slide at 1280x720, one slide per page (13 pages).
 

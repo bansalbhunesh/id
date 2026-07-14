@@ -54,8 +54,8 @@ curl https://id-ysm9.onrender.com/sandbox/outcome-contract
 Run readiness only inside the approved environment. The endpoint is underwriter-gated, processes records in memory, persists none of the submitted payloads, and returns no application identifiers.
 
 ```bash
-curl -X POST "$UDYAMPULSE_URL/sandbox/pilot-readiness" \
-  -H "Authorization: Bearer $UDYAMPULSE_UNDERWRITER_KEY" \
+curl -X POST "$SAAKHSCORE_URL/sandbox/pilot-readiness" \
+  -H "Authorization: Bearer $SAAKHSCORE_UNDERWRITER_KEY" \
   -H "Content-Type: application/json" \
   --data-binary @pilot-outcomes.json
 ```
@@ -112,13 +112,16 @@ Required deployment configuration:
 
 | Variable | Requirement |
 |---|---|
-| `UDYAMPULSE_MODE` | `pilot` |
-| `UDYAMPULSE_API_KEYS` | Private role credentials; no published demo keys |
-| `UDYAMPULSE_AUDIT_HMAC_KEY` | KMS/Vault-managed deployment secret |
-| `UDYAMPULSE_AUDIT_BACKEND` | `managed_append_only` or `postgres_worm` |
-| `UDYAMPULSE_ALLOWED_ORIGINS` | Approved bank origins only |
-| `UDYAMPULSE_MAX_BODY_BYTES` | Approved API-gateway and service payload ceiling |
-| `UDYAMPULSE_MEMO_PROVIDER` | `deterministic` unless Bedrock is separately approved |
+| `SAAKHSCORE_MODE` | `pilot` |
+| `SAAKHSCORE_API_KEYS` | Private role credentials; no published demo keys |
+| `SAAKHSCORE_AUDIT_HMAC_KEY` | KMS/Vault-managed deployment secret |
+| `SAAKHSCORE_AUDIT_BACKEND` | `managed_append_only` or `postgres_worm` |
+| `SAAKHSCORE_ALLOWED_ORIGINS` | Approved bank origins only |
+| `SAAKHSCORE_MAX_BODY_BYTES` | Approved API-gateway and service payload ceiling |
+| `SAAKHSCORE_MEMO_PROVIDER` | `deterministic` unless Bedrock is separately approved |
+
+Legacy `UDYAMPULSE_*` names for every variable above are honored as a fallback
+(`backend/env_compat.py`); prefer the `SAAKHSCORE_` prefix for new deployments.
 
 Confirm `GET /deployment/readiness` has no blockers before changing runtime mode. Pilot startup will fail closed otherwise.
 

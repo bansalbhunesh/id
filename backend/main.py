@@ -1,5 +1,6 @@
 """SaakhScore API - MSME Financial Health Card."""
-import os
+
+from env_compat import env_setting
 from pathlib import Path
 from time import perf_counter
 
@@ -61,7 +62,7 @@ app = FastAPI(
 _DEFAULT_ORIGINS = "http://localhost:5500,http://127.0.0.1:5500,http://localhost:8000,http://127.0.0.1:8000,https://id-ysm9.onrender.com"
 ALLOWED_ORIGINS = [
     origin.strip()
-    for origin in os.getenv("UDYAMPULSE_ALLOWED_ORIGINS", _DEFAULT_ORIGINS).split(",")
+    for origin in env_setting("ALLOWED_ORIGINS", _DEFAULT_ORIGINS).split(",")
     if origin.strip()
 ]
 
@@ -129,7 +130,7 @@ async def security_headers(request, call_next):
     )
     for name, value in build_security_headers(context).items():
         response.headers[name] = value
-    response.headers["X-SaakhScore-Mode"] = os.getenv("UDYAMPULSE_MODE", "public_demo")
+    response.headers["X-SaakhScore-Mode"] = env_setting("MODE", "public_demo")
     return response
 
 

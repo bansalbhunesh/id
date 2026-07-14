@@ -110,7 +110,7 @@ itself explainable. No LLM ever touches the decision path.
 ### Phase C — Pilot hardening
 - **C1:** flip the promotion gates from label checks to real capability probes
   (durable append-only audit backend actually reachable; consent artefact actually
-  verified), then let `UDYAMPULSE_MODE=pilot` pass honestly.
+  verified), then let `SAAKHSCORE_MODE=pilot` pass honestly.
 - **C2:** production monitoring: live PSI/AUC/KS drift, calibration drift, reason-
   code stability, and disparate-impact tracking with alert thresholds.
 - **C3:** champion/challenger shadow scoring before any model swap.

@@ -7,7 +7,8 @@ pilot mode fails closed until a deployment supplies its own credentials.
 """
 from __future__ import annotations
 
-import os
+
+from env_compat import env_setting
 
 from fastapi import Header, HTTPException
 
@@ -18,7 +19,7 @@ _DEMO_KEYS = {
 
 
 def _load_keys() -> dict[str, str]:
-    raw = os.getenv("UDYAMPULSE_API_KEYS")
+    raw = env_setting("API_KEYS")
     if not raw:
         return dict(_DEMO_KEYS)
 

@@ -92,7 +92,7 @@ Use the committed screenshots from `docs/deck/assets/`:
 
 ## Slide 11 - Prototype Performance Report / Benchmarking
 
-- 162 automated tests passing (135 backend + 9 frontend unit + 18 Playwright e2e), plus a non-root container build/runtime/fail-closed CI job.
+- 167 automated tests passing (140 backend + 9 frontend unit + 18 Playwright e2e), plus a non-root container build/runtime/fail-closed CI job.
 - Public proxy holdout evidence: ROC-AUC 0.7497 (bootstrap 95% interval 0.7314-0.7678), Gini 0.4993, KS 0.4225, Brier 0.1415, ECE 0.0122 on 4,500 untouched rows. Cross-sectional random holdout, not OOT; reproducible with `python backend/model_training/train_pd_model.py`.
 - Real small-business benchmark (`GET /model/sme-benchmark`): the v2 champion is selected across 418,947 resolved real SBA 7(a) loans at natural base rates (197,716-loan train split) and validated on a true later-in-time window (FY2017-19: 114,770 loans, ROC-AUC 0.9623, KS 0.82) plus a 257k-loan recession stress cohort (ROC-AUC 0.9255), with a registry-tracked experiment programme behind it (docs/research/BENCHMARK_REPORT.md). US proxy domain, disclosed; not an IDBI calibration.
 - Coverage includes scoring, input validation, grade boundaries, NTC reversal, improvement plan, hash-chained audit logging and tamper detection, consent enforcement, auth/RBAC, ML Shapley invariants, sandbox feed mapping, recalibration reports, validation metrics, portfolio impact, governance summary, and API endpoints.
@@ -104,7 +104,7 @@ Use the committed screenshots from `docs/deck/assets/`:
 
 1. Connect authenticated IDBI sandbox AA/GST/UPI/EPFO feeds to the implemented `/sandbox/score` contract.
 2. Validate dated repayment outcomes through `/sandbox/pilot-readiness`, then retrain the champion/challenger pipeline offline and promote only after `/deployment/readiness` passes.
-3. Enable `UDYAMPULSE_MODEL_PROVIDER=xgboost|lightgbm` and benchmark SHAP-backed GBM output against the transparent scorecard.
+3. Enable `SAAKHSCORE_MODEL_PROVIDER=xgboost|lightgbm` and benchmark SHAP-backed GBM output against the transparent scorecard.
 4. Enable AWS Bedrock memo generation in the pilot environment, with deterministic fallback already present.
 5. Move policy from grade-based to PD-threshold-based (`policy-v2`), and move RBAC/audit storage from the current public-demo scope (bearer-token roles, in-memory hash-chained log) to full IDBI SSO and persistent multi-instance storage -- see `docs/SECURITY_COMPLIANCE.md` for what's already implemented versus deferred.
 6. Use the implemented pilot metrics to track NTC/NTB approval lift, decision-time reduction, early-NPA guardrail, and portfolio diversification against real, not target, numbers.

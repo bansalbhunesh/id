@@ -1,5 +1,10 @@
 services:
   - type: web
+    # Pre-rebrand service slug and env-var names, kept deliberately: renaming a
+    # live Blueprint service makes Render provision a NEW service and orphan the
+    # deployed URL. The app reads SAAKHSCORE_* first and falls back to these
+    # UDYAMPULSE_* names (backend/env_compat.py); coordinated rename is a
+    # post-hackathon step (Render dashboard first, then this file).
     name: udyampulse-idbi
     runtime: docker
     branch: main

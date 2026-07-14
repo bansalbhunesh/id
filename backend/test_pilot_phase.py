@@ -180,7 +180,7 @@ def test_public_demo_is_allowed_but_pilot_mode_fails_closed(monkeypatch):
 
 def test_unknown_runtime_mode_fails_closed(monkeypatch):
     monkeypatch.setenv("UDYAMPULSE_MODE", "typo-mode")
-    with pytest.raises(RuntimeError, match="invalid UDYAMPULSE_MODE"):
+    with pytest.raises(RuntimeError, match="invalid SAAKHSCORE_MODE"):
         assert_deployment_allowed()
 
 

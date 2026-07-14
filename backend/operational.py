@@ -2,6 +2,8 @@
 from __future__ import annotations
 
 import os
+
+from env_compat import env_setting
 import re
 import uuid
 from dataclasses import dataclass
@@ -16,14 +18,14 @@ _REQUEST_ID = re.compile(r"^[A-Za-z0-9._:-]{8,128}$")
 
 def _bounded_int(name: str, default: int, *, minimum: int, maximum: int) -> int:
     try:
-        value = int(os.getenv(name, str(default)))
+        value = int(env_setting(name, str(default)))
     except ValueError:
         value = default
     return max(minimum, min(maximum, value))
 
 
 MAX_BODY_BYTES = _bounded_int(
-    "UDYAMPULSE_MAX_BODY_BYTES",
+    "MAX_BODY_BYTES",
     DEFAULT_MAX_BODY_BYTES,
     minimum=64 * 1024,
     maximum=64 * 1024 * 1024,
@@ -103,7 +105,7 @@ def release_metadata() -> dict:
         "service": SERVICE_NAME,
         "version": APP_VERSION,
         "commit": commit[:12],
-        "mode": os.getenv("UDYAMPULSE_MODE", "public_demo").strip().lower(),
+        "mode": env_setting("MODE", "public_demo").strip().lower(),
     }
 
 

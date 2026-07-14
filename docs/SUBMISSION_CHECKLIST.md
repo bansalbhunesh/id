@@ -25,7 +25,7 @@ Use this as the final IDBI Innovate / H2S submission source of truth.
 
 ## Verification Gates
 
-- Backend tests: `135 passed` (clean-venv reproducible; see pinned `backend/requirements.txt` + `backend/requirements-dev.txt`); the UI suites add 9 frontend-unit + 18 Playwright e2e tests (162 total).
+- Backend tests: `140 passed` (clean-venv reproducible; see pinned `backend/requirements.txt` + `backend/requirements-dev.txt`); the UI suites add 9 frontend-unit + 18 Playwright e2e tests (167 total).
 - Public proxy evidence: `GET /model/evaluation` reports random-holdout AUC 0.7497 (95% bootstrap 0.7314-0.7678), Gini 0.4993, KS 0.4225, Brier 0.1415, ECE 0.0122, and explicit no-OOT-yet disclosure; reproducible via `python backend/model_training/train_pd_model.py`.
 - Security: `GET /audit-log` requires the `auditor` role; CORS is allowlisted; JSON is no-store; app CSP, request tracing, body/array bounds and fail-closed promotion are tested. See `docs/SECURITY_COMPLIANCE.md`.
 - Deck export: submission deck is the filled official template (15 pages including the branded cover and closing pages), exported to PDF from the PPTX; the extended deck re-exports from `docs/deck/index.html` (13 pages) after changing model evidence or screenshots.

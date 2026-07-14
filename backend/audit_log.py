@@ -5,6 +5,8 @@ import hashlib
 import hmac
 import json
 import os
+
+from env_compat import env_setting
 import threading
 import time
 from datetime import datetime, timezone
@@ -14,7 +16,7 @@ DEFAULT_LOG_PATH = Path(__file__).parent / "audit_log.jsonl"
 
 
 def configured_log_path() -> Path:
-    configured = os.getenv("UDYAMPULSE_AUDIT_LOG_PATH", "").strip()
+    configured = env_setting("AUDIT_LOG_PATH", "").strip()
     return Path(configured) if configured else DEFAULT_LOG_PATH
 
 
@@ -44,7 +46,7 @@ def _compute_entry_hash(entry_without_hash: dict, prev_hash: str) -> str:
 def _subject_ref(name: str) -> str:
     # A deployment must override this key. The demo default is intentionally
     # labelled and never protects real data; it merely keeps names out of logs.
-    key = os.getenv("UDYAMPULSE_AUDIT_HMAC_KEY", "public-demo-not-for-real-data")
+    key = env_setting("AUDIT_HMAC_KEY", "public-demo-not-for-real-data")
     digest = hmac.new(
         key.encode("utf-8"),
         name.strip().casefold().encode("utf-8"),

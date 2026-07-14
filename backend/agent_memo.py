@@ -1,7 +1,7 @@
 """Generates a plain-language underwriter memo from a score result.
 
 The public demo stays deterministic by default. Stage 2 can set
-`UDYAMPULSE_MEMO_PROVIDER=bedrock` plus a Bedrock model ID to generate the
+`SAAKHSCORE_MEMO_PROVIDER=bedrock` (legacy `UDYAMPULSE_MEMO_PROVIDER` honored) plus a Bedrock model ID to generate the
 memo with AWS Bedrock Runtime; any SDK, credential, or model failure falls
 back to the deterministic memo so underwriting remains available.
 """
@@ -9,6 +9,8 @@ from __future__ import annotations
 
 import json
 import os
+
+from env_compat import env_setting
 import re
 
 
@@ -168,7 +170,7 @@ def _memo_matches_known_facts(memo: str, score_result: dict) -> bool:
 
 def generate_memo(score_result: dict) -> str:
     fallback = _deterministic_memo(score_result)
-    if os.getenv("UDYAMPULSE_MEMO_PROVIDER", "").lower() != "bedrock":
+    if env_setting("MEMO_PROVIDER", "").lower() != "bedrock":
         return fallback
     generated = _bedrock_memo(score_result)
     if generated and _memo_matches_known_facts(generated, score_result):

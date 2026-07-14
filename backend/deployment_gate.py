@@ -3,7 +3,8 @@ from __future__ import annotations
 
 import hashlib
 import json
-import os
+
+from env_compat import env_setting
 from pathlib import Path
 
 from auth import authentication_status
@@ -58,14 +59,14 @@ def _artifact_integrity() -> tuple[bool, str]:
 def build_deployment_readiness() -> dict:
     from ml import model_status
 
-    mode = os.getenv("UDYAMPULSE_MODE", "public_demo").strip().lower()
+    mode = env_setting("MODE", "public_demo").strip().lower()
     manifest = _champion_manifest()
     runtime = model_status()
     auth = authentication_status()
     model_scope = manifest.get("deployment_scope", "public_demo_only")
     temporal_validation = manifest.get("temporal_validation", "cross_sectional_holdout")
-    audit_backend = os.getenv("UDYAMPULSE_AUDIT_BACKEND", "local_jsonl")
-    custom_hmac = bool(os.getenv("UDYAMPULSE_AUDIT_HMAC_KEY"))
+    audit_backend = env_setting("AUDIT_BACKEND", "local_jsonl")
+    custom_hmac = bool(env_setting("AUDIT_HMAC_KEY"))
     artifacts_valid, artifact_detail = _artifact_integrity()
 
     gates = [
@@ -132,7 +133,7 @@ def assert_deployment_allowed() -> None:
     readiness = build_deployment_readiness()
     if readiness["mode"] not in VALID_MODES:
         raise RuntimeError(
-            f"SaakhScore startup blocked: invalid UDYAMPULSE_MODE={readiness['mode']}"
+            f"SaakhScore startup blocked: invalid SAAKHSCORE_MODE (legacy UDYAMPULSE_MODE)={readiness['mode']}"
         )
     if not readiness["runtime_allowed"]:
         codes = ", ".join(blocker["code"] for blocker in readiness["blockers"])

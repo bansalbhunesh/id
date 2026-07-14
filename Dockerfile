@@ -5,7 +5,7 @@ WORKDIR /app
 ENV PYTHONDONTWRITEBYTECODE=1 \
     PYTHONUNBUFFERED=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1 \
-    UDYAMPULSE_AUDIT_LOG_PATH=/app/runtime/audit_log.jsonl \
+    SAAKHSCORE_AUDIT_LOG_PATH=/app/runtime/audit_log.jsonl \
     PORT=8000
 
 COPY backend/requirements.txt backend/requirements.txt

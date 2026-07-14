@@ -6,14 +6,14 @@ This is a public hackathon control set, not an assertion of IDBI production cert
 
 | Control | Current implementation | Verification |
 |---|---|---|
-| Authentication | Bearer API keys parsed from `UDYAMPULSE_API_KEYS` | Protected-route tests |
+| Authentication | Bearer API keys parsed from `SAAKHSCORE_API_KEYS` (legacy `UDYAMPULSE_API_KEYS`) | Protected-route tests |
 | RBAC | `underwriter`, `auditor`, `admin` role hierarchy | Underwriter write tests; auditor log tests |
 | Protected writes | `/score`, `/sandbox/score`, `/sandbox/recalibration/report`, `/sandbox/pilot-readiness`, `/validation/report` require `underwriter` | protected-route and pilot-phase tests |
 | Audit access | `/audit-log` requires `auditor` or higher | 401/bad-key/valid-key tests |
 | Consent | Fixed underwriting purpose, active status, grant/expiry order, no future grant, maximum 365 days, supported unique scopes, and every supplied feed covered by scope | Consent and missing-scope tests |
 | Data minimisation | Audit events store an HMAC `subject_ref`, not borrower name | `test_scoring_appends_to_audit_log` |
 | Audit integrity | Genesis-anchored SHA256 event chain, fsync append, restart recovery, tamper detection, and one-time pseudonymising migration of legacy logs | Audit chain/restart/genesis/tamper tests |
-| CORS | Explicit origin allowlist from `UDYAMPULSE_ALLOWED_ORIGINS` | `main.py` |
+| CORS | Explicit origin allowlist from `SAAKHSCORE_ALLOWED_ORIGINS` (legacy `UDYAMPULSE_ALLOWED_ORIGINS`) | `main.py` |
 | Abuse control | Thread-safe per-process IP sliding windows, stale-key cleanup, route-specific quotas, retry and remaining-budget headers | rate-limit tests |
 | Resource bounds | 8 MiB declared-body ceiling; bounded pilot, recalibration, validation and reason-code arrays; O(n log n) AUC/KS | operational and validation-scale tests |
 | Request trace | Validated or generated `X-Request-ID` plus `Server-Timing` on every response | operational tests |
@@ -28,14 +28,14 @@ This is a public hackathon control set, not an assertion of IDBI production cert
 
 ## Demo Credentials
 
-When `UDYAMPULSE_API_KEYS` is unset, the synthetic public demo exposes:
+When `SAAKHSCORE_API_KEYS`/`UDYAMPULSE_API_KEYS` is unset, the synthetic public demo exposes:
 
 - `saakhscore-demo-underwriter-key` with `underwriter` scope;
 - `saakhscore-demo-auditor-key` with `auditor` scope.
 
-They are intentionally public and must never be used with real data. A pilot sets its own credentials and `UDYAMPULSE_AUDIT_HMAC_KEY`; it does not inherit the demo defaults.
+They are intentionally public and must never be used with real data. A pilot sets its own credentials and `SAAKHSCORE_AUDIT_HMAC_KEY`; it does not inherit the demo defaults.
 
-Setting `UDYAMPULSE_MODE=pilot` does not bypass this requirement. Startup fails unless every gate exposed by `GET /deployment/readiness` passes.
+Setting `SAAKHSCORE_MODE=pilot` (legacy `UDYAMPULSE_MODE`) does not bypass this requirement. Startup fails unless every gate exposed by `GET /deployment/readiness` passes.
 
 Example:
 
